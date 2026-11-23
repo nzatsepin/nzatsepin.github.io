@@ -1,0 +1,305 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DatView manual 2026 | Zatsepin Lab</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Inter","Segoe UI",Helvetica,Arial,sans-serif;color:#1c2430;background:#ffffff;line-height:1.65;font-size:16px}a{color:#0b5c8a;text-decoration:none}a:hover{text-decoration:underline}.wrap{max-width:980px;margin:0 auto;padding:0 24px}header{position:sticky;top:0;background:#ffffff;border-bottom:1px solid #e3e8ee;z-index:10}.bar{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1120px}.logo{font-weight:700;font-size:19px;color:#0d1b2a}.logo span{color:#0b5c8a}nav a{color:#334155;margin-left:22px;font-size:14.5px;font-weight:500}.sub{background:#0d1b2a}.sub .wrap{display:flex;align-items:center;gap:6px;height:52px;max-width:1120px}.sub b{color:#ffffff;margin-right:18px;font-size:17px}.sub a{color:#c3d0de;font-size:14.5px;padding:6px 12px;border-radius:6px}.sub a.on{background:#1f3550;color:#ffffff}.doc{padding-top:36px;padding-bottom:64px}.doc h1{font-size:30px;color:#0d1b2a;margin:0 0 14px}.doc h2{font-size:22px;color:#0d1b2a;margin:38px 0 12px;padding-top:10px;border-top:1px solid #e3e8ee}.doc h3{font-size:17px;color:#0d1b2a;margin:24px 0 8px}.doc p,.doc ul,.doc ol{margin:0 0 14px}.doc ul,.doc ol{padding-left:22px}.doc li{margin:4px 0}.doc img{max-width:100%;border:1px solid #e3e8ee;border-radius:8px;margin:10px 0 18px}.doc code{font-family:"JetBrains Mono",Consolas,monospace;font-size:13.5px;background:#f2f5f8;padding:1px 5px;border-radius:4px}.doc pre{background:#0d1b2a;color:#e8eef5;padding:16px 18px;border-radius:8px;overflow-x:auto;margin:0 0 18px}.doc pre code{background:none;color:inherit;padding:0;font-size:13.5px}.doc table{border-collapse:collapse;width:100%;margin:6px 0 20px;font-size:14.5px}.doc th,.doc td{border-bottom:1px solid #e3e8ee;padding:9px 10px;text-align:left;vertical-align:top}.doc th{background:#f5f7fa;font-size:13.5px}.doc blockquote{border-left:3px solid #0b5c8a;padding:4px 14px;color:#4a5a6b;margin:0 0 14px;background:#f5f9fc}footer{background:#0d1b2a;color:#9fb1c3;font-size:14px;padding:28px 0}@media(max-width:800px){nav a{display:none}}
+</style></head><body>
+<header><div class="wrap bar"><a class="logo" href="../index.html">Zatsepin <span>Lab</span></a><nav><a href="../index.html#research">Research</a><a href="#">People</a><a href="#">Publications</a><a href="../index.html#resources">Resources</a><a href="../projects.html">Join us</a></nav></div></header>
+<div class="sub"><div class="wrap"><b>DatView</b><a class="" href="index.html">Overview</a><a class="on" href="manual.html">Manual 2026</a><a class="" href="update.html">Update notes</a></div></div>
+<main class="wrap doc"><h1 id="datview-manual-2026-additions">DatView manual: 2026 additions</h1>
+<p>This supplements the 2019 <em>DatView Manual and Tutorial</em>. The GUI, filters, partitions, groups, XML configuration and scripts described there are unchanged unless this document says otherwise.</p>
+<p>Contents</p>
+<ol>
+<li><a href="#1-installation">Installation</a></li>
+<li><a href="#2-datgenpy-new-options-and-columns">datgen.py: new options and columns</a></li>
+<li><a href="#3-eiger--hdf5-master-files">EIGER / HDF5 master files</a></li>
+<li><a href="#4-sample-positions-and-the-plate-plot">Sample positions and the plate plot</a></li>
+<li><a href="#5-merging-a-selection-without-a-stream-file">Merging a selection without a stream file</a></li>
+<li><a href="#6-large-datasets">Large datasets</a></li>
+<li><a href="#7-changed-behaviour-and-compatibility">Changed behaviour and compatibility</a></li>
+<li><a href="#8-troubleshooting">Troubleshooting</a></li>
+</ol>
+<hr />
+<h2 id="1-installation">1. Installation</h2>
+<pre><code class="language-bash">git clone https://github.com/nzatsepin/DatViewCL.git
+cd DatViewCL
+python3 -m venv ~/venvs/datview          # optional
+source ~/venvs/datview/bin/activate
+pip install -r requirements.txt
+python datgen.py -h
+</code></pre>
+<ul>
+<li>Python 3.9–3.13. Tested with numpy 2.5, matplotlib 3.11, PyQt5 5.15, pandas 3.1, h5py 3.16 and pyqtgraph 0.14 in a clean environment installed from <code>requirements.txt</code>.</li>
+<li>For merging, CrystFEL ≥ 0.10 must be on <code>PATH</code> in the shell DatView is started from. Tested with 0.12.0.</li>
+<li>Run <code>datview.py</code> locally or with X forwarding. If you only need the scripts (<code>datgen.py</code>, <code>datexport.py</code>, <code>datplot.py -s</code>), you can run them headless (<code>QT_QPA_PLATFORM=offscreen</code>).</li>
+</ul>
+<h2 id="2-datgenpy-new-options-and-columns">2. datgen.py: new options and columns</h2>
+<pre><code>datgen.py [-o OUT] [--eiger] [--h5 PATH ...] [--headers | --header NAME ...]
+          [--positions TABLE | --grid NX NY [--serpentine]] [existing options] files...
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--h5 PATH</code> (alias of <code>--cxi</code>)</td>
+<td>Adds an HDF5 dataset from each frame's image file as a column. Scalars apply to every frame. 1D arrays are indexed by event. Read once per file. A path missing from the file gives <code>-1</code>, with one warning.</td>
+</tr>
+<tr>
+<td><code>--eiger</code></td>
+<td>Adds the standard DECTRIS/NXmx paths: <code>detector_distance</code>, <code>beam_center_x/y</code>, <code>count_time</code>, <code>incident_wavelength</code>, <code>goniometer/omega</code>.</td>
+</tr>
+<tr>
+<td><code>--headers</code></td>
+<td>Adds a column for every <code>header/...</code> value in the stream, i.e. every field copied with <code>indexamajig --copy-header</code>.</td>
+</tr>
+<tr>
+<td><code>--header NAME</code></td>
+<td>Adds one such value.</td>
+</tr>
+<tr>
+<td><code>--positions TABLE</code></td>
+<td>Adds plate/drop/raster position columns from a table (§4).</td>
+</tr>
+<tr>
+<td><code>--grid NX NY</code></td>
+<td>Adds <code>grid_col</code>/<code>grid_row</code> from the event number, for frames collected as an NX × NY raster per file. Add <code>--serpentine</code> for snake scans.</td>
+</tr>
+</tbody>
+</table>
+<p>New built-in columns (CrystFEL 0.10–0.12 streams):</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Stream line</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>serial</code></td>
+<td><code>Image serial number</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>hit</code></td>
+<td><code>hit</code></td>
+<td>1 if the peak search passed <code>--min-peaks</code></td>
+</tr>
+<tr>
+<td><code>ntries</code></td>
+<td><code>n_indexing_tries</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>pkres</code></td>
+<td><code>peak_resolution</code></td>
+<td>nm⁻¹</td>
+</tr>
+<tr>
+<td><code>uaxis</code></td>
+<td><code>unique_axis</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>presid</code></td>
+<td><code>predict_refine/final_residual</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>The new columns are appended after the 2019 columns, so the column numbers in the 2019 manual still apply. Output column order: built-in, HDF5, static, concatenated, stream headers, positions, numpy file, group columns.</p>
+<p><strong>Byte offsets.</strong> Offsets are now byte positions measured in binary mode, so they are exact on every platform and with any file encoding. Peak and reflection offsets (<code>pstart/pend</code>, <code>rstart/rend</code>) point to the first data line and the end-of-list marker.</p>
+<h2 id="3-eiger-hdf5-master-files">3. EIGER / HDF5 master files</h2>
+<p><strong>Indexing.</strong> Use the master file in the indexamajig list. <code>list_events</code> (CrystFEL) or <code>scripts/listevents.py master.h5 -o frames.lst</code> expands it into one line per frame. Example geometry (single panel, EIGER native layout):</p>
+<pre><code>dim0 = %
+dim1 = ss
+dim2 = fs
+data = /entry/data/data
+</code></pre>
+<p><strong>Metadata columns.</strong></p>
+<pre><code class="language-bash">python scripts/h5fields.py scan_0012_master.h5     # lists scalars and per-frame arrays
+python datgen.py --eiger --h5 /entry/sample/goniometer/omega -o run.dat run.stream
+</code></pre>
+<p>Values copied into the stream at indexing time (<code>indexamajig --copy-header=/path</code>) are cheaper to read: use <code>--headers</code> instead.</p>
+<p><strong>Item viewer.</strong> The viewer reads frames from master files whose <code>/entry/data</code> holds <code>data_000001</code>, <code>data_000002</code>, … external links. The event number counts frames across the links in order. You need <code>hdf5plugin</code> for bitshuffle/LZ4 data. The data files must sit next to the master file, as the links are relative.</p>
+<p><strong>Legacy LCLS/CXI.</strong> The XTC/CXI paths, Cheetah file-name parsing (<code>run</code>, <code>class</code>, <code>subcxi</code>) and <code>/LCLS/...</code> fields are kept unchanged. They have not been retested against current LCLS formats.</p>
+<h2 id="4-sample-positions-and-the-plate-plot">4. Sample positions and the plate plot</h2>
+<h3 id="41-what-to-record">4.1 What to record</h3>
+<p>Each frame needs: <strong>which file and frame</strong>, and <strong>where on the sample it was collected</strong>. DatView reads this from a positions table, one row per scan (or per frame), CSV or tab-separated:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Required</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ifile</code></td>
+<td>yes</td>
+<td>Image file of the scan (EIGER: the <code>_master.h5</code>). Matched by full path, then by file name, so the table still works after data are moved.</td>
+</tr>
+<tr>
+<td><code>event_start</code>, <code>event_end</code></td>
+<td>for several scans per file</td>
+<td>First and last frame index (0-based, inclusive) of this scan in the file. Leave both empty if the whole file is one scan.</td>
+</tr>
+<tr>
+<td><code>event</code></td>
+<td>alternative</td>
+<td>One row per frame.</td>
+</tr>
+<tr>
+<td><code>well</code></td>
+<td>plates</td>
+<td>Well label, <code>A1</code> … <code>H12</code>. Row letter A = 1. Alternatively give <code>well_row</code> and <code>well_col</code> as numbers.</td>
+</tr>
+<tr>
+<td><code>drop</code></td>
+<td>plates with &gt;1 drop</td>
+<td>1, 2, …</td>
+</tr>
+<tr>
+<td><code>grid_nx</code>, <code>grid_ny</code></td>
+<td>rasters</td>
+<td>Points per line (fast axis) and number of lines.</td>
+</tr>
+<tr>
+<td><code>serpentine</code></td>
+<td>rasters</td>
+<td><code>yes</code> if alternate lines run in reverse.</td>
+</tr>
+<tr>
+<td><code>grid_col</code>, <code>grid_row</code></td>
+<td>alternative</td>
+<td>Explicit raster indices, with one row per frame.</td>
+</tr>
+<tr>
+<td><code>step_x_um</code>, <code>step_y_um</code>, <code>x0_um</code>, <code>y0_um</code></td>
+<td>optional</td>
+<td>Raster step and origin, giving <code>pos_x_um</code>/<code>pos_y_um</code> columns.</td>
+</tr>
+<tr>
+<td>any other column</td>
+<td>optional</td>
+<td>Copied through, e.g. <code>plate</code>, <code>condition</code>, <code>humidity</code>, <code>time_open_min</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Raster convention: frame <em>k</em> of a scan (counting from <code>event_start</code>) is at line <code>k // grid_nx</code>. Its point is <code>k % grid_nx</code>, reversed on odd lines if <code>serpentine</code>. <code>grid_row</code> 0 is the first line collected. If your scan starts at a different corner, or runs along y first, the drop is drawn mirrored or transposed. Use explicit <code>grid_col</code>/<code>grid_row</code> columns in that case.</p>
+<p>Example: two drops per well, 20 × 15 snake raster per drop, one master file per drop:</p>
+<pre><code class="language-csv">ifile,well,drop,grid_nx,grid_ny,serpentine,step_x_um,step_y_um,plate
+plate1_A1_d1_master.h5,A1,1,20,15,yes,10,10,plate1
+plate1_A1_d2_master.h5,A1,2,20,15,yes,10,10,plate1
+plate1_A2_d1_master.h5,A2,1,20,15,yes,10,10,plate1
+</code></pre>
+<p>Example: several drops in one master file:</p>
+<pre><code class="language-csv">ifile,event_start,event_end,well,drop,grid_nx,grid_ny,serpentine
+run7_master.h5,0,299,B3,1,20,15,yes
+run7_master.h5,300,599,B3,2,20,15,yes
+</code></pre>
+<h3 id="42-writing-the-table-at-the-beamline">4.2 Writing the table at the beamline</h3>
+<p><strong>MX3 SSX notebooks:</strong> <code>scripts/mx3plate2positions.py</code> converts the plate CSV and plate log that <code>SSXscanTools.py</code> already writes. See <a href="#">MX3_SCAN_SCRIPTS.md</a> for the steps, the checks to make, and the problems found in the current notebooks.</p>
+<p>Other collection scripts:</p>
+<p>The most reliable source is the grid-scan script itself, because it knows the well, drop, grid size and scan order when each scan starts. Add one call per scan at the end of the script:</p>
+<pre><code class="language-bash">python /path/to/DatView/scripts/makepositions.py -o /data/.../plate1_positions.csv \
+    --ifile scan_0012_master.h5 --well B3 --drop 2 --grid 20 15 --serpentine --step 10 10 --plate plate1
+</code></pre>
+<p>From Python, append the same CSV row with <code>csv.DictWriter</code> (columns as in §4.1).</p>
+<p>Check against one real scan that:</p>
+<ol>
+<li>the master file name the script logs matches the <code>ifile</code> CrystFEL writes to the stream (<code>Image filename:</code>);</li>
+<li>the frame order (start corner, fast axis, snake or not) matches the convention above. Lines along y take <code>fast_axis = y</code>;</li>
+<li>scans split across several master files, or several drops written to one master file, are covered by <code>event_start</code>/<code>event_end</code>.</li>
+</ol>
+<p>More positions-table columns: <code>fast_axis</code> (<code>x</code> default, <code>y</code> = lines along y), <code>grid_col_offset</code>/<code>grid_row_offset</code> (place a scan inside a larger map). <code>ifile</code> may contain wildcards (<code>*_12_master.h5</code>).</p>
+<p>For a single raster without plate information: <code>datgen.py --grid NX NY [--serpentine]</code>.</p>
+<h3 id="43-making-the-table">4.3 Making the table</h3>
+<pre><code class="language-bash">python datgen.py --positions plate1_positions.csv -o plate1.dat plate1_*.stream
+python datview.py plate1.dat
+</code></pre>
+<p>Columns added: <code>well</code>, <code>well_row</code>, <code>well_col</code>, <code>drop</code>, <code>grid_col</code>, <code>grid_row</code>, plus <code>pos_x_um</code>/<code>pos_y_um</code> if steps were given, plus any extra columns. <code>well_row</code>, <code>well_col</code> and <code>drop</code> are categorical, so they can also be used as partitions.</p>
+<h3 id="44-the-plate-plot">4.4 The plate plot</h3>
+<p><em>Plot → Plate / Sample Position Plot</em>:</p>
+<ul>
+<li><strong>Colour by</strong>: any column (e.g. <code>npeak</code>, <code>a</code>, <code>reslim</code>, <code>multi</code>).</li>
+<li><strong>Statistic</strong> per well, drop or raster point: mean, median, max, min, std, count, or <em>fraction &gt; 0</em>. <em>Fraction &gt; 0</em> on <code>multi</code> gives the indexing rate; on <code>hit</code> it gives the hit rate. Values of −1 (not measured, e.g. cell parameters of unindexed frames) are ignored, except by <em>count</em>.</li>
+<li><strong>Plate</strong>: Auto (from the data), 24-well (4 × 6) or 96-well (8 × 12). <strong>Drops per well</strong>: Auto or 1–3.</li>
+<li><strong>Raster points</strong>: on, each drop shows its raster; off, one value per drop.</li>
+</ul>
+<p>Interaction is the same as in the other plots. Shift-drag to select wells or raster points: every other plot then shows only those frames. Selections on other plots dim the unselected data on the plate (<em>Draw both</em>). The colour scale is fixed to the full dataset, so colours stay comparable while the selection changes. Hover shows well, drop, grid point, value and number of frames. Empty drops are light grey.</p>
+<p>From the command line:</p>
+<pre><code class="language-bash">python datplot.py -p &quot;plate -c a --agg mean --plate 96 --noraster&quot; \
+                  -p &quot;plate -c multi --agg 'fraction &gt; 0' --plate 96&quot; -r 2 -c 1 -s plate.png plate1.dat
+</code></pre>
+<p><img alt="Plate plot of a synthetic 96-well dataset" src="img/plate_demo.png" /></p>
+<p><em>Synthetic data (<code>tests/make_plate_demo.py</code>): the a axis grows with collection order and at the plate edge (evaporation), the indexing rate is highest in the drop centres, and well D7 is empty.</em></p>
+<h2 id="5-merging-a-selection-without-a-stream-file">5. Merging a selection without a stream file</h2>
+<p><em>File → Merge Selection (process_hkl / partialator)…</em> builds the command from the program, point group, output file and extra options. You can also edit the command directly. DatView sends the selected chunks on the program's standard input (<code>-i -</code>), and no stream file is written.</p>
+<ul>
+<li>The result is identical to exporting the selection as a stream and merging that file (checked with <code>process_hkl</code>).</li>
+<li>With an active partition, one merge runs per partition. The partition name is added to the output name: <code>merged_&lt;name&gt;.hkl</code>.</li>
+<li>Program output goes to the terminal DatView was started from. The dialog reports each exit code.</li>
+<li>Each selected crystal is sent as its own chunk (chunk header and peaks, then that crystal). Selecting one crystal of a multi-crystal frame merges only that crystal.</li>
+</ul>
+<p>Command line:</p>
+<pre><code class="language-bash">python datexport.py --filter good.xml --merge &quot;partialator -y 4/mmm -o good.hkl --model=unity --iterations=1&quot; run.dat
+python datexport.py --partition well --merge &quot;process_hkl -y 4/mmm -o by_well.hkl&quot; plate1.dat
+</code></pre>
+<h2 id="6-large-datasets">6. Large datasets</h2>
+<ul>
+<li><strong>Memory.</strong> The loader keeps a single copy of the table. Text columns (file names, indexing method, well labels) are stored once per distinct value. Closing a plot window or unticking a histogram releases it. The status bar shows the process memory.</li>
+<li><strong>Scatter plots</strong> with more points than <code>&lt;scatterRasterThreshold&gt;</code> (default 50,000, in the XML config) are drawn as an image at screen resolution. Each pixel shows the mean colour value of the points in it, and the image is re-binned after zoom or pan. Selection, zoom and tooltips are unchanged. Set the threshold very high to always draw individual markers.</li>
+<li><strong>Hidden plots</strong> do not redraw. They update when shown.</li>
+<li><strong>Reloading.</strong> <em>Save Numpy</em> (<code>.npz</code>) reloads faster than the <code>.dat</code> file.</li>
+</ul>
+<p>Measured on 1,000,000 rows (2-core VM), 12 histograms open, then 5 scatter plots opened and closed: memory 0.55 GB vs 2.9–3.5 GB (2019), selection update 0.8–2.0 s vs 1.3–32 s. Details: <a href="update.html">UPDATE_2026.md</a>.</p>
+<h2 id="7-changed-behaviour-and-compatibility">7. Changed behaviour and compatibility</h2>
+<ul>
+<li>2019 <code>.dat</code>, <code>.npz</code>, filter, group and XML config files load as before.</li>
+<li><code>.npz</code> files saved now no longer contain a second raw copy of the table. Only columns altered on load (<code>mult</code>, <code>invert</code>) keep their original values.</li>
+<li>Exported <code>.dat</code> files reproduce the input values (<code>aclen</code> was previously truncated to an integer, and the orientation matrix lost precision).</li>
+<li><em>OR</em> filters in saved filter files load correctly (previously an exception).</li>
+<li>Histograms are drawn as one filled step outline per stack instead of one rectangle per bin. The counts are identical.</li>
+<li><code>datplot.py -s</code> works without a display. It has a new <code>plate</code> plot type.</li>
+<li>PyQt4 import fallbacks remain but are untested.</li>
+</ul>
+<h2 id="8-troubleshooting">8. Troubleshooting</h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Cause / fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OSError: Can't read data (can't open directory)</code> / blank frames in the viewer</td>
+<td><code>hdf5plugin</code> missing, or EIGER data files not next to the master file.</td>
+</tr>
+<tr>
+<td><code>'process_hkl' was not found on PATH</code></td>
+<td>Start DatView from a shell where CrystFEL is set up.</td>
+</tr>
+<tr>
+<td>Plate plot menu greyed out</td>
+<td>The table has no <code>well_row</code>/<code>well_col</code> or <code>grid_col</code>/<code>grid_row</code> columns. Rerun datgen with <code>--positions</code> or <code>--grid</code>.</td>
+</tr>
+<tr>
+<td>Plate rows empty after <code>--positions</code></td>
+<td><code>ifile</code> in the table does not match the stream's <code>Image filename</code> (neither full path nor file name), or the event ranges do not cover the frames.</td>
+</tr>
+<tr>
+<td>Drop drawn mirrored or transposed</td>
+<td>Scan order differs from the convention in §4.1. Give <code>grid_col</code>/<code>grid_row</code> per frame.</td>
+</tr>
+<tr>
+<td>Column missing with <code>--h5</code></td>
+<td>Path not in that file (one warning per path). <code>scripts/h5fields.py</code> lists the paths present.</td>
+</tr>
+</tbody>
+</table></main>
+<footer><div class="wrap">DatView: original written by Natasha Stander (Zatsepin lab, 2017–2019). Updated in 2026 in Zatsepin lab.<br>Zatsepin Lab · Department of Physics and Astronomy · Swinburne University of Technology</div></footer></body></html>

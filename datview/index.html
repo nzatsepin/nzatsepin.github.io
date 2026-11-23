@@ -1,0 +1,87 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DatView | Zatsepin Lab</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Inter","Segoe UI",Helvetica,Arial,sans-serif;color:#1c2430;background:#ffffff;line-height:1.65;font-size:16px}a{color:#0b5c8a;text-decoration:none}a:hover{text-decoration:underline}.wrap{max-width:980px;margin:0 auto;padding:0 24px}header{position:sticky;top:0;background:#ffffff;border-bottom:1px solid #e3e8ee;z-index:10}.bar{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1120px}.logo{font-weight:700;font-size:19px;color:#0d1b2a}.logo span{color:#0b5c8a}nav a{color:#334155;margin-left:22px;font-size:14.5px;font-weight:500}.sub{background:#0d1b2a}.sub .wrap{display:flex;align-items:center;gap:6px;height:52px;max-width:1120px}.sub b{color:#ffffff;margin-right:18px;font-size:17px}.sub a{color:#c3d0de;font-size:14.5px;padding:6px 12px;border-radius:6px}.sub a.on{background:#1f3550;color:#ffffff}.doc{padding-top:36px;padding-bottom:64px}.doc h1{font-size:30px;color:#0d1b2a;margin:0 0 14px}.doc h2{font-size:22px;color:#0d1b2a;margin:38px 0 12px;padding-top:10px;border-top:1px solid #e3e8ee}.doc h3{font-size:17px;color:#0d1b2a;margin:24px 0 8px}.doc p,.doc ul,.doc ol{margin:0 0 14px}.doc ul,.doc ol{padding-left:22px}.doc li{margin:4px 0}.doc img{max-width:100%;border:1px solid #e3e8ee;border-radius:8px;margin:10px 0 18px}.doc code{font-family:"JetBrains Mono",Consolas,monospace;font-size:13.5px;background:#f2f5f8;padding:1px 5px;border-radius:4px}.doc pre{background:#0d1b2a;color:#e8eef5;padding:16px 18px;border-radius:8px;overflow-x:auto;margin:0 0 18px}.doc pre code{background:none;color:inherit;padding:0;font-size:13.5px}.doc table{border-collapse:collapse;width:100%;margin:6px 0 20px;font-size:14.5px}.doc th,.doc td{border-bottom:1px solid #e3e8ee;padding:9px 10px;text-align:left;vertical-align:top}.doc th{background:#f5f7fa;font-size:13.5px}.doc blockquote{border-left:3px solid #0b5c8a;padding:4px 14px;color:#4a5a6b;margin:0 0 14px;background:#f5f9fc}footer{background:#0d1b2a;color:#9fb1c3;font-size:14px;padding:28px 0}@media(max-width:800px){nav a{display:none}}
+</style></head><body>
+<header><div class="wrap bar"><a class="logo" href="../index.html">Zatsepin <span>Lab</span></a><nav><a href="../index.html#research">Research</a><a href="#">People</a><a href="#">Publications</a><a href="../index.html#resources">Resources</a><a href="../projects.html">Join us</a></nav></div></header>
+<div class="sub"><div class="wrap"><b>DatView</b><a class="on" href="index.html">Overview</a><a class="" href="manual.html">Manual 2026</a><a class="" href="update.html">Update notes</a></div></div>
+<main class="wrap doc"><h1 id="datview">DatView</h1>
+<p>DatView displays tables of per-frame and per-crystal statistics from serial crystallography and keeps a selection linked across every plot. Drag a range on one histogram and all other histograms, scatter plots, 2D histograms and plate maps redraw to show that subset. The selection can be saved as a CrystFEL stream, list or table, or merged directly with <code>process_hkl</code> or <code>partialator</code>.</p>
+<p>Reference: N. Stander, P. Fromme &amp; N. A. Zatsepin, <em>J. Appl. Cryst.</em> <strong>52</strong>, 1440–1448 (2019), <a href="https://doi.org/10.1107/S1600576719012044">doi:10.1107/S1600576719012044</a>.</p>
+<p><img alt="Unit cell a mapped onto the raster grid" src="img/mx3_gridscan_demo.png" /></p>
+<h2 id="requirements">Requirements</h2>
+<p>Python ≥ 3.9 with:</p>
+<pre><code>pip install -r requirements.txt
+</code></pre>
+<p><code>numpy scipy matplotlib h5py hdf5plugin lxml pyqtgraph PyQt5 pandas</code>. You need <code>hdf5plugin</code> to read bitshuffle/LZ4-compressed EIGER data. <code>pandas</code> is optional but makes loading large tables much faster. Two scripts have extra dependencies: <code>scripts/palxss.py</code> needs <code>tables</code>, and <code>scripts/venn3.py</code> needs <code>matplotlib-venn</code>. To use the merge function, CrystFEL (0.10 or later) must be on <code>PATH</code>.</p>
+<h2 id="quick-start">Quick start</h2>
+<pre><code class="language-bash">git clone https://github.com/nzatsepin/DatViewCL.git
+cd DatViewCL
+pip install -r requirements.txt
+
+# 1. Stream(s) -&gt; table
+python datgen.py -o run.dat run1.stream run2.stream
+
+#    EIGER master metadata, stream header values, plate positions:
+python datgen.py --eiger --headers --positions plate.csv -o run.dat run*.stream
+
+# 2. Explore
+python datview.py run.dat -g detector.geom
+
+# 3. Without the GUI: select, export, merge
+python datexport.py --filter good.xml run.dat good.stream
+python datexport.py --filter good.xml --merge &quot;process_hkl -y 2/m -o good.hkl&quot; run.dat
+python datplot.py -p &quot;plate -c a --plate 96&quot; -s plate_a.png run.dat
+</code></pre>
+<p>All scripts take <code>-h</code>.</p>
+<h2 id="what-is-new-2026">What is new (2026)</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Memory and speed</strong></td>
+<td>5× less memory and interactive selections with any number of plots open: 1,000,000 rows, 12 histograms + 5 scatter plots: 0.5 GB vs 3.5 GB; a selection updates in 2 s vs 30 s. Closed plots are now freed. See <a href="update.html">docs/UPDATE_2026.md</a>.</td>
+</tr>
+<tr>
+<td><strong>Merge without a stream file</strong></td>
+<td><em>File → Merge Selection</em> or <code>datexport.py --merge "..."</code> pipes the selected chunks straight into <code>process_hkl</code>/<code>partialator</code> (<code>-i -</code>). The output is byte-identical to merging an exported stream.</td>
+</tr>
+<tr>
+<td><strong>CrystFEL 0.10–0.12 streams</strong></td>
+<td>New fields: <code>serial</code>, <code>hit</code>, <code>ntries</code>, <code>pkres</code>, <code>uaxis</code>, <code>presid</code>. Byte-exact offsets. <code>--headers</code> adds every <code>--copy-header</code> value.</td>
+</tr>
+<tr>
+<td><strong>EIGER / HDF5 master files</strong></td>
+<td><code>--eiger</code> adds detector distance, beam centre, count time, wavelength and ω from the master file. <code>--h5 PATH</code> adds any per-frame dataset. The item viewer reads frames through the <code>data_NNNNNN</code> links. <code>scripts/h5fields.py</code> lists usable fields.</td>
+</tr>
+<tr>
+<td><strong>Plate / sample position plot</strong></td>
+<td>Any column per well, drop and raster point of a 24- or 96-well plate (or a bare raster). Selections on the plate sync to all plots. See the <a href="manual.html#4-sample-positions-and-the-plate-plot">manual</a>. MX3 scan notebooks: <code>scripts/mx3plate2positions.py</code> (<a href="#">docs/MX3_SCAN_SCRIPTS.md</a>).</td>
+</tr>
+<tr>
+<td><strong>Compatibility</strong></td>
+<td>Python 3.9–3.13, numpy 2, matplotlib ≥ 3.9. Dat and filter files from 2019 still load. LCLS/CXI code paths kept unchanged.</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="Plate plot" src="img/gui_plate_selection.png" /></p>
+<h2 id="documentation">Documentation</h2>
+<ul>
+<li><a href="manual.html">Manual (2026 additions)</a>: installation, new options, sample positions, merging, troubleshooting</li>
+<li><a href="https://zatsepinlab.atlassian.net/wiki/spaces/DAT/pages/827785219/Tutorial+2019">Tutorial and manual (2019)</a>: GUI, filters, partitions, groups and configuration are all unchanged</li>
+<li><a href="update.html">Update notes and benchmarks</a></li>
+<li><a href="#">MX3 scan notebooks → position maps</a></li>
+<li><a href="CHANGELOG.md">Changelog</a></li>
+</ul>
+<h2 id="tests">Tests</h2>
+<pre><code class="language-bash">pip install pytest
+QT_QPA_PLATFORM=offscreen python -m pytest tests
+</code></pre>
+<p>The tests use small real CrystFEL 0.12 streams (<code>tests/data</code>). If <code>process_hkl</code> and <code>partialator</code> are on <code>PATH</code>, the merge tests also run them.</p>
+<h2 id="credits">Credits</h2>
+<p>Original written by Natasha Stander (Zatsepin lab, 2017–2019).</p>
+<p>Updated in 2026 in Zatsepin lab, Swinburne University of Technology.</p>
+<p>Includes a modified CfelPyUtils geometry parser and the histogram clip function of cxiview.</p></main>
+<footer><div class="wrap">DatView: original written by Natasha Stander (Zatsepin lab, 2017–2019). Updated in 2026 in Zatsepin lab.<br>Zatsepin Lab · Department of Physics and Astronomy · Swinburne University of Technology</div></footer></body></html>

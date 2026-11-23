@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Zatsepin Lab</title><style>*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Inter","Segoe UI",Helvetica,Arial,sans-serif;color:#111;background:#ffffff;line-height:1.6;font-size:16px}
+a{color:#0b4fa8;text-decoration:none}a:hover{text-decoration:underline}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+header.site{position:sticky;top:0;background:#ffffff;border-bottom:1px solid #d5dbe3;z-index:20}
+.bar{display:flex;align-items:center;justify-content:space-between;height:62px}
+.logo{font-weight:700;font-size:19px;color:#12203d}
+nav.main a{color:#12203d;margin-left:20px;font-size:14.5px;font-weight:600}
+nav.main a.on{border-bottom:2px solid #12203d;padding-bottom:3px}
+nav.main a.cta{background:#12203d;color:#ffffff;padding:7px 14px;border-radius:6px}
+.banner{position:relative;background:#12203d center/cover no-repeat;color:#ffffff}
+.banner::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,18,36,.55),rgba(10,18,36,.75))}
+.banner .inner{position:relative;max-width:860px;margin:0 auto;padding:64px 24px 56px;text-align:center}
+.banner .kicker{font-size:14px;letter-spacing:1.5px;text-transform:uppercase;color:#e6ecf5;font-weight:600}
+.banner h1{font-size:40px;line-height:1.15;margin:8px 0 0;color:#ffffff}
+.banner.tall .inner{padding:110px 24px 96px}
+.banner.tall h1{font-size:52px}
+.banner p.lead{margin:18px auto 0;font-size:18px;color:#f1f4f9;max-width:760px}
+.banner .btns{margin-top:26px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-block;padding:11px 18px;border-radius:6px;font-weight:700;font-size:15px}
+.btn.p{background:#ffffff;color:#12203d}.btn.s{border:2px solid #ffffff;color:#ffffff}.btn:hover{text-decoration:none;opacity:.92}
+.col{max-width:860px;margin:0 auto;padding:40px 24px 64px}
+.col p{margin:0 0 1rem}
+.top-callout{background:#e4e9f2;border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:.97rem}
+a.button{display:inline-block;margin-top:.6rem;background:#12203d;color:#ffffff;text-decoration:none;padding:.55rem 1.1rem;border-radius:6px;font-weight:700;font-size:.92rem}
+nav.jumplinks{display:flex;flex-wrap:wrap;gap:.5rem;margin:1.5rem 0 1rem;padding:.8rem 1rem;background:#e4e9f2;border-radius:8px;position:sticky;top:62px;z-index:10}
+nav.jumplinks a{font-size:.9rem;color:#12203d;font-weight:600;padding:.28rem .7rem;border-radius:5px;background:#ffffff;border:1px solid #b9c3d1}
+h2.section{font-size:1.35rem;color:#12203d;border-bottom:2px solid #12203d;padding-bottom:.35rem;margin:2.75rem 0 .6rem;scroll-margin-top:130px}
+p.section-note{color:#222;font-size:.95rem;margin-bottom:1.25rem}
+.project{border:1px solid #b9c3d1;border-radius:8px;padding:1rem 1.15rem;margin-bottom:.9rem;background:#ffffff}
+.project.arc-funded{border-left:5px solid #b3121b}
+.project.arc-funded .project-title{color:#b3121b}
+.project.filled{background:#f1f3f6;border-left:5px solid #444}
+.project-title{font-weight:700;font-size:1.06rem;margin:0 0 .35rem;color:#111}
+.project-desc{margin:0 0 .6rem;font-size:.98rem}
+.project-note{font-size:.92rem;color:#222;margin:0 0 .6rem;font-style:italic}
+.tags{display:flex;flex-wrap:wrap;gap:.4rem}
+.tag{font-size:.8rem;font-weight:600;background:#e4e9f2;color:#12203d;padding:.15rem .6rem;border-radius:10px}
+.tag.arc{background:#b3121b;color:#ffffff}.tag.filled{background:#333;color:#ffffff}
+p.inline-note{font-size:.97rem}
+.callout{background:#e4e9f2;border-radius:8px;padding:1rem 1.15rem;margin-bottom:1rem;font-size:.95rem}
+.callout.strong{border:2px solid #12203d;background:#ffffff;scroll-margin-top:80px}
+.callout ul{margin:.5rem 0 0 1.2rem}
+.disclaimer{background:#fdf0cf;border-left:5px solid #b5790a;padding:.85rem 1.1rem;font-size:.94rem;border-radius:4px;margin-bottom:1.25rem}
+.disclaimer.red{background:#fdecea;border-left-color:#b3121b}
+.step{display:flex;gap:1rem;margin-bottom:1.5rem;align-items:flex-start}
+.step-num{flex-shrink:0;width:2.1rem;height:2.1rem;border-radius:50%;background:#12203d;color:#ffffff;display:flex;align-items:center;justify-content:center;font-weight:700}
+.step-body h3{margin:0 0 .3rem;font-size:1.08rem;color:#12203d}
+.step-body p{margin:0 0 .4rem;font-size:.97rem}
+p.small,.small{font-size:.9rem;color:#222}
+table{width:100%;border-collapse:collapse;font-size:.93rem;margin-bottom:1rem}
+th,td{text-align:left;padding:.55rem .65rem;border:1px solid #b9c3d1;vertical-align:top}
+th{background:#e4e9f2;color:#12203d}
+section.band{padding:56px 0}section.band.alt{background:#f2f4f7}
+.band h2{font-size:26px;color:#12203d;margin-bottom:8px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:22px}
+.card{border:1px solid #b9c3d1;border-radius:10px;padding:20px;background:#ffffff}
+.card h3{font-size:17px;color:#12203d;margin-bottom:6px}.card p{font-size:14.5px;color:#222}
+.join{background:#12203d;color:#ffffff;border-radius:12px;padding:30px 34px;display:flex;justify-content:space-between;align-items:center;gap:24px}
+.join h2{color:#ffffff}.join p{color:#e6ecf5;max-width:640px;margin:0}
+footer.site{background:#12203d;color:#dbe3ee;font-size:14px;padding:34px 0}
+footer.site a{color:#ffffff}
+@media(max-width:860px){.grid{grid-template-columns:1fr}nav.main a:not(.cta){display:none}.join{flex-direction:column;align-items:flex-start}.banner h1,.banner.tall h1{font-size:34px}}
+</style></head><body>
+<header class="site"><div class="wrap bar"><a class="logo" href="index.html">Zatsepin Lab</a><nav class="main"><a class="" href="index.html#research">Research</a><a class="" href="#">People</a><a class="" href="#">Publications</a><a class="" href="index.html#news">News</a><a class="" href="datview/index.html">DatView</a><a class="" href="index.html#resources">Resources</a><a class="cta" href="projects.html">Join us</a></nav></div></header>
+<div class="banner tall" style="background-image:url('https://sites.google.com/sitesv-images-rt/APXyLQc8yiqHCUmCm1uLR9VYpHnq_SRd1SjmufO8YTkFLKFdOVAFOvEhZ4TvJvnHHkmzXrOHmn3ilxTGpbNyNkE2QixWpO8ByPxqawqvu5vOgFVMANByJhW8gEXa-ElBwxQL13fU75_Qaj8CsqN0Fz763omcGydo_OuMOkPL09_xuwjXVh_7xVAz6_R5husK-Ur4fImI_3fA07belufA=w1280')"><div class="inner"><div class="kicker"></div><h1>Zatsepin Lab</h1><p class="lead">We develop X-ray crystallography technologies at the frontier of what's possible, capturing biochemical reactions in real time, at atomic resolution under physiological conditions. Our goal is to reveal protein structures and dynamics that are inaccessible with conventional approaches, to drive drug discovery, understand fundamental structural biology and advance materials science.</p><p class="lead" style="font-size:16px">The lab is led by ARC Future Fellow A/Prof Nadia Zatsepin and based in the Department of Physics and Astronomy at Swinburne University of Technology, Melbourne.</p><div class="btns"><a class="btn p" href="projects.html">Interested in joining the lab?</a><a class="btn s" href="#research">Research</a></div></div></div>
+<section class="band" id="research"><div class="wrap">
+<h2>Research</h2>
+<div class="grid">
+<div class="card"><h3>Room-temperature serial crystallography</h3><p>Time-resolved imaging of the antibacterial target DsbA as drug candidates bind, to inform inhibitor design. ARC Future Fellowship.</p></div>
+<div class="card"><h3>Synchrotron nanocrystallography</h3><p>A fluctuation X-ray scattering method for structures from sub-micron crystals. ARC Discovery Project 2026-2028.</p></div>
+<div class="card"><h3>Serial crystallography infrastructure in Australia</h3><p>Leading the inaugural Collaborative Access Program at the Australian Synchrotron, MX3 and MX2.</p></div>
+<div class="card"><h3>Fundamental physics of XFEL imaging</h3><p>Theoretical modelling of the limits of serial femtosecond crystallography.</p></div>
+<div class="card"><h3>S1P lyase inhibitor characterisation</h3><p>Structures of S1P lyase with two inhibitors, aimed at multiple sclerosis and Alzheimer's disease. Funded 2026-2028.</p></div>
+<div class="card"><h3>Software</h3><p>DatView and SPIND, developed in the lab, and contributions to CrystFEL.</p></div>
+</div></div></section>
+<section class="band alt"><div class="wrap"><div class="join"><div><h2>Interested in joining the lab?</h2><p>We offer interdisciplinary research projects at PhD, Masters and undergraduate level. For PhD applicants, we can support applications for RTP or SUPRA scholarships (Swinburne PhD scholarships for high-achieving students) and other scholarship schemes.</p></div><a class="btn p" href="projects.html">Available projects</a></div></div></section>
+<section class="band" id="news"><div class="wrap"><h2>News</h2>
+<p><a href="#">ANSTO User Meeting 2026</a> · <a href="#">Crystal36-AXAA 2026</a> · <a href="https://scholar.google.com/citations?user=zYC2VMkAAAAJ">Google Scholar</a></p>
+</div></section>
+<section class="band alt" id="resources"><div class="wrap"><h2>Resources</h2>
+<p><a href="datview/index.html">DatView</a> · <a href="#">SPIND</a> · <a href="#">SSX in plates scan planning</a> · <a href="#">Education: Diffraction, from one molecule to a crystal</a> · <a href="#">Microfocus MX beamlines</a> · <a href="#">Workshops</a> · <a href="#">Hit finding</a> · <a href="#">Beamtime proposal deadlines</a> · <a href="#">ANZ XFEL</a></p>
+</div></section>
+
+<footer class="site"><div class="wrap">Contact: nzatsepin at swin edu au &nbsp;·&nbsp; <a href="https://experts.swinburne.edu.au/11120-nadia-zatsepin" target="_blank" rel="noopener">Staff profile</a><br>Department of Physics and Astronomy, Swinburne University of Technology, Hawthorn VIC 3122</div></footer>
+</body></html>
