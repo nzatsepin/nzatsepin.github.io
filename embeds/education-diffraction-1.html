@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>From one molecule to a crystal: how diffraction builds up</title>
+<style>
+:root{
+  --bg:#eef2f6; --surface:#ffffff; --ink:#16233a; --muted:#56637a; --rule:#cfd7e2;
+  --accent:#1e5aa8; --on-accent:#ffffff; --ewald:#0b8fae; --hit:#c97a00;
+  --plotbg:#ffffff; --grid:#e3e8ef; --curve:#1e5aa8; --env:#8a97ab; --mol:#1e5aa8;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0c1420; --surface:#131e2f; --ink:#e2e8f1; --muted:#93a1b6; --rule:#26354b;
+    --accent:#76aeff; --on-accent:#0c1420; --ewald:#4fd3ef; --hit:#ffb648;
+    --plotbg:#0f1928; --grid:#1d2a3d; --curve:#86b8ff; --env:#61718a; --mol:#86b8ff;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0c1420; --surface:#131e2f; --ink:#e2e8f1; --muted:#93a1b6; --rule:#26354b;
+  --accent:#76aeff; --on-accent:#0c1420; --ewald:#4fd3ef; --hit:#ffb648;
+  --plotbg:#0f1928; --grid:#1d2a3d; --curve:#86b8ff; --env:#61718a; --mol:#86b8ff;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:1320px;margin:0 auto;padding:16px}
+h1{font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;font-weight:600;font-size:2rem;line-height:1.2;margin:0}
+.sub{color:var(--ink);margin:4px 0 14px;max-width:72ch}
+.steps{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px;padding:0;list-style:none}
+.steps button{font:inherit;font-size:1rem;border:1px solid var(--rule);background:var(--surface);color:var(--ink);padding:6px 12px;border-radius:999px;cursor:pointer}
+.steps button .n{display:inline-block;min-width:1.3em;font-weight:600;color:var(--accent)}
+.steps button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.steps button[aria-selected="true"] .n{color:var(--on-accent)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;align-items:start}
+@media (max-width:960px){.layout{grid-template-columns:1fr}}
+.figs{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1fr);gap:12px;align-items:start}
+@media (max-width:600px){.figs{grid-template-columns:1fr}}
+figure{margin:0;background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:8px}
+figure canvas{display:block;width:100%;border-radius:4px}
+#cReal,#cRecip{aspect-ratio:1/1}
+#cProf{aspect-ratio:2.6/1}
+@media (max-width:600px){#cProf{aspect-ratio:1.8/1}}
+.fig-prof{grid-column:1/-1}
+figcaption{font-size:.95rem;color:var(--ink);margin-top:6px;line-height:1.35}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:12px 14px}
+.play{display:flex;gap:8px;flex-wrap:wrap}
+.play button{font:inherit;font-size:1rem;padding:7px 12px;border-radius:6px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--on-accent)}
+.play button.secondary{background:transparent;color:var(--accent)}
+.row{display:grid;grid-template-columns:7.6em minmax(0,1fr) 4.8em;align-items:center;gap:8px;margin-top:9px;font-size:.98rem}
+.row output{text-align:right;font-variant-numeric:tabular-nums}
+.row input[type=range]{width:100%;accent-color:var(--accent)}
+.check{display:flex;gap:8px;align-items:center;margin-top:9px;font-size:.98rem}
+.check input{accent-color:var(--accent)}
+.hidden{display:none!important}
+#explain h2{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-size:1.4rem;font-weight:600;margin:0 0 6px}
+#explain p{margin:6px 0;font-size:1rem}
+.eq{font-family:"Cambria Math","STIX Two Math","Latin Modern Math","Times New Roman",serif;font-size:1.1rem;background:var(--bg);border-left:3px solid var(--accent);padding:8px 10px;margin:8px 0;overflow-x:auto;line-height:1.7}
+#readout{font-size:.98rem;font-variant-numeric:tabular-nums}
+#readout table{border-collapse:collapse;width:100%}
+#readout td{padding:2px 0;vertical-align:top}
+#readout td+td{text-align:right;padding-left:8px}
+footer{margin-top:16px;font-size:.98rem;color:var(--ink)}
+footer details{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:10px 14px;margin-top:8px}
+footer summary{cursor:pointer;color:var(--ink);font-weight:600}
+footer p,footer li{max-width:90ch}
+footer ol{padding-left:1.3em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>From one molecule to a crystal: how diffraction builds up</h1>
+  <p class="sub">Every image below is calculated from atomic coordinates of a model molecule in a 2D projection. Follow the five steps, or play the full sequence.</p>
+  <div class="steps" role="tablist" aria-label="Steps">
+    <button role="tab" data-s="1" aria-selected="true"><span class="n">1</span> One molecule</button>
+    <button role="tab" data-s="2" aria-selected="false"><span class="n">2</span> A few copies</button>
+    <button role="tab" data-s="3" aria-selected="false"><span class="n">3</span> Larger crystal</button>
+    <button role="tab" data-s="4" aria-selected="false"><span class="n">4</span> Infinite crystal</button>
+    <button role="tab" data-s="5" aria-selected="false"><span class="n">5</span> Ewald sphere</button>
+  </div>
+
+  <div class="layout">
+    <div class="figs">
+      <figure><canvas id="cReal"></canvas><figcaption id="capReal"></figcaption></figure>
+      <figure><canvas id="cRecip"></canvas><figcaption id="capRecip"></figcaption></figure>
+      <figure class="fig-prof"><canvas id="cProf"></canvas><figcaption id="capProf"></figcaption></figure>
+    </div>
+
+    <aside class="side">
+      <div class="card">
+        <div class="play">
+          <button id="btnTour">Play full sequence</button>
+          <button id="btnStep" class="secondary">Animate this step</button>
+        </div>
+        <div class="row" data-st="235"><label for="inNa">Cells along a</label><input id="inNa" type="range" min="1" max="60" step="1"><output id="oNa"></output></div>
+        <div class="row" data-st="235"><label for="inNb">Cells along b</label><input id="inNb" type="range" min="1" max="60" step="1"><output id="oNb"></output></div>
+        <div class="row" data-st="5"><label for="inLam">Wavelength λ</label><input id="inLam" type="range" min="0.5" max="10" step="0.1"><output id="oLam"></output></div>
+        <div class="row" data-st="5"><label for="inPhi">Crystal angle φ</label><input id="inPhi" type="range" min="0" max="360" step="0.1"><output id="oPhi"></output></div>
+        <div class="row" data-st="12345"><label for="inB">B factor</label><input id="inB" type="range" min="0" max="100" step="1"><output id="oB"></output></div>
+        <div class="row" data-st="12345"><label for="inRes">Resolution limit</label><input id="inRes" type="range" min="4" max="15" step="0.5"><output id="oRes"></output></div>
+        <div class="row" data-st="12345"><label for="inDyn">Display range</label><input id="inDyn" type="range" min="2" max="8" step="0.5"><output id="oDyn"></output></div>
+        <label class="check" data-st="123"><input id="inZoom" type="checkbox"> Profile: zoom onto one period (h = 1 to 2)</label>
+        <label class="check" data-st="5"><input id="inAcc" type="checkbox"> Accumulate detector over rotation</label>
+      </div>
+      <div class="card" id="explain" aria-live="polite"></div>
+      <div class="card" id="readout"></div>
+    </aside>
+  </div>
+
+  <footer>
+    <details>
+      <summary>Model and what is left out</summary>
+      <p>2D calculation, plane group p1 (equivalently, the zero-layer section of reciprocal space, which by the projection–slice theorem is the transform of the structure projected along the beam-normal axis): one molecule of 40 point atoms per rectangular cell, a = 40 Å, b = 30 Å. Atoms are Gaussian electron clouds (b = 15 Å², equal weight) with an adjustable isotropic B factor, so the amplitude carries exp(−(15 Å² + B)s²) with s = |q|/2 = sin θ/λ. The molecular transform is a direct sum over atoms; the lattice factor is evaluated analytically and averaged over each pixel, so unresolved fringes appear as their mean, as on a detector. Reciprocal-space units: q = 1/d (Å⁻¹, no 2π). Intensities are shown on a logarithmic scale; the region d &gt; 90 Å is masked by a beamstop.</p>
+      <p>Not modelled: polarisation and absorption, mosaicity, beam divergence and bandwidth (spot width here comes only from crystal size), bulk solvent, symmetry other than p1, the third dimension, anomalous scattering, multiple scattering, radiation damage and counting noise.</p>
+    </details>
+    <details>
+      <summary>References</summary>
+      <ol>
+        <li>Als-Nielsen, J. &amp; McMorrow, D. (2011). <i>Elements of Modern X-ray Physics</i>, 2nd ed. Wiley.</li>
+        <li>Ewald, P. P. (1921). Das „reziproke Gitter“ in der Strukturtheorie. Z. Kristallogr. 56, 129–156.</li>
+        <li>Chapman, H. N. et al. (2011). Femtosecond X-ray protein nanocrystallography. Nature 470, 73–77.</li>
+        <li>Sayre, D. (1952). Some implications of a theorem due to Shannon. Acta Cryst. 5, 843.</li>
+        <li>Kirian, R. A. et al. (2010). Femtosecond protein nanocrystallography: data analysis methods. Opt. Express 18, 5713–5723.</li>
+        <li>Spence, J. C. H. et al. (2011). Phasing of coherent femtosecond X-ray diffraction from size-varying nanocrystals. Opt. Express 19, 2866–2873.</li>
+        <li>Holton, J. M. &amp; Frankel, K. A. (2010). The minimum crystal size needed for a complete diffraction data set. Acta Cryst. D66, 393–408.</li>
+      </ol>
+    </details>
+  </footer>
+</div>
+
+<script>
+(function(){
+'use strict';
+const A=40, B=30, B0=15, P=512, QBS=1/90, TAU=2*Math.PI, DEG=Math.PI/180;
+const $=id=>document.getElementById(id);
+
+/* ---------- model molecule (deterministic) ---------- */
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const mol=(function(){
+  const r=rng(20240611), pts=[];
+  const inside=(x,y)=>((x+3)/11)**2+((y+0.5)/8.5)**2<=1||((x-6.5)/6.5)**2+((y-4.5)/5.5)**2<=1||((x-2)/5)**2+((y+6.5)/3.5)**2<=1;
+  let tries=0;
+  while(pts.length<40&&tries<400000){
+    tries++;
+    const x=-15+30*r(), y=-11+22*r();
+    if(!inside(x,y)) continue;
+    let ok=true;
+    for(const p of pts){const dx=p[0]-x,dy=p[1]-y;if(dx*dx+dy*dy<2.3*2.3){ok=false;break;}}
+    if(ok) pts.push([x,y]);
+  }
+  let mx=0,my=0; for(const p of pts){mx+=p[0];my+=p[1];} mx/=pts.length; my/=pts.length;
+  for(const p of pts){p[0]-=mx;p[1]-=my;}
+  const bonds=new Path2D(), atoms=new Path2D(); let D=0;
+  for(let i=0;i<pts.length;i++){
+    atoms.moveTo(pts[i][0]+0.75,pts[i][1]); atoms.arc(pts[i][0],pts[i][1],0.75,0,TAU);
+    for(let j=i+1;j<pts.length;j++){
+      const d=Math.hypot(pts[i][0]-pts[j][0],pts[i][1]-pts[j][1]);
+      if(d>D) D=d;
+      if(d<3.4){bonds.moveTo(pts[i][0],pts[i][1]);bonds.lineTo(pts[j][0],pts[j][1]);}
+    }
+  }
+  return {pts,bonds,atoms,D,M:pts.length,ax:Float64Array.from(pts,p=>p[0]),ay:Float64Array.from(pts,p=>p[1])};
+})();
+function F2at(x,y){let re=0,im=0;for(let j=0;j<mol.M;j++){const ph=TAU*(x*mol.ax[j]+y*mol.ay[j]);re+=Math.cos(ph);im+=Math.sin(ph);}return re*re+im*im;}
+function fwhm(N){let lo=0,hi=1/N;for(let i=0;i<60;i++){const m=(lo+hi)/2;if(dir(N,m)/(N*N)>0.5)lo=m;else hi=m;}return 2*lo;}
+function firstSub(N){let m=0;const x1=Math.min(2/N,0.5);for(let i=1;i<2000;i++){const x=1/N+(x1-1/N)*i/2000;const v=dir(N,x)/(N*N);if(v>m)m=v;}return m;}
+function dir(N,x){if(N<=1)return 1;const s=Math.sin(Math.PI*x);if(Math.abs(s)<1e-9)return N*N;const v=Math.sin(N*Math.PI*x)/s;return v*v;}
+
+/* ---------- state ---------- */
+const st={stage:1,Na:1,Nb:1,lambda:3,phi:10*DEG,Bdw:20,dyn:4.5,dmin:7.5,zoom:false,accum:false};
+let qmax=1/st.dmin, dq=2*qmax/P;
+const gDW=q2=>Math.exp(-(B0+st.Bdw)*q2/2);
+
+/* ---------- molecular transform on grid ---------- */
+const qx=new Float64Array(P), qy=new Float64Array(P);
+const RE=new Float64Array(P*P), IM=new Float64Array(P*P), F2=new Float32Array(P*P);
+let fKey='';
+function ensureF(){
+  const key=String(qmax); if(key===fKey) return; fKey=key;
+  dq=2*qmax/P;
+  for(let i=0;i<P;i++){qx[i]=-qmax+(i+0.5)*dq; qy[i]=qmax-(i+0.5)*dq;}
+  RE.fill(0); IM.fill(0);
+  const cx=new Float64Array(P),sx=new Float64Array(P),cy=new Float64Array(P),sy=new Float64Array(P);
+  for(let j=0;j<mol.M;j++){
+    const x=mol.ax[j], y=mol.ay[j];
+    for(let i=0;i<P;i++){let ph=TAU*qx[i]*x;cx[i]=Math.cos(ph);sx[i]=Math.sin(ph);ph=TAU*qy[i]*y;cy[i]=Math.cos(ph);sy[i]=Math.sin(ph);}
+    for(let r=0;r<P;r++){
+      const a=cy[r], b=sy[r], o=r*P;
+      for(let c=0;c<P;c++){const u=cx[c],v=sx[c];RE[o+c]+=u*a-v*b;IM[o+c]+=u*b+v*a;}
+    }
+  }
+  for(let p=0;p<P*P;p++) F2[p]=RE[p]*RE[p]+IM[p]*IM[p];
+}
+
+/* ---------- colour map (inferno, polynomial fit) ---------- */
+const LUT=new Uint8ClampedArray(256*3);
+(function(){
+  const c=[[0.0002189403691192265,0.001651004631001012,-0.01948089843709184],[0.1065134194856116,0.5639564367884091,3.932712388889277],[11.60249308247187,-3.972853965665698,-15.9423941062914],[-41.70399613139459,17.43639888205313,44.35414519872813],[77.162935699427,-33.40235894210092,-81.80730925738993],[-71.31942824499214,32.62606426397723,73.20951985803202],[25.13112622477341,-12.24266895238567,-23.07032500287172]];
+  for(let i=0;i<256;i++){const t=i/255;for(let k=0;k<3;k++){let v=0;for(let n=6;n>=0;n--)v=v*t+c[n][k];LUT[i*3+k]=Math.round(Math.max(0,Math.min(1,v))*255);}}
+})();
+const lut=t=>{const i=Math.max(0,Math.min(255,Math.round(t*255)))*3;return `rgb(${LUT[i]},${LUT[i+1]},${LUT[i+2]})`;};
+const tOf=(I,ref)=>Math.max(0,Math.min(1,1+Math.log10(I/ref+1e-300)/st.dyn));
+
+/* ---------- reciprocal-space images ---------- */
+function makeOff(){const c=document.createElement('canvas');c.width=c.height=P;const x=c.getContext('2d');return {c,x,img:x.createImageData(P,P),key:''};}
+const offFinite=makeOff(), offBase=makeOff();
+const gx=new Float64Array(P), gy=new Float64Array(P), La=new Float64Array(P), Lb=new Float64Array(P), Ibuf=new Float32Array(P*P);
+function latAvg(out,q,N,a){
+  if(N<=1){out.fill(1);return;}
+  const SS=Math.max(16,Math.min(96,4*N));
+  for(let i=0;i<P;i++){let s=0;for(let k=0;k<SS;k++){s+=dir(N,(q[i]+((k+0.5)/SS-0.5)*dq)*a);}out[i]=s/SS;}
+}
+function buildImage(o,lattice,dim){
+  ensureF();
+  const key=[qmax,st.Bdw,st.dyn,lattice?st.Na:0,lattice?st.Nb:0,dim].join('|');
+  if(o.key===key) return; o.key=key;
+  const Bt=B0+st.Bdw;
+  for(let i=0;i<P;i++){gx[i]=Math.exp(-Bt*qx[i]*qx[i]/2);gy[i]=Math.exp(-Bt*qy[i]*qy[i]/2);}
+  if(lattice){latAvg(La,qx,st.Na,A);latAvg(Lb,qy,st.Nb,B);}else{La.fill(1);Lb.fill(1);}
+  let mx=0; const bs2=QBS*QBS;
+  for(let r=0;r<P;r++){const o2=r*P, fy=gy[r]*Lb[r], q2y=qy[r]*qy[r];
+    for(let c=0;c<P;c++){const v=F2[o2+c]*gx[c]*La[c]*fy;Ibuf[o2+c]=v;if(v>mx&&qx[c]*qx[c]+q2y>bs2)mx=v;}}
+  const d=o.img.data, inv=1/mx, dyn=st.dyn;
+  for(let p=0;p<P*P;p++){
+    let t=1+Math.log10(Ibuf[p]*inv+1e-300)/dyn; t=t<0?0:t>1?1:t;
+    const i=((t*255)|0)*3, q=p*4;
+    d[q]=LUT[i]*dim; d[q+1]=LUT[i+1]*dim; d[q+2]=LUT[i+2]*dim; d[q+3]=255;
+  }
+  o.x.putImageData(o.img,0,0);
+}
+
+/* ---------- reciprocal lattice points ---------- */
+let spots=[], spotMax=1, spotKey='';
+function ensureSpots(){
+  const key=[qmax,st.Bdw].join('|'); if(key===spotKey) return; spotKey=key;
+  spots=[]; spotMax=0;
+  const hm=Math.floor(qmax*A), km=Math.floor(qmax*B);
+  for(let h=-hm;h<=hm;h++)for(let k=-km;k<=km;k++){
+    const x=h/A,y=k/B,q2=x*x+y*y;
+    if(q2>qmax*qmax||q2<QBS*QBS) continue;
+    const I=F2at(x,y)*gDW(q2);
+    spots.push({h,k,gx:x,gy:y,I}); if(I>spotMax)spotMax=I;
+  }
+}
+let excited=[];
+function computeExcited(){
+  ensureSpots();
+  const R=1/st.lambda, co=Math.cos(st.phi), si=Math.sin(st.phi);
+  excited=[];
+  for(const s of spots){
+    s.X=co*s.gx-si*s.gy; s.Y=si*s.gx+co*s.gy;
+    s.eps=Math.hypot(s.X+R,s.Y)-R;
+    {const gcx=s.X+R, gcy=s.Y, gl=Math.hypot(gcx,gcy), dx=-s.eps*gcx/gl, dy=-s.eps*gcy/gl, cxx=co*dx+si*dy, cyy=-si*dx+co*dy;
+     s.on=Math.abs(cxx*A)<1/st.Na&&Math.abs(cyy*B)<1/st.Nb;}
+    if(s.on){s.tth=Math.atan2(s.Y,s.X+R);excited.push(s);}
+  }
+  excited.sort((a,b)=>b.I-a.I);
+}
+
+/* ---------- detector (Ewald circle) ---------- */
+const NBIN=720, DSS=8, det=new Float64Array(NBIN), acc=new Float64Array(NBIN);
+let accKey='', lastPhi=null, accN=0;
+const th2Max=()=>2*Math.asin(Math.min(1,qmax*st.lambda/2));
+function updateDetector(){
+  const key=[qmax,st.Bdw,st.Na,st.Nb,st.lambda,st.accum].join('|');
+  if(key!==accKey){acc.fill(0);accKey=key;lastPhi=null;accN=0;}
+  const L=1/st.lambda, tm=th2Max(), co=Math.cos(st.phi), si=Math.sin(st.phi);
+  for(let b=0;b<NBIN;b++){
+    let s=0;
+    for(let k=0;k<DSS;k++){
+      const tt=-tm+(b+(k+0.5)/DSS)/NBIN*2*tm;
+      const lx=(Math.cos(tt)-1)*L, ly=Math.sin(tt)*L, q2=lx*lx+ly*ly;
+      if(q2<QBS*QBS) continue;
+      const cx=co*lx+si*ly, cy=-si*lx+co*ly;
+      s+=F2at(cx,cy)*gDW(q2)*dir(st.Na,cx*A)*dir(st.Nb,cy*B);
+    }
+    det[b]=s/DSS;
+  }
+  if(st.accum&&st.phi!==lastPhi){for(let b=0;b<NBIN;b++)acc[b]+=det[b];accN++;lastPhi=st.phi;}
+}
+
+/* ---------- helpers ---------- */
+function colors(){const cs=getComputedStyle(document.documentElement);const g=n=>cs.getPropertyValue(n).trim();
+  return {ink:g('--ink'),muted:g('--muted'),rule:g('--rule'),accent:g('--accent'),ewald:g('--ewald'),hit:g('--hit'),plotbg:g('--plotbg'),grid:g('--grid'),curve:g('--curve'),env:g('--env'),mol:g('--mol'),surface:g('--surface')};}
+const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+const pow10=n=>'10'+String(n).split('').map(ch=>SUP[ch]||ch).join('');
+function niceStep(range,target){const raw=range/target,p=10**Math.floor(Math.log10(raw)),m=raw/p;return (m<1.5?1:m<3?2:m<7?5:10)*p;}
+function arrow(ctx,x0,y0,x1,y1,hs){ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();const a=Math.atan2(y1-y0,x1-x0);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x1-hs*Math.cos(a-0.4),y1-hs*Math.sin(a-0.4));ctx.lineTo(x1-hs*Math.cos(a+0.4),y1-hs*Math.sin(a+0.4));ctx.closePath();ctx.fill();}
+function font(ctx,px,u,w){ctx.font=`${w||400} ${px*u}px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif`;}
+function axes(ctx,pa,xr,yr,xlab,ylab,c,u,xfmt){
+  const X=x=>pa.L+(x-xr[0])/(xr[1]-xr[0])*pa.w, Y=y=>pa.T+(yr[1]-y)/(yr[1]-yr[0])*pa.h;
+  ctx.save(); font(ctx,14,u); ctx.lineWidth=u; ctx.strokeStyle=c.grid; ctx.fillStyle=c.ink;
+  ctx.textAlign='right'; ctx.textBaseline='middle';
+  for(let n=Math.ceil(yr[0]);n<=Math.floor(yr[1]);n++){const y=Y(n);ctx.beginPath();ctx.moveTo(pa.L,y);ctx.lineTo(pa.L+pa.w,y);ctx.stroke();ctx.fillText(pow10(n),pa.L-5*u,y);}
+  const step=niceStep(xr[1]-xr[0],7); ctx.textAlign='center'; ctx.textBaseline='top';
+  for(let v=Math.ceil(xr[0]/step-1e-9)*step;v<=xr[1]+1e-12;v+=step){const x=X(v);ctx.beginPath();ctx.moveTo(x,pa.T);ctx.lineTo(x,pa.T+pa.h);ctx.stroke();ctx.fillText(xfmt(v,step),x,pa.T+pa.h+4*u);}
+  ctx.strokeStyle=c.rule; ctx.strokeRect(pa.L,pa.T,pa.w,pa.h);
+  ctx.fillStyle=c.ink; ctx.fillText(xlab,pa.L+pa.w/2,pa.T+pa.h+24*u);
+  ctx.save(); ctx.translate(14*u,pa.T+pa.h/2); ctx.rotate(-Math.PI/2); ctx.textBaseline='middle'; ctx.fillText(ylab,0,0); ctx.restore();
+  ctx.restore();
+  return {X,Y};
+}
+const fmtQ=(v,s)=>(Math.abs(v)<1e-12?0:v).toFixed(s<0.01?3:2);
+
+/* ---------- real space ---------- */
+function drawReal(){
+  const cv=$('cReal'), ctx=cv.getContext('2d'), W=cv.width, H=cv.height; if(!W) return;
+  const u=W/Math.max(1,cv.clientWidth), c=colors();
+  ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle=c.plotbg; ctx.fillRect(0,0,W,H);
+  if(st.stage===5){drawLab(ctx,W,H,u,c);return;}
+  let na=st.Na, nb=st.Nb, sc, i0, i1, j0, j1, cxA, cyA;
+  if(st.stage===1){na=nb=1;sc=W*0.8/(mol.D+4);i0=i1=j0=j1=0;cxA=A/2;cyA=B/2;}
+  else if(st.stage===4){sc=W/(3.4*A);i0=-4;i1=4;j0=-6;j1=6;cxA=A/2;cyA=B/2;}
+  else {sc=Math.min(W*0.86/(na*A),H*0.86/(nb*B));i0=0;i1=na-1;j0=0;j1=nb-1;cxA=na*A/2;cyA=nb*B/2;}
+  const MX=x=>W/2+(x-cxA)*sc, MY=y=>H/2-(y-cyA)*sc;
+  if(st.stage!==1){
+    ctx.strokeStyle=c.rule; ctx.lineWidth=Math.max(0.5,Math.min(1.2,sc/6))*u; ctx.beginPath();
+    for(let i=i0;i<=i1+1;i++){ctx.moveTo(MX(i*A),MY(j0*B));ctx.lineTo(MX(i*A),MY((j1+1)*B));}
+    for(let j=j0;j<=j1+1;j++){ctx.moveTo(MX(i0*A),MY(j*B));ctx.lineTo(MX((i1+1)*A),MY(j*B));}
+    ctx.stroke();
+  }
+  ctx.strokeStyle=c.mol; ctx.fillStyle=c.mol;
+  const drawAtoms=sc*0.75>1.1*u;
+  for(let i=i0;i<=i1;i++)for(let j=j0;j<=j1;j++){
+    ctx.setTransform(sc,0,0,-sc,MX((i+0.5)*A),MY((j+0.5)*B));
+    ctx.lineWidth=(sc>4*u?1.3:0.7)*u/sc; ctx.stroke(mol.bonds);
+    if(drawAtoms) ctx.fill(mol.atoms);
+  }
+  ctx.setTransform(1,0,0,1,0,0);
+  if(st.stage===4){
+    const g=ctx.createRadialGradient(W/2,H/2,W*0.22,W/2,H/2,W*0.62);
+    ctx.fillStyle=c.plotbg; const hx=ctx.fillStyle, rr=parseInt(hx.slice(1,3),16), gg=parseInt(hx.slice(3,5),16), bb=parseInt(hx.slice(5,7),16);
+    g.addColorStop(0,`rgba(${rr},${gg},${bb},0)`); g.addColorStop(1,`rgba(${rr},${gg},${bb},1)`);
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    font(ctx,15,u); ctx.fillStyle=c.ink; ctx.textAlign='center'; ctx.textBaseline='bottom';
+    ctx.fillText('lattice continues without limit',W/2,H-8*u);
+  }
+  // scale bar
+  const bar=10*sc; if(bar>12*u){
+    ctx.strokeStyle=c.ink; ctx.lineWidth=2*u; ctx.beginPath(); ctx.moveTo(12*u,H-14*u); ctx.lineTo(12*u+bar,H-14*u); ctx.stroke();
+    font(ctx,14,u); ctx.fillStyle=c.ink; ctx.textAlign='left'; ctx.textBaseline='bottom'; ctx.fillText('10 Å',12*u,H-18*u);
+  }
+}
+
+function drawLab(ctx,W,H,u,c){
+  const cx=W*0.28, cy=H*0.5, detX=W*0.88, D=detX-cx, lim=75*DEG;
+  const tm=Math.max(1e-4,Math.min(th2Max(),lim)), m=(0.42*H)/(D*Math.tan(tm));
+  ctx.strokeStyle=c.ink; ctx.fillStyle=c.ink; ctx.lineWidth=2*u;
+  arrow(ctx,W*0.03,cy,cx-W*0.07,cy,8*u);
+  ctx.setLineDash([4*u,4*u]); ctx.strokeStyle=c.muted; ctx.lineWidth=u;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(detX,cy); ctx.stroke(); ctx.setLineDash([]);
+  // rays
+  const ref=spotMax;
+  for(const s of excited.slice(0,10)){
+    if(Math.abs(s.tth)>lim) continue;
+    const y=cy-m*D*Math.tan(s.tth), t=tOf(s.I,ref);
+    ctx.globalAlpha=0.25+0.7*t; ctx.strokeStyle=c.hit; ctx.lineWidth=(1+1.5*t)*u;
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(detX,y); ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+  // crystal
+  const ext=Math.max(st.Na*A,st.Nb*B), sc=(W*0.15)/ext, co=Math.cos(st.phi), si=Math.sin(st.phi);
+  const Pt=(x,y)=>[cx+(co*x-si*y)*sc, cy-(si*x+co*y)*sc];
+  const ha=st.Na*A/2, hb=st.Nb*B/2;
+  ctx.strokeStyle=c.mol; ctx.lineWidth=0.8*u; ctx.beginPath();
+  if(st.Na<=24&&st.Nb<=24){
+    for(let i=0;i<=st.Na;i++){const a=Pt(-ha+i*A,-hb),b=Pt(-ha+i*A,hb);ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);}
+    for(let j=0;j<=st.Nb;j++){const a=Pt(-ha,-hb+j*B),b=Pt(ha,-hb+j*B);ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);}
+  } else {
+    const p=[Pt(-ha,-hb),Pt(ha,-hb),Pt(ha,hb),Pt(-ha,hb)]; ctx.moveTo(p[0][0],p[0][1]); for(let i=1;i<4;i++)ctx.lineTo(p[i][0],p[i][1]); ctx.closePath();
+    ctx.globalAlpha=0.25; ctx.fillStyle=c.mol; ctx.fill(); ctx.globalAlpha=1;
+  }
+  ctx.stroke();
+  // detector
+  ctx.strokeStyle=c.muted; ctx.lineWidth=3*u; ctx.beginPath(); ctx.moveTo(detX,cy-0.47*H); ctx.lineTo(detX,cy+0.47*H); ctx.stroke();
+  const useAcc=st.accum&&accN>0; let ref2=(st.Na*st.Nb)**2*spotMax;
+  if(useAcc){ref2=0;for(let b=0;b<NBIN;b++)if(acc[b]>ref2)ref2=acc[b];}
+  const src=useAcc?acc:det, th=th2Max();
+  for(let b=0;b<NBIN;b++){
+    const tt=-th+(b+0.5)/NBIN*2*th; if(Math.abs(tt)>lim||!(src[b]>0)) continue;
+    const t=tOf(src[b],ref2); if(t<0.03) continue;
+    const y=cy-m*D*Math.tan(tt); ctx.fillStyle=lut(t); ctx.fillRect(detX+3*u,y-1.5*u,10*u,3*u);
+  }
+  ctx.fillStyle=c.ink; ctx.fillRect(detX-3*u,cy-3*u,6*u,6*u);
+  font(ctx,14,u); ctx.fillStyle=c.ink; ctx.textAlign='left'; ctx.textBaseline='bottom';
+  ctx.fillText(`beam, λ = ${st.lambda.toFixed(1)} Å`,W*0.03,cy-8*u);
+  ctx.textBaseline='top'; ctx.fillText(`φ = ${(((st.phi/DEG)%360)+360)%360|0}°`,cx-W*0.07,cy+0.1*H);
+  ctx.textAlign='right'; ctx.fillText(useAcc?'detector (accumulated)':'detector',detX-6*u,cy+0.42*H);
+  if(Math.abs(m-1)>0.05){ctx.fillStyle=c.ink;ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText(`vertical scale ×${m.toFixed(1)}`,8*u,8*u);}
+}
+
+/* ---------- reciprocal space ---------- */
+function drawRecip(){
+  const cv=$('cRecip'), ctx=cv.getContext('2d'), S=cv.width; if(!S) return;
+  const u=S/Math.max(1,cv.clientWidth), c=colors(), k=S/P;
+  ensureF();
+  const toX=q=>(q+qmax)/dq*k, toY=q=>(qmax-q)/dq*k, rpx=q=>q/dq*k;
+  ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle='#000'; ctx.fillRect(0,0,S,S);
+  ctx.imageSmoothingEnabled=true;
+  const s=st.stage;
+  if(s<=3){
+    buildImage(offFinite,s>1,1); ctx.drawImage(offFinite.c,0,0,S,S);
+  } else {
+    buildImage(offBase,false,0.38); ensureSpots();
+    ctx.save(); ctx.beginPath(); ctx.arc(S/2,S/2,S/2,0,TAU); ctx.clip();
+    if(s===5){ctx.translate(S/2,S/2);ctx.rotate(-st.phi);ctx.translate(-S/2,-S/2);}
+    ctx.drawImage(offBase.c,0,0,S,S); ctx.restore();
+    const co=Math.cos(s===5?st.phi:0), si=Math.sin(s===5?st.phi:0);
+    for(const p of spots){
+      const X=co*p.gx-si*p.gy, Y=si*p.gx+co*p.gy, t=tOf(p.I,spotMax);
+      const r=(1.3+3.4*t)*u*Math.min(1.6,S/(500*u));
+      ctx.fillStyle=lut(0.2+0.8*t); ctx.beginPath(); ctx.arc(toX(X),toY(Y),r,0,TAU); ctx.fill();
+      if(s===5&&p.on){ctx.strokeStyle=c.hit;ctx.lineWidth=2*u;ctx.beginPath();ctx.arc(toX(X),toY(Y),r+4*u,0,TAU);ctx.stroke();}
+    }
+    ctx.strokeStyle='rgba(255,255,255,0.35)'; ctx.lineWidth=u; ctx.beginPath(); ctx.arc(S/2,S/2,S/2-u,0,TAU); ctx.stroke();
+  }
+  // beamstop
+  ctx.fillStyle='#5f6773'; ctx.beginPath(); ctx.arc(toX(0),toY(0),rpx(QBS),0,TAU); ctx.fill();
+  // reciprocal axes
+  if(s>=2){
+    const ph=s===5?st.phi:0, co=Math.cos(ph), si=Math.sin(ph);
+    ctx.strokeStyle='#ffffff'; ctx.fillStyle='#ffffff'; ctx.lineWidth=1.5*u; font(ctx,15,u,600);
+    const ax=[[1/A,0,'a*'],[0,1/B,'b*']];
+    for(const [x,y,l] of ax){const X=co*x-si*y,Y=si*x+co*y;arrow(ctx,toX(0),toY(0),toX(X),toY(Y),6*u);ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(l,toX(X*1.45),toY(Y*1.45));}
+  }
+  // Ewald circle
+  if(s===5){
+    const R=1/st.lambda;
+    ctx.strokeStyle=c.ewald; ctx.lineWidth=2*u; ctx.beginPath(); ctx.arc(toX(-R),toY(0),rpx(R),0,TAU); ctx.stroke();
+    ctx.fillStyle=c.ewald; ctx.strokeStyle=c.ewald; ctx.lineWidth=1.5*u;
+    arrow(ctx,toX(-Math.min(R,qmax*0.98)),toY(0),toX(0)-rpx(QBS),toY(0),7*u);
+    font(ctx,15,u,600); ctx.textAlign='left'; ctx.textBaseline='bottom'; ctx.fillText('k₀',toX(-Math.min(R,qmax*0.98))+4*u,toY(0)-4*u);
+    if(excited.length){const e=excited[0];ctx.setLineDash([5*u,4*u]);ctx.strokeStyle=c.hit;ctx.beginPath();ctx.moveTo(toX(-R),toY(0));ctx.lineTo(toX(e.X),toY(e.Y));ctx.stroke();ctx.setLineDash([]);
+      ctx.fillStyle=c.hit;ctx.textAlign='left';ctx.textBaseline='bottom';ctx.fillText(`(${e.h},${e.k})`,toX(e.X)+7*u,toY(e.Y)-5*u);}
+  }
+  // q scale bar
+  const bar=0.05, L=rpx(bar);
+  ctx.strokeStyle='#ffffff'; ctx.lineWidth=2*u; ctx.beginPath(); ctx.moveTo(10*u,S-12*u); ctx.lineTo(10*u+L,S-12*u); ctx.stroke();
+  font(ctx,14,u); ctx.fillStyle='#ffffff'; ctx.textAlign='left'; ctx.textBaseline='bottom'; ctx.fillText('0.05 Å⁻¹',10*u,S-16*u);
+}
+
+/* ---------- profile / detector plot ---------- */
+let profCache={key:'',F:null};
+function profileF(x0,x1,n){const key=[x0,x1,n].join('|');if(profCache.key!==key){const F=new Float64Array(n);for(let i=0;i<n;i++)F[i]=F2at(x0+(x1-x0)*(i+0.5)/n,0);profCache={key,F};}return profCache.F;}
+function drawProf(){
+  const cv=$('cProf'), ctx=cv.getContext('2d'), W=cv.width, H=cv.height; if(!W) return;
+  const u=W/Math.max(1,cv.clientWidth), c=colors(), s=st.stage;
+  ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle=c.plotbg; ctx.fillRect(0,0,W,H);
+  const pa={L:72*u,R:14*u,T:22*u}; pa.w=W-pa.L-pa.R; pa.h=H-pa.T-50*u;
+  const cols=Math.max(40,Math.floor(pa.w));
+  if(s<=3){
+    const z=st.zoom, x0=z?0.85/A:-qmax, x1=z?2.15/A:qmax, SS=6, n=cols*SS;
+    const Fl=profileF(x0,x1,n), lat=s>=2, Na=st.Na, Nb2=st.Nb*st.Nb;
+    const lo=new Float64Array(cols), hi=new Float64Array(cols), env=new Float64Array(cols);
+    let top=-Infinity;
+    for(let col=0;col<cols;col++){
+      let a=Infinity,b=-Infinity;
+      for(let kk=0;kk<SS;kk++){const i=col*SS+kk,q=x0+(x1-x0)*(i+0.5)/n;const v=Fl[i]*gDW(q*q)*(lat?dir(Na,q*A)*Nb2:1);const lv=Math.log10(v+1e-300);if(lv<a)a=lv;if(lv>b)b=lv;}
+      lo[col]=a; hi[col]=b;
+      const i=col*SS+3, q=x0+(x1-x0)*(i+0.5)/n;
+      env[col]=Math.log10(Fl[i]*gDW(q*q)*(lat?Na*Na*Nb2:1)+1e-300);
+      if(Math.abs(q)>QBS) top=Math.max(top,b,env[col]);
+    }
+    const yr=[top+0.25-st.dyn-0.6,top+0.25];
+    const {X,Y}=axes(ctx,pa,[x0,x1],yr,'q along a* (Å⁻¹), q_y = 0','intensity',c,u,fmtQ);
+    const cl=v=>Y(Math.max(yr[0],Math.min(yr[1],v)));
+    const xc=col=>pa.L+(col+0.5)/cols*pa.w;
+    ctx.save(); ctx.beginPath(); ctx.rect(pa.L,pa.T,pa.w,pa.h); ctx.clip();
+    if(!z){ctx.fillStyle=c.grid;ctx.fillRect(X(-QBS),pa.T,X(QBS)-X(-QBS),pa.h);}
+    if(lat){
+      ctx.strokeStyle=c.env; ctx.lineWidth=u; ctx.setLineDash([3*u,3*u]); font(ctx,13,u); ctx.fillStyle=c.ink; ctx.textAlign='center'; ctx.textBaseline='top';
+      for(let h=Math.ceil(x0*A);h<=Math.floor(x1*A);h++){const x=X(h/A);ctx.beginPath();ctx.moveTo(x,pa.T);ctx.lineTo(x,pa.T+pa.h);ctx.stroke();ctx.fillText(`h = ${h}`,x,pa.T+2*u);}
+      ctx.setLineDash([5*u,4*u]); ctx.lineWidth=1.3*u; ctx.beginPath();
+      for(let col=0;col<cols;col++){const y=cl(env[col]);col?ctx.lineTo(xc(col),y):ctx.moveTo(xc(col),y);} ctx.stroke(); ctx.setLineDash([]);
+    }
+    ctx.fillStyle=c.curve; ctx.globalAlpha=0.3; ctx.beginPath();
+    for(let col=0;col<cols;col++){const y=cl(hi[col]);col?ctx.lineTo(xc(col),y):ctx.moveTo(xc(col),y);}
+    for(let col=cols-1;col>=0;col--)ctx.lineTo(xc(col),cl(lo[col]));
+    ctx.closePath(); ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle=c.curve; ctx.lineWidth=1.4*u; ctx.beginPath();
+    for(let col=0;col<cols;col++){const y=cl(hi[col]);col?ctx.lineTo(xc(col),y):ctx.moveTo(xc(col),y);} ctx.stroke();
+    ctx.restore();
+    font(ctx,14,u); ctx.textAlign='right'; ctx.textBaseline='top'; ctx.fillStyle=c.ink;
+    if(lat&&z&&Na>=2) ctx.fillText(`between h = 1 and 2: Nₐ − 1 = ${Na-1} zeros, Nₐ − 2 = ${Na-2} subsidiary maxima`,pa.L+pa.w-6*u,pa.T+16*u);
+    if(lat){ctx.fillStyle=c.ink;ctx.fillText('dashed: (NₐN_b)² |F|², the molecular transform scaled to the peak height',pa.L+pa.w-6*u,pa.T+(z&&Na>=2?30:16)*u);}
+  } else if(s===4){
+    const x0=-qmax, x1=qmax, n=cols, Fl=profileF(x0,x1,n);
+    let mx=0; const ev=new Float64Array(n);
+    for(let i=0;i<n;i++){const q=x0+(x1-x0)*(i+0.5)/n;ev[i]=Fl[i]*gDW(q*q);if(Math.abs(q)>QBS&&ev[i]>mx)mx=ev[i];}
+    const yr=[-st.dyn-0.3,0.25];
+    const {X,Y}=axes(ctx,pa,[x0,x1],yr,'q along a* (Å⁻¹), q_y = 0','relative intensity',c,u,fmtQ);
+    const cl=v=>Y(Math.max(yr[0],Math.min(yr[1],v)));
+    ctx.save(); ctx.beginPath(); ctx.rect(pa.L,pa.T,pa.w,pa.h); ctx.clip();
+    ctx.fillStyle=c.grid; ctx.fillRect(X(-QBS),pa.T,X(QBS)-X(-QBS),pa.h);
+    ctx.strokeStyle=c.env; ctx.lineWidth=1.2*u; ctx.setLineDash([5*u,4*u]); ctx.beginPath();
+    for(let i=0;i<n;i++){const x=pa.L+(i+0.5)/n*pa.w,y=cl(Math.log10(ev[i]/mx+1e-300));i?ctx.lineTo(x,y):ctx.moveTo(x,y);} ctx.stroke(); ctx.setLineDash([]);
+    const hm=Math.floor(qmax*A); ctx.strokeStyle=c.curve; ctx.fillStyle=c.curve; ctx.lineWidth=2*u;
+    for(let h=-hm;h<=hm;h++){if(h===0)continue;const q=h/A;if(Math.abs(q)<QBS)continue;const v=Math.log10(F2at(q,0)*gDW(q*q)/mx+1e-300);const x=X(q),y=cl(v);
+      ctx.beginPath();ctx.moveTo(x,pa.T+pa.h);ctx.lineTo(x,y);ctx.stroke();ctx.beginPath();ctx.arc(x,y,3*u,0,TAU);ctx.fill();}
+    ctx.restore();
+    font(ctx,14,u); ctx.fillStyle=c.ink; ctx.textAlign='right'; ctx.textBaseline='top';
+    ctx.fillText('stems: Bragg reflections (h, 0); dashed: continuous molecular transform',pa.L+pa.w-6*u,pa.T+6*u);
+  } else {
+    const th=th2Max(), useAcc=st.accum&&accN>0, ref=(st.Na*st.Nb)**2*spotMax;
+    const yr=[-st.dyn,0.3];
+    const {X,Y}=axes(ctx,pa,[-th/DEG,th/DEG],yr,'scattering angle 2θ (°)','intensity / max peak',c,u,(v,s2)=>(Math.abs(v)<1e-9?0:v).toFixed(s2<1?1:0));
+    const cl=v=>Y(Math.max(yr[0],Math.min(yr[1],v)));
+    const bx=b=>pa.L+(b+0.5)/NBIN*pa.w;
+    ctx.save(); ctx.beginPath(); ctx.rect(pa.L,pa.T,pa.w,pa.h); ctx.clip();
+    if(useAcc){
+      let am=0; for(let b=0;b<NBIN;b++)if(acc[b]>am)am=acc[b];
+      ctx.fillStyle=c.hit; ctx.globalAlpha=0.35; ctx.beginPath(); ctx.moveTo(bx(0),pa.T+pa.h);
+      for(let b=0;b<NBIN;b++)ctx.lineTo(bx(b),acc[b]>0?cl(Math.log10(acc[b]/am)):pa.T+pa.h);
+      ctx.lineTo(bx(NBIN-1),pa.T+pa.h); ctx.closePath(); ctx.fill(); ctx.globalAlpha=1;
+    }
+    ctx.strokeStyle=c.curve; ctx.lineWidth=1.4*u; ctx.beginPath(); let started=false;
+    for(let b=0;b<NBIN;b++){if(!(det[b]>0)){started=false;continue;}const y=cl(Math.log10(det[b]/ref));if(started)ctx.lineTo(bx(b),y);else{ctx.moveTo(bx(b),y);started=true;}}
+    ctx.stroke();
+    font(ctx,13,u); ctx.fillStyle=c.hit; ctx.textAlign='center'; ctx.textBaseline='bottom';
+    for(const e of excited.slice(0,6)){const x=X(e.tth/DEG);ctx.fillText(`(${e.h},${e.k})`,x,pa.T+12*u);}
+    ctx.restore();
+    font(ctx,14,u); ctx.textAlign='left'; ctx.textBaseline='top';
+    ctx.fillStyle=c.curve; ctx.fillText('current orientation',pa.L+6*u,pa.T+16*u);
+    if(useAcc){ctx.fillStyle=c.hit;ctx.fillText(`accumulated over ${accN} orientations (own scale)`,pa.L+6*u,pa.T+30*u);}
+  }
+}
+
+/* ---------- text ---------- */
+const TEXT={
+1:`<h2>One molecule</h2>
+<p>A single molecule scatters a continuous pattern, its molecular transform. Each atom contributes a wave whose phase depends on its position; only the intensity is recorded.</p>
+<div class="eq"><i>F</i>(<b>q</b>) = Σ<sub><i>j</i></sub> <i>f<sub>j</sub></i>(<i>q</i>) exp(2π<i>i</i> <b>q</b>·<b>r</b><sub><i>j</i></sub>)<br><i>I</i>(<b>q</b>) = |<i>F</i>(<b>q</b>)|²</div>
+<p>Features have widths of roughly 1/<i>D</i> for a molecule of size <i>D</i>. The pattern is centrosymmetric (Friedel’s law) because the electron density is real, and it fades with q through the atomic form factor and B factor.</p>`,
+2:`<h2>A few copies</h2>
+<p>Identical molecules placed on a lattice scatter coherently. The molecular transform is unchanged but multiplied by the lattice factor.</p>
+<div class="eq"><i>I</i>(<b>q</b>) = |<i>F</i>(<b>q</b>)|² · |<i>S</i>(<b>q</b>)|²<br>|<i>S</i>|² = sin²(π<i>N<sub>a</sub></i> <b>q</b>·<b>a</b>) / sin²(π <b>q</b>·<b>a</b>) × (same for <b>b</b>)</div>
+<p>Where <b>q</b>·<b>a</b> is an integer <i>h</i>, all copies scatter in phase: a principal maximum (<i>N<sub>a</sub>N<sub>b</sub></i>)² times one molecule. Between adjacent principal maxima there are <i>N<sub>a</sub></i> − 1 zeros and <i>N<sub>a</sub></i> − 2 subsidiary maxima. Zoom the profile onto one period to count them.</p>`,
+3:`<h2>Larger crystal</h2>
+<p>As the number of cells grows, principal maxima grow as <i>N</i>² and narrow as 1/<i>N</i>, so the integrated intensity of each peak grows as the number of unit cells.</p>
+<div class="eq">peak ∝ (<i>N<sub>a</sub>N<sub>b</sub></i>)²,&nbsp; FWHM Δ<i>q</i> → 0.886/(<i>N<sub>a</sub>a</i>) for large <i>N<sub>a</sub></i>,&nbsp; integrated ∝ <i>N<sub>a</sub>N<sub>b</sub></i></div>
+<p>The subsidiary maxima persist for any finite crystal (the first is 11 % of the principal peak for <i>N</i> = 3, tending to 4.7 % for large <i>N</i>) but crowd together and become unresolved here at large <i>N</i>. Each Bragg peak carries the crystal’s shape transform. These fringes have been observed in X-ray free-electron-laser diffraction from sub-micrometre crystals (Chapman et al., 2011); Kirian et al. (2010) treat their analysis.</p>`,
+4:`<h2>Infinite crystal</h2>
+<p>For <i>N</i> → ∞ the lattice factor becomes a set of delta functions on the reciprocal lattice. The molecular transform is sampled only at <b>G</b> = <i>h</i><b>a</b>* + <i>k</i><b>b</b>*, with <i>a</i>* = 1/<i>a</i>, <i>b</i>* = 1/<i>b</i> for this rectangular cell.</p>
+<div class="eq">|<i>S</i>(<b>q</b>)|²/<i>N</i> → (1/<i>A</i><sub>cell</sub>) Σ<sub><i>hk</i></sub> δ(<b>q</b> − <i>h</i><b>a</b>* − <i>k</i><b>b</b>*)<br><i>I<sub>hk</sub></i> ∝ |<i>F</i>(<i>h</i><b>a</b>* + <i>k</i><b>b</b>*)|²</div>
+<p>Everything between the spots and all phases are lost. Sayre (1952) pointed out that intensities sampled more finely than the Bragg spacing carry information on the phases; Bragg data alone do not. The intensity between Bragg peaks of finite crystals has been proposed as a source of this information (Spence et al., 2011).</p>`,
+5:`<h2>Ewald sphere</h2>
+<p>Elastic scattering conserves |<b>k</b>|, so <b>q</b> = <b>k</b>′ − <b>k</b><sub>0</sub> must lie on a sphere of radius 1/λ through the origin (a circle in this 2D section). A reflection is recorded only while its reciprocal-lattice point, broadened by the finite crystal, touches the sphere; the crystal is rotated to bring others into contact.</p>
+<div class="eq">|<b>k</b>′| = |<b>k</b><sub>0</sub>| = 1/λ<br>|<b>q</b>| = 2 sin θ / λ = 1/<i>d<sub>hk</sub></i> &nbsp;⇔&nbsp; λ = 2<i>d<sub>hk</sub></i> sin θ</div>
+<p>At λ ≈ 1 Å the radius (1 Å⁻¹) is large compared with the resolution range shown, so the curvature is small but not negligible; increase λ to exaggerate it. Accumulating over a rotation integrates each reflection as it crosses the sphere, which is where the Lorentz factor of the integrated intensity comes from. The integrated spot intensity (Darwin; Holton &amp; Frankel, 2010, eq. 1):</p>
+<div class="eq"><i>I</i> = <i>I</i><sub>beam</sub> <i>r<sub>e</sub></i>² (<i>V</i><sub>xtal</sub>/<i>V</i><sub>cell</sub>) (λ³/ω<i>V</i><sub>cell</sub>) <i>L P A</i> |<i>F</i>|²</div>
+<p>This demonstration covers |<i>F</i>|², the scaling with number of cells, the Ewald geometry and the B factor; polarisation <i>P</i>, absorption <i>A</i> and the scale constants are omitted.</p>`
+};
+
+function readout(){
+  const s=st.stage, rows=[];
+  const r=(k,v)=>rows.push(`<tr><td>${k}</td><td>${v}</td></tr>`);
+  r('Resolution limit',`${st.dmin.toFixed(1)} Å (q ≤ ${qmax.toFixed(3)} Å⁻¹)`);
+  if(s===1){r('Atoms',mol.M);r('Molecule size D',`≈ ${mol.D.toFixed(0)} Å`);r('1/D',`${(1/mol.D).toFixed(3)} Å⁻¹`);}
+  if(s===2||s===3){
+    r('Molecules',`${st.Na} × ${st.Nb} = ${st.Na*st.Nb}`);
+    r('Peak gain (NₐN_b)²',(st.Na*st.Nb)**2);
+    if(st.Na>1){r('FWHM along a*',`${(fwhm(st.Na)/A).toFixed(4)} Å⁻¹`);r('Subsidiary maxima per period',st.Na-2);if(st.Na>2)r('First subsidiary max.',`${(100*firstSub(st.Na)).toFixed(1)} % of peak`);}
+    r('Bragg spacing a*',`${(1/A).toFixed(4)} Å⁻¹`);
+  }
+  if(s===4){ensureSpots();r('Reflections to resolution limit',spots.length);r('a*, b*',`${(1/A).toFixed(4)}, ${(1/B).toFixed(4)} Å⁻¹`);r('Half Bragg spacing a*/2',`${(1/(2*A)).toFixed(4)} Å⁻¹`);}
+  if(s===5){
+    r('λ, 1/λ',`${st.lambda.toFixed(1)} Å, ${(1/st.lambda).toFixed(3)} Å⁻¹`);
+    r('2θ max',`${(th2Max()/DEG).toFixed(1)}°`);
+    r('Reflections in contact',excited.length);
+    if(excited.length){const e=excited[0], d=1/Math.hypot(e.gx,e.gy), th=Math.abs(e.tth)/2;
+      r('Strongest',`(${e.h},${e.k}), d = ${d.toFixed(2)} Å`);
+      r('θ on circle',`${(th/DEG).toFixed(2)}°`);
+      r('2d sin θ',`${(2*d*Math.sin(th)).toFixed(3)} Å`);
+      r('Excitation error',`${(e.eps*1e4).toFixed(2)} × 10⁻⁴ Å⁻¹`);}
+  }
+  $('readout').innerHTML=`<table>${rows.join('')}</table>`;
+}
+function captions(){
+  const s=st.stage;
+  $('capReal').textContent=s===1?'Real space: one molecule (40 atoms).':s===4?'Real space: an unbounded lattice of identical cells.':s===5?'Laboratory frame: beam, rotating crystal and flat detector (2D, schematic).':`Real space: ${st.Na} × ${st.Nb} cells, a = 40 Å, b = 30 Å.`;
+  $('capRecip').textContent=(s===1?'Reciprocal space: molecular transform |F(q)|²':s<=3?'Reciprocal space: |F|²·|S|², lattice factor averaged per pixel':s===4?'Reciprocal space: Bragg reflections over the dimmed molecular transform':'Reciprocal space: rotated reciprocal lattice and Ewald circle; ringed points lie within the central maximum of their shape transform')+`. Log scale, ${st.dyn} decades. Grey disc: beamstop.`;
+  $('capProf').textContent=s<=3?(st.zoom?'Profile along a* through the origin, zoomed onto one reciprocal-lattice period. Shaded band: range of intensity within a screen pixel where fringes are unresolved.':'Profile along a* through the origin. Shaded band: range of intensity within a screen pixel where fringes are unresolved.'):s===4?'Profile along a* through the origin, infinite crystal.':'Detector: intensity along the Ewald circle against 2θ, computed directly from atoms and lattice factor.';
+}
+
+/* ---------- controls ---------- */
+const ctl={Na:$('inNa'),Nb:$('inNb'),lambda:$('inLam'),phi:$('inPhi'),Bdw:$('inB'),dmin:$('inRes'),dyn:$('inDyn')};
+function sync(){
+  ctl.Na.value=st.Na; ctl.Nb.value=st.Nb; ctl.lambda.value=st.lambda; ctl.phi.value=(((st.phi/DEG)%360)+360)%360;
+  ctl.Bdw.value=st.Bdw; ctl.dmin.value=st.dmin; ctl.dyn.value=st.dyn;
+  $('oNa').textContent=st.Na; $('oNb').textContent=st.Nb; $('oLam').textContent=st.lambda.toFixed(1)+' Å';
+  $('oPhi').textContent=((((st.phi/DEG)%360)+360)%360).toFixed(0)+'°'; $('oB').textContent=st.Bdw+' Å²';
+  $('oRes').textContent=st.dmin.toFixed(1)+' Å'; $('oDyn').textContent=st.dyn+' dec';
+  $('inZoom').checked=st.zoom; $('inAcc').checked=st.accum;
+}
+function bind(el,key,conv){el.addEventListener('input',()=>{stopAnim();st[key]=conv(parseFloat(el.value));if(key==='dmin')qmax=1/st.dmin;sync();req();});}
+bind(ctl.Na,'Na',Math.round); bind(ctl.Nb,'Nb',Math.round); bind(ctl.lambda,'lambda',v=>v); bind(ctl.phi,'phi',v=>v*DEG);
+bind(ctl.Bdw,'Bdw',v=>v); bind(ctl.dmin,'dmin',v=>v); bind(ctl.dyn,'dyn',v=>v);
+$('inZoom').addEventListener('change',e=>{st.zoom=e.target.checked;req();});
+$('inAcc').addEventListener('change',e=>{st.accum=e.target.checked;req();});
+
+function setStage(s){
+  st.stage=s;
+  if(s===1){st.Na=st.Nb=1;st.zoom=false;}
+  if(s===2){st.Na=4;st.Nb=1;st.zoom=true;}
+  if(s===3){st.Na=st.Nb=12;st.zoom=true;}
+  if(s===4){st.zoom=false;}
+  if(s===5){st.Na=st.Nb=12;st.phi=26*DEG;st.accum=false;}
+  document.querySelectorAll('.steps button').forEach(b=>b.setAttribute('aria-selected',String(+b.dataset.s===s)));
+  document.querySelectorAll('[data-st]').forEach(el=>el.classList.toggle('hidden',!el.dataset.st.includes(String(s))));
+  $('explain').innerHTML=TEXT[s];
+  sync(); req();
+}
+document.querySelectorAll('.steps button').forEach(b=>b.addEventListener('click',()=>{stopAnim();setStage(+b.dataset.s);}));
+
+/* ---------- animation ---------- */
+const V2=[1,2,3,4,5,6,8,10], V3=[2,3,4,6,8,12,16,24,32,44,60];
+const SEQ={
+  1:{dur:4500,run(){}},
+  2:{dur:V2.length*1300+600,run(t){const v=V2[Math.min(V2.length-1,Math.floor(t/1300))];st.Na=v;st.Nb=1;}},
+  3:{dur:V3.length*1100+600,run(t){const v=V3[Math.min(V3.length-1,Math.floor(t/1100))];st.Na=st.Nb=v;}},
+  4:{dur:6500,run(){}},
+  5:{dur:24000,run(t,a){st.phi=a.phi0+t/1000*5*DEG;}}
+};
+let anim=null;
+function buttons(){$('btnTour').textContent=anim&&anim.tour?'Stop':'Play full sequence';$('btnStep').textContent=anim&&!anim.tour?'Stop':'Animate this step';}
+function startAnim(tour){
+  if(tour) setStage(1);
+  if(st.stage===2&&!tour){st.Nb=1;}
+  anim={tour,t0:null,phi0:st.phi};
+  buttons(); requestAnimationFrame(tick);
+}
+function stopAnim(){anim=null;buttons();}
+function tick(ts){
+  if(!anim) return;
+  if(anim.t0===null) anim.t0=ts;
+  const t=ts-anim.t0, sq=SEQ[st.stage];
+  sq.run(t,anim); sync(); render();
+  if(t>=sq.dur){
+    if(anim.tour&&st.stage<5){setStage(st.stage+1);anim.t0=ts;anim.phi0=st.phi;if(st.stage===5){st.accum=true;sync();}}
+    else {stopAnim();return;}
+  }
+  requestAnimationFrame(tick);
+}
+$('btnTour').addEventListener('click',()=>{if(anim&&anim.tour)stopAnim();else startAnim(true);});
+$('btnStep').addEventListener('click',()=>{if(anim&&!anim.tour)stopAnim();else startAnim(false);});
+
+/* ---------- render loop ---------- */
+let raf=0;
+function req(){if(!raf)raf=requestAnimationFrame(()=>{raf=0;render();});}
+function render(){
+  if(st.stage===5){computeExcited();updateDetector();}
+  drawReal(); drawRecip(); drawProf(); readout(); captions();
+}
+function size(){
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  for(const id of ['cReal','cRecip','cProf']){const cv=$(id);const w=Math.round(cv.clientWidth*dpr),h=Math.round(cv.clientHeight*dpr);if(w&&h&&(cv.width!==w||cv.height!==h)){cv.width=w;cv.height=h;}}
+  req();
+}
+new ResizeObserver(size).observe(document.querySelector('.figs'));
+const mq=window.matchMedia('(prefers-color-scheme: dark)'); if(mq.addEventListener)mq.addEventListener('change',req);
+setStage(1); size();
+})();
+</script>
+</body>
+</html>

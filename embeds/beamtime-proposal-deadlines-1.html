@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beamtime Proposal Deadlines — Serial Crystallography</title>
+<style>
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; padding:30px 22px 70px; background:#ffffff; color:#000000;
+  font-family:Verdana,Helvetica,Arial,sans-serif;
+  font-size:17px; line-height:1.5;
+  overflow-x:hidden;
+}
+.wrap{max-width:1600px;margin:0 auto}
+h1{font-size:30px;line-height:1.25;margin:0 0 14px;font-weight:bold;color:#000}
+h2{font-size:24px;line-height:1.3;margin:56px 0 8px;font-weight:bold;color:#000}
+h2 .sub{display:block;font-size:17px;font-weight:normal;color:#000;margin-top:8px;line-height:1.45}
+.meta{margin:0 0 20px;font-size:16px;font-weight:normal;color:#444}
+.refresh{margin:14px 0 0;font-size:14px;color:#666}
+.refresh code{background:#f2f2f2;border:1px solid #ccc;padding:1px 6px;font-family:monospace;font-size:13px;color:#444}
+.check{display:block;margin-top:8px;font-weight:bold;color:#0000cc;text-decoration:underline;font-size:15px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;align-items:center;font-size:16px;color:#000;margin:0 0 10px}
+.chip{display:inline-block;padding:5px 10px;font-size:16px;font-weight:bold;white-space:nowrap;color:#000;border:2px solid #000}
+.chip.red{background:#ffbdb6}
+.chip.amber{background:#ffdf7d}
+.chip.plain{background:#ffffff}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:17px;border:2px solid #000}
+caption{text-align:left;font-size:16px;color:#000;padding:0 0 8px}
+.resetbtn{font-family:inherit;font-size:16px;color:#0000cc;background:none;border:0;padding:0;cursor:pointer;text-decoration:underline}
+.resetbtn:hover{color:#551a8b}
+th,td{text-align:left;vertical-align:top;padding:16px 14px;border:1px solid #000;color:#000}
+th{font-size:16px;font-weight:bold;background:#3a3a3a;color:#fff;border:1px solid #3a3a3a}
+th.sortable .arrow{font-size:17px;font-weight:bold;color:#ffd24a;margin-left:5px}
+th.sort-active{background:#0000cc;border-color:#0000cc}
+th.sort-active .arrow{color:#fff}
+.fac{font-weight:bold;min-width:14ch}
+.fac .country{font-weight:normal;font-size:15px;color:#444}
+.fac .bl{display:block;font-weight:normal;color:#000;font-size:16px;margin-top:6px}
+td.dl{min-width:15ch;font-weight:bold}
+td.dl .date{display:inline-block;padding:6px 10px;font-weight:bold;border:2px solid #000}
+td.dl .days{display:block;font-size:16px;font-weight:normal;color:#000;margin-top:8px}
+td.dl.soon .date{background:#ffbdb6}
+td.dl.near .date{background:#ffdf7d}
+td.dl.past .date{background:#d9d9d9}
+td.dl.flag .date{background:#ffffff;border:2px dashed #000}
+.notes{max-width:42ch;color:#000}
+.cycle{max-width:22ch;color:#000}
+.calltype{max-width:18ch}
+.links a{display:block;margin-bottom:9px;color:#0000cc;text-decoration:underline;word-break:break-word;font-weight:bold}
+.links a:visited{color:#551a8b}
+.links a:last-child{margin-bottom:0}
+footer{margin-top:56px;padding-top:20px;border-top:2px solid #000;font-size:17px;color:#000;max-width:78ch}
+@media (max-width:600px){
+  body{padding:24px 14px 52px;font-size:17px}
+  h1{font-size:25px}
+  h2{font-size:21px}
+  table,tbody,tr,td{display:block;width:100%}
+  table{border:0}
+  thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  tr{border:2px solid #000;padding:14px;margin:0 0 20px;background:#fff}
+  td{border:0;padding:12px 0}
+  td+td{border-top:1px solid #000}
+  td::before{content:attr(data-label);display:block;font-size:15px;font-weight:bold;color:#000;margin-bottom:5px;text-transform:uppercase}
+  .fac::before{display:none}
+  .fac{font-size:20px;padding-top:0}
+  .notes,.cycle,.calltype{max-width:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Beamtime proposal deadlines — serial crystallography</h1>
+<p class="meta">Updated 20/10/2026. Dates may change without notice: confirm via facility page (click &ldquo;check source &#8599;&rdquo;).</p>
+
+<div class="legend">
+  <span class="chip red">deadline within 30 days</span>
+  <span class="chip amber">within 90 days</span>
+  <span class="chip plain">beyond 90 days, rolling, or unverified</span>
+</div>
+
+<h2>Table 1 — Hard X-ray FELs
+  <span class="sub">Calls relevant to serial femtosecond crystallography (SFX), time-resolved SFX, and protein crystal screening / sample characterisation.</span>
+</h2>
+
+<table>
+<caption>Click a header to sort by column.</caption>
+<thead>
+<tr>
+  <th scope="col">Facility / Beamline</th>
+  <th scope="col">Call type</th>
+  <th scope="col">Next deadline</th>
+  <th scope="col">Cycle</th>
+  <th scope="col">Notes</th>
+  <th scope="col">Links</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td class="fac" data-label="Facility">SwissFEL (PSI) <span class="country">· Switzerland</span><span class="bl">Alvra, Cristallina-MX</span></td>
+  <td class="calltype" data-label="Call type">Regular call (15 Mar / 15 Sep)</td>
+  <td class="dl flag" data-label="Next deadline"><span class="date">unverified — check link</span><span class="days">15 Sep 2026 closed (Jan–Jul 2027); next not posted</span><a class="check" href="https://www.psi.ch/en/swissfel/calls" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Half-yearly; this call covers 1 Jan – 31 Jul 2027</td>
+  <td class="notes" data-label="Notes">Cristallina-MX and Alvra both take SFX and time-resolved SFX. PCS beamtimes are offered at Alvra Prime and Cristallina-MX via a short-form route within this same call — max one page, must state a clear goal, PSI supplies a template. No separate PCS deadline.</td>
+  <td class="links" data-label="Links"><a href="https://www.psi.ch/en/swissfel/calls" target="_blank" rel="noopener">Details — SwissFEL calls</a><a href="https://duo.psi.ch/duo/" target="_blank" rel="noopener">Submit — PSI DUO</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">European XFEL <span class="country">· Germany</span><span class="bl">SPB/SFX</span></td>
+  <td class="calltype" data-label="Call type">QUAST (Quick Access Screening Time) — rolling</td>
+  <td class="dl flag" data-label="Next deadline"><span class="date">Rolling</span><span class="days">no fixed deadline</span><a class="check" href="https://www.xfel.eu/users/beamtime/call_for_proposals/ongoing_call___quick_access_screening_time_quast/index_eng.html" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Continuous; scheduled adjacent to regular beamtime</td>
+  <td class="notes" data-label="Notes">Quick Access Screening Time: crystal screening and short data-completion runs at SPB/SFX (up to 8 h), liquid jet or aerosol or fixed geometry, no optical pump — contacting the instrument team before submitting is a strict requirement.</td>
+  <td class="links" data-label="Links"><a href="https://www.xfel.eu/users/beamtime/call_for_proposals/ongoing_call___quick_access_screening_time_quast/index_eng.html" target="_blank" rel="noopener">Details — QUAST</a><a href="https://in.xfel.eu/upex" target="_blank" rel="noopener">Submit — UPEX</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">European XFEL <span class="country">· Germany</span><span class="bl">SPB/SFX, MID</span></td>
+  <td class="calltype" data-label="Call type">Regular call (16th) — user experiments</td>
+  <td class="dl flag" data-label="Next deadline"><span class="date">unverified — check link</span><span class="days">next call not yet announced</span><a class="check" href="https://www.xfel.eu/users/beamtime/call_for_proposals/index_eng.html" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">15th call covered 2027-I and closed 7 May 2026</td>
+  <td class="notes" data-label="Notes">The route for full SFX and time-resolved experiments at SPB/SFX and MID; no 16th call was posted as of 19 Aug 2026, so use QUAST above for screening in the meantime.</td>
+  <td class="links" data-label="Links"><a href="https://www.xfel.eu/users/beamtime/call_for_proposals/index_eng.html" target="_blank" rel="noopener">Details — calls page</a><a href="https://in.xfel.eu/upex" target="_blank" rel="noopener">Submit — UPEX</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">SACLA (SPring-8) <span class="country">· Japan</span><span class="bl">BL2, BL3</span></td>
+  <td class="calltype" data-label="Call type">General call, plus year-round routes</td>
+  <td class="dl" data-label="Next deadline" data-deadline="2026-11-02"><span class="date">2 Nov 2026</span><span class="days"></span><span class="days">10:00 JST</span><a class="check" href="https://sacla.xfel.jp/?p=10944&amp;lang=en" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Two research periods per year (A and B)</td>
+  <td class="notes" data-label="Notes">SFX and time-resolved SFX (DAPHNIS) run at BL2/BL3. The 2027A research-proposal call is open. Urgent and proprietary time-designated proposals are accepted all year. Note the separate Feasibility Study Program has its own dates.</td>
+  <td class="links" data-label="Links"><a href="https://sacla.xfel.jp/?p=10944&amp;lang=en" target="_blank" rel="noopener">Details — current calls</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">PAL-XFEL <span class="country">· South Korea</span><span class="bl">NCI, XSS</span></td>
+  <td class="calltype" data-label="Call type">General user call</td>
+  <td class="dl flag" data-label="Next deadline"><span class="date">unverified — check link</span><span class="days">26 Aug 2026 closed (Jan–Jun 2027); next not posted</span><a class="check" href="https://pal.postech.ac.kr/en/bbs/use/TYhCqnQDVrpQz3X9/selectView.do?nttId=90004853" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Half-yearly; this call covers Jan–Jun 2027</td>
+  <td class="notes" data-label="Notes">NCI is the SFX / coherent-imaging station, with up to 3 h of protein crystal screening beamtime on request; a Korean local contact and prior discussion with an instrument scientist are both mandatory.</td>
+  <td class="links" data-label="Links"><a href="https://pal.postech.ac.kr/en/bbs/use/TYhCqnQDVrpQz3X9/selectView.do?nttId=90004853" target="_blank" rel="noopener">Details — call notice</a><a href="https://pal.postech.ac.kr/en/index.do" target="_blank" rel="noopener">Submit — PAL user portal</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">LCLS / LCLS-II (SLAC) <span class="country">· USA</span><span class="bl">MFX, XPP and others</span></td>
+  <td class="calltype" data-label="Call type">Rapid Access / Proprietary, rolling</td>
+  <td class="dl flag" data-label="Next deadline"><span class="date">Rolling</span><span class="days">always open</span><a class="check" href="https://lcls.slac.stanford.edu/proposals" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Continuous, alongside the run-based calls</td>
+  <td class="notes" data-label="Notes">Rapid Access and Proprietary Research proposals are accepted at any time outside the run calls; SLAC asks that you contact the user office first to confirm the proposal type fits.</td>
+  <td class="links" data-label="Links"><a href="https://lcls.slac.stanford.edu/proposals" target="_blank" rel="noopener">Details — LCLS proposals</a><a href="https://ups.servicenowservices.com/ups" target="_blank" rel="noopener">Submit — UPS</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">LCLS / LCLS-II (SLAC) <span class="country">· USA</span><span class="bl">CXI, MFX and others</span></td>
+  <td class="calltype" data-label="Call type">Run 28 — regular call for proposals</td>
+  <td class="dl flag" data-label="Next deadline"><span class="date">unverified — check link</span><span class="days">Run 28 call not yet posted</span><a class="check" href="https://lcls.slac.stanford.edu/proposals" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Run-based; Run 27 runs Sep 2026 – Mar 2027</td>
+  <td class="notes" data-label="Notes">Run 27 closed 26 Feb 2026 and is in review; the next run call had not appeared as of 19 Aug 2026 — subscribe to the LCLS users' list or use Rapid Access above.</td>
+  <td class="links" data-label="Links"><a href="https://lcls.slac.stanford.edu/proposals" target="_blank" rel="noopener">Details — LCLS proposals</a><a href="https://ups.servicenowservices.com/ups" target="_blank" rel="noopener">Submit — UPS</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">LCLS / LCLS-II (SLAC) <span class="country">· USA</span><span class="bl">MFX</span></td>
+  <td class="calltype" data-label="Call type">PCS (Protein Crystal Screening) — per-run call</td>
+  <td class="dl flag" data-label="Next deadline"><span class="date">unverified — check link</span><span class="days">no PCS call posted for Run 27/28</span><a class="check" href="https://lcls.slac.stanford.edu/proposals" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Separate call issued alongside each run call</td>
+  <td class="notes" data-label="Notes">Short 6–12 h slots to screen sample preparations or collect a full dataset under good conditions, with limited instrument flexibility. Sample delivery at MFX has included GDVN, DFFN, LCP jets, MESH, droplet-on-demand and fixed target. Not for mix-and-inject, pump-probe or spectroscopy. No PCS call was posted as of 19 Aug 2026.</td>
+  <td class="links" data-label="Links"><a href="https://lcls.slac.stanford.edu/proposals" target="_blank" rel="noopener">Details — LCLS proposals</a><a href="https://ups.servicenowservices.com/ups" target="_blank" rel="noopener">Submit — UPS</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">LCLS / LCLS-II (SLAC) <span class="country">· USA</span><span class="bl">MFX</span></td>
+  <td class="calltype" data-label="Call type">Mail-in smSFX (small-molecule) — Run 27</td>
+  <td class="dl flag" data-label="Next deadline"><span class="date">unverified — check link</span><span class="days">Run 27 submissions open; deadline not stated</span><a class="check" href="https://lcls.slac.stanford.edu/proposals/smsfx" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Per run; Run 27 beamtime provisionally Aug–Dec 2026</td>
+  <td class="notes" data-label="Notes">Small-molecule SFX, not protein — chemistry and materials samples are posted to LCLS staff who screen them and attempt structure solution. Aggregated by material class (hybrid materials, MOF/COF, inorganic covalent solids, molecular organic crystals). Samples triaged on science case plus pXRD and microscopy. Register in UPS, then submit a mail-in request.</td>
+  <td class="links" data-label="Links"><a href="https://lcls.slac.stanford.edu/proposals/smsfx" target="_blank" rel="noopener">Details — mail-in smSFX</a><a href="https://ups.servicenowservices.com/ups" target="_blank" rel="noopener">Submit — UPS</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">SHINE (Shanghai) <span class="country">· China</span><span class="bl">hard X-ray endstations</span></td>
+  <td class="calltype" data-label="Call type">No external user call found</td>
+  <td class="dl flag" data-label="Next deadline"><span class="date">not found</span><span class="days">no call located</span><a class="check" href="https://lssf.cas.cn/en/" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Not established</td>
+  <td class="notes" data-label="Notes">Still in commissioning as far as could be established on 19 Aug 2026 — no external call and no SHINE user page found; it is not yet listed on the CAS facilities user platform where such a call would be expected to appear.</td>
+  <td class="links" data-label="Links"><a href="https://lssf.cas.cn/en/" target="_blank" rel="noopener">Details — CAS user platform (SHINE not listed)</a></td>
+</tr>
+</tbody>
+</table>
+
+<h2>Table 2 — Synchrotron MX beamlines with serial crystallography capability
+  <span class="sub">Standard calls and BAG / block-allocation schemes. Where a facility runs both a dated call and a rolling route, both are listed.</span>
+</h2>
+
+<table>
+<caption>Click a header to sort by column.</caption>
+<thead>
+<tr>
+  <th scope="col">Facility / Beamline</th>
+  <th scope="col">Call type</th>
+  <th scope="col">Next deadline</th>
+  <th scope="col">Cycle</th>
+  <th scope="col">Notes</th>
+  <th scope="col">Links</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td class="fac" data-label="Facility">Australian Synchrotron <span class="country">· Australia</span><span class="bl">MX1, MX2, MX3</span></td>
+  <td class="calltype" data-label="Call type">CAP (Collaborative Access Program) — annual</td>
+  <td class="dl flag" data-label="Next deadline"><span class="date">unverified — check link</span><span class="days">2027 CAP closed 30 Jul 2026</span><a class="check" href="https://www.ansto.gov.au/facilities/australian-synchrotron/melbourne-access-proposals" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Annual; the 2027 CAP covers late Jan – early Dec 2027</td>
+  <td class="notes" data-label="Notes">CAP is the standard way onto the MX beamlines — a group of labs shares one block allocation across the year — and the round after 2027 was not yet announced on 19 Aug 2026.</td>
+  <td class="links" data-label="Links"><a href="https://www.ansto.gov.au/facilities/australian-synchrotron/melbourne-access-proposals" target="_blank" rel="noopener">Details — Melbourne access proposals</a><a href="https://portal.synchrotron.org.au/" target="_blank" rel="noopener">Submit — user portal</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">Australian Synchrotron <span class="country">· Australia</span><span class="bl">MX1, MX2, MX3</span></td>
+  <td class="calltype" data-label="Call type">Merit access — round 2027-2</td>
+  <td class="dl" data-label="Next deadline" data-deadline="2026-11-26"><span class="date">26 Nov 2026</span><span class="days"></span><a class="check" href="https://www.ansto.gov.au/facilities/australian-synchrotron/melbourne-access-proposals" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Three rounds a year; 2027-2 covers late May – Aug 2027, opens 26 Oct 2026</td>
+  <td class="notes" data-label="Notes">MX3 is the microfocus beamline used for serial and small-crystal work, but CAP is the normal MX route (below) — merit rounds mostly fill what CAP does not take.</td>
+  <td class="links" data-label="Links"><a href="https://www.ansto.gov.au/facilities/australian-synchrotron/melbourne-access-proposals" target="_blank" rel="noopener">Details — Melbourne access proposals</a><a href="https://portal.synchrotron.org.au/" target="_blank" rel="noopener">Submit — user portal</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">ESRF <span class="country">· France</span><span class="bl">ID29, ID30A / ID30B</span></td>
+  <td class="calltype" data-label="Call type">Standard, BAG and MX-BAG</td>
+  <td class="dl" data-label="Next deadline" data-deadline="2027-03-01"><span class="date">1 Mar 2027</span><span class="days"></span><span class="days">17:00 CET</span><a class="check" href="https://www.esrf.fr/home/UsersAndScience/Apply-for-beamtime/proposal-types-and-deadlines.html" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Two calls a year (1 Mar, 10 Sep); 1 Mar 2027 covers the 2027-II period</td>
+  <td class="notes" data-label="Notes">ID29 is the dedicated time-resolved serial crystallography beamline and the ID30 series covers microfocus and automated screening; MX-BAG is the block route for structural biology consortia.</td>
+  <td class="links" data-label="Links"><a href="https://www.esrf.fr/home/UsersAndScience/Apply-for-beamtime/proposal-types-and-deadlines.html" target="_blank" rel="noopener">Details — proposal types &amp; deadlines</a><a href="https://smis.esrf.fr" target="_blank" rel="noopener">Submit — SMIS</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">ESRF <span class="country">· France</span><span class="bl">ID29, ID30A / ID30B, BM07</span></td>
+  <td class="calltype" data-label="Call type">MX-Rolling — rapid access, continuous</td>
+  <td class="dl flag" data-label="Next deadline"><span class="date">Rolling</span><span class="days">continuous call</span><a class="check" href="https://www.esrf.fr/home/UsersAndScience/Apply-for-beamtime/proposal-types-and-deadlines.html" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Continuous, alongside the two dated calls</td>
+  <td class="notes" data-label="Notes">Rapid access to the structural biology beamlines for a single project or a few, open to non-BAG members only — the practical route when you need beamtime before the next standard round.</td>
+  <td class="links" data-label="Links"><a href="https://www.esrf.fr/home/UsersAndScience/Apply-for-beamtime/proposal-types-and-deadlines.html" target="_blank" rel="noopener">Details — proposal types &amp; deadlines</a><a href="https://smis.esrf.fr" target="_blank" rel="noopener">Submit — SMIS</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">PETRA III (DESY) <span class="country">· Germany</span><span class="bl">P11</span></td>
+  <td class="calltype" data-label="Call type">Rolling proposals</td>
+  <td class="dl flag" data-label="Next deadline"><span class="date">Rolling</span><span class="days">no fixed deadline</span><a class="check" href="https://photon-science.desy.de/users_area/calls__deadlines/index_eng.html" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Continuous; P11 is outside the dated PETRA III call</td>
+  <td class="notes" data-label="Notes">P11 supports standard and fixed-target serial MX and accepts proposals at any time through DOOR — the 1 Sep 2026 regular PETRA III call covers other beamlines, not this one.</td>
+  <td class="links" data-label="Links"><a href="https://photon-science.desy.de/users_area/calls__deadlines/index_eng.html" target="_blank" rel="noopener">Details — calls &amp; deadlines</a><a href="https://door.desy.de" target="_blank" rel="noopener">Submit — DOOR</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">PETRA III (EMBL Hamburg) <span class="country">· Germany</span><span class="bl">P13, P14 (T-REXX)</span></td>
+  <td class="calltype" data-label="Call type">Annual EMBL Hamburg call — single or BAG</td>
+  <td class="dl" data-label="Next deadline" data-deadline="2026-10-26"><span class="date">26 Oct 2026</span><span class="days"></span><span class="days">midnight CET</span><a class="check" href="https://www.embl.org/services-facilities/hamburg/" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Annual call; this round covers Apr–Dec 2027</td>
+  <td class="notes" data-label="Notes">Covers P13 (MX) and P14 (MX, including the T-REXX time-resolved endstation and XIMG); P12 on the same call is SAXS/TR-SAXS. BAG proposals are encouraged over several single proposals, even for a single group. T-REXX requests must be submitted under the T-REXX heading. Groups with previous EMBL beamtime must submit as a continuation and file the proposal summary report. Instruct-ERIC access support available through the user office. Outcomes notified second half of January 2027.</td>
+  <td class="links" data-label="Links"><a href="https://www.embl.org/services-facilities/hamburg/" target="_blank" rel="noopener">Details — EMBL MX group</a><a href="https://smis.embl-hamburg.de/misapps/SMISWebClient" target="_blank" rel="noopener">Submit — SMIS</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">MAX IV <span class="country">· Sweden</span><span class="bl">BioMAX, MicroMAX</span></td>
+  <td class="calltype" data-label="Call type">Standard and BAG, call 2027a</td>
+  <td class="dl flag" data-label="Next deadline"><span class="date">unverified — check link</span><span class="days">2027a closed 16 Sep 2026; 2027b not posted</span><a class="check" href="https://www.maxiv.lu.se/user-access/call-for-proposals/" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Two calls a year; 2027a covers Jan–Jun 2027, call opens 2 Sep 2026</td>
+  <td class="notes" data-label="Notes">MicroMAX is purpose-built for serial and time-resolved serial crystallography and BioMAX adds fixed-target serial plus fragment screening — both take standard and BAG proposals in this call.</td>
+  <td class="links" data-label="Links"><a href="https://www.maxiv.lu.se/user-access/call-for-proposals/" target="_blank" rel="noopener">Details — call for proposals</a><a href="https://duo.maxiv.lu.se" target="_blank" rel="noopener">Submit — MAX IV DUO</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">Diamond <span class="country">· UK</span><span class="bl">I24, VMXi (+ I03, I04, I04-1, I23)</span></td>
+  <td class="calltype" data-label="Call type">Standard and BAG, period AP41</td>
+  <td class="dl flag" data-label="Next deadline"><span class="date">unverified — check link</span><span class="days">AP42 call open; deadline not yet posted</span><a class="check" href="https://www.diamond.ac.uk/Instruments/Mx/Synchrotron-Access.html" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Two calls a year; AP42 is the open call, BAGs span four periods</td>
+  <td class="notes" data-label="Notes">I24 is the serial and time-resolved serial beamline (fixed target and jet) and VMXi does unattended room-temperature in-situ collection straight from crystallisation plates; one application can request several MX beamlines.</td>
+  <td class="links" data-label="Links"><a href="https://www.diamond.ac.uk/Instruments/Mx/Synchrotron-Access.html" target="_blank" rel="noopener">Details — MX synchrotron access</a><a href="https://www.diamond.ac.uk/Users/Apply-for-Beamtime.html" target="_blank" rel="noopener">Submit — apply for beamtime</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">NSLS-II <span class="country">· USA</span><span class="bl">FMX (17-ID-2), AMX (17-ID-1)</span></td>
+  <td class="calltype" data-label="Call type">General User, BAG, Partner User</td>
+  <td class="dl" data-label="Next deadline" data-deadline="2027-01-31"><span class="date">31 Jan 2027</span><span class="days"></span><span class="days">23:59 ET</span><a class="check" href="https://www.bnl.gov/ps/userguide/" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Three four-month cycles a year; deadlines 31 Jan, 31 May, 30 Sep</td>
+  <td class="notes" data-label="Notes">FMX microfocus supports fixed-target and jet serial work; General User proposals last a year but need a separate beamtime request each cycle, and BAGs run two years across up to five beamlines.</td>
+  <td class="links" data-label="Links"><a href="https://www.bnl.gov/ps/userguide/" target="_blank" rel="noopener">Details — NSLS-II user guide</a><a href="https://pass.bnl.gov/" target="_blank" rel="noopener">Submit — PASS</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">SLS (PSI) <span class="country">· Switzerland</span><span class="bl">PXI (X06SA), PXIII (X06DA)</span></td>
+  <td class="calltype" data-label="Call type">Regular call I-27</td>
+  <td class="dl flag" data-label="Next deadline"><span class="date">unverified — check link</span><span class="days">I-27 closed 15 Oct 2026; next expected ~15 May 2027</span><a class="check" href="https://www.psi.ch/en/sls/calls" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Two calls a year (~15 May, ~15 Oct); I-27 covers 1 Mar – 31 Aug 2027</td>
+  <td class="notes" data-label="Notes">Post-SLS 2.0 restart, so the beamline list is still growing: PXI and PXIII featured in the last call, PXII is not currently listed — discuss serial work with the beamline before writing a proposal.</td>
+  <td class="links" data-label="Links"><a href="https://www.psi.ch/en/sls/calls" target="_blank" rel="noopener">Details — SLS calls</a><a href="https://duo.psi.ch/duo/" target="_blank" rel="noopener">Submit — PSI DUO</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">SOLEIL <span class="country">· France</span><span class="bl">PROXIMA-1, PROXIMA-2A</span></td>
+  <td class="calltype" data-label="Call type">Standard and BAG, call AP39</td>
+  <td class="dl flag" data-label="Next deadline"><span class="date">unverified — check link</span><span class="days">AP39 closed 15 Sep 2026; AP40 not posted</span><a class="check" href="https://www.synchrotron-soleil.fr/en/users/current-call-proposals" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Two calls a year; standard covers 2 Mar – 12 Sep 2027, BAG runs 1 or 2 years</td>
+  <td class="notes" data-label="Notes">PROXIMA-1 (with the ACTOR sample changer) and PROXIMA-2A microfocus are both on the two-year BAG list, which is the usual route for groups running repeated screening campaigns.</td>
+  <td class="links" data-label="Links"><a href="https://www.synchrotron-soleil.fr/en/users/current-call-proposals" target="_blank" rel="noopener">Details — current call</a><a href="https://sun.synchrotron-soleil.fr/sunset/bridge/sunset/" target="_blank" rel="noopener">Submit — SUNset</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">ALBA <span class="country">· Spain</span><span class="bl">XAIRA, XALOC</span></td>
+  <td class="calltype" data-label="Call type">Standard call, 2027-I</td>
+  <td class="dl flag" data-label="Next deadline"><span class="date">unverified — check link</span><span class="days">2027-I closed 7 Sep 2026; 2027-II not posted</span><a class="check" href="https://www.cells.es/en/users/access/call-information" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Two calls a year; 2027-I covers Jan–Jun 2027, MX allocated across the full year</td>
+  <td class="notes" data-label="Notes">XAIRA, the new microfocus beamline, enters user operation in 2027-I with limited shifts and restricted capability, so discuss feasibility with staff; XALOC keeps its own rolling route listed below.</td>
+  <td class="links" data-label="Links"><a href="https://www.cells.es/en/users/access/call-information" target="_blank" rel="noopener">Details — call information</a><a href="https://userofficesystem.cells.es/" target="_blank" rel="noopener">Submit — user office system</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">ALBA <span class="country">· Spain</span><span class="bl">XALOC (BL13)</span></td>
+  <td class="calltype" data-label="Call type">Rapid access, continuous</td>
+  <td class="dl flag" data-label="Next deadline"><span class="date">Rolling</span><span class="days">continuously open</span><a class="check" href="https://www.cells.es/en/users/access/call-information" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Continuous; MX beamtime is allocated across the whole year</td>
+  <td class="notes" data-label="Notes">XALOC stays open on a rapid-access basis with review inside about three weeks, but beamtime is only awarded when slots happen to be free, so it suits screening rather than a planned campaign.</td>
+  <td class="links" data-label="Links"><a href="https://www.cells.es/en/users/access/call-information" target="_blank" rel="noopener">Details — call information</a><a href="https://userofficesystem.cells.es/" target="_blank" rel="noopener">Submit — user office system</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">APS <span class="country">· USA</span><span class="bl">MX sectors</span></td>
+  <td class="calltype" data-label="Call type">General User proposal, run 2027-1</td>
+  <td class="dl" data-label="Next deadline" data-deadline="2026-10-21"><span class="date">21 Oct 2026</span><span class="days"></span><span class="days">14:00 Chicago time</span><a class="check" href="https://www.aps.anl.gov/Users-Information/About-Proposals/Proposal-Deadlines-and-Meetings" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Three run cycles a year; 2027-1 runs ~1 Feb – 22 Apr 2027, call opens 14 Sep 2026</td>
+  <td class="notes" data-label="Notes">This is the General User route; several APS macromolecular sectors are CAT-operated and run their own rapid-access or mail-in schemes, so check the individual sector before committing to this call.</td>
+  <td class="links" data-label="Links"><a href="https://www.aps.anl.gov/Users-Information/About-Proposals/Proposal-Deadlines-and-Meetings" target="_blank" rel="noopener">Details — deadlines &amp; meetings</a><a href="https://ups.servicenowservices.com/ups" target="_blank" rel="noopener">Submit — UPS</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">Canadian Light Source <span class="country">· Canada</span><span class="bl">CMCF-ID, CMCF-BM</span></td>
+  <td class="calltype" data-label="Call type">General User call for proposals</td>
+  <td class="dl flag" data-label="Next deadline"><span class="date">unverified — check link</span><span class="days">19 Aug 2026 closed (Jan–Jun 2027); next not posted</span><a class="check" href="https://www.lightsource.ca/users/getting-started/applying-for-beamtime.php" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Two calls a year, ~6-month cycles</td>
+  <td class="notes" data-label="Notes">Conventional and fixed-target MX rather than a dedicated serial endstation. CMCF beamtime is shift-request based against an active project — requests can be filed year-round at least four weeks ahead, independent of the general CfP deadline.</td>
+  <td class="links" data-label="Links"><a href="https://www.lightsource.ca/users/getting-started/applying-for-beamtime.php" target="_blank" rel="noopener">Details — applying for beamtime</a><a href="https://user.lightsource.ca" target="_blank" rel="noopener">Submit — CLS user portal</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">CHESS <span class="country">· USA</span><span class="bl">7B2 FlexX (MacCHESS)</span></td>
+  <td class="calltype" data-label="Call type">Standard proposal, run 2027_1</td>
+  <td class="dl" data-label="Next deadline" data-deadline="2026-11-18"><span class="date">18 Nov 2026</span><span class="days"></span><span class="days">beamtime request due 2 Dec 2026</span><a class="check" href="https://www.chess.cornell.edu/users/chess-deadlines" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Three runs a year; 2027_1 runs 27 Jan – 30 Mar 2027, call opens 7 Oct 2026</td>
+  <td class="notes" data-label="Notes">MacCHESS at 7B2 covers room-temperature, in-situ and high-pressure MX rather than a jet serial setup, and the same beamline also takes continuously reviewed rapid-access proposals.</td>
+  <td class="links" data-label="Links"><a href="https://www.chess.cornell.edu/users/chess-deadlines" target="_blank" rel="noopener">Details — CHESS deadlines</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">SSRL (SLAC) <span class="country">· USA</span><span class="bl">Structural Molecular Biology MX</span></td>
+  <td class="calltype" data-label="Call type">Standard MX proposal</td>
+  <td class="dl" data-label="Next deadline" data-deadline="2026-12-01"><span class="date">1 Dec 2026</span><span class="days"></span><span class="days">MX proposal deadline</span><a class="check" href="https://www-ssrl.slac.stanford.edu/ssrl/web/user-services/proposal-submission-procedures" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Three MX deadlines a year (1 Apr, 1 Jul, 1 Dec); proposals stay live up to six scheduling periods</td>
+  <td class="notes" data-label="Notes">Standard cryo-MX with strong remote and mail-in operation and no advertised dedicated serial endstation — confirm any serial or time-resolved plan with SMB staff before submitting.</td>
+  <td class="links" data-label="Links"><a href="https://www-ssrl.slac.stanford.edu/ssrl/web/user-services/proposals-macromolecular-crystallography" target="_blank" rel="noopener">Details — MX proposal procedures</a><a href="https://userportal.slac.stanford.edu/" target="_blank" rel="noopener">Submit — SLAC user portal</a></td>
+</tr>
+
+<tr>
+  <td class="fac" data-label="Facility">SPring-8 <span class="country">· Japan</span><span class="bl">MX beamlines (BL41XU, BL45XU)</span></td>
+  <td class="calltype" data-label="Call type">General proposals, 2027A</td>
+  <td class="dl" data-label="Next deadline" data-deadline="2026-12-15"><span class="date">15 Dec 2026</span><span class="days"></span><span class="days">10:00 JST</span><a class="check" href="https://user.spring8.or.jp/?lang=en&amp;p=26156" target="_blank" rel="noopener">check source ↗</a></td>
+  <td class="cycle" data-label="Cycle">Two main periods a year (A and B); 2027A covers Apr–Jul 2027, ~282 shifts</td>
+  <td class="notes" data-label="Notes">All 2026B calls had closed by 19 Aug 2026 and no 2027A dates were listed; urgent proposals, measurement service and proprietary time-designated proposals stay open all year.</td>
+  <td class="links" data-label="Links"><a href="https://user.spring8.or.jp/?lang=en&amp;p=26156" target="_blank" rel="noopener">Details — call for proposals</a></td>
+</tr>
+</tbody>
+</table>
+
+<footer>
+Every dated entry was read from the facility's own call or deadline page on 19 August 2026, re-checked 20 October 2026. Entries marked "unverified — check link" are ones where the facility had not published the next date at that time; the link still points at the page where the call is announced. Times are quoted in the facility's own local time zone.
+<p class="refresh">To refresh: open <a href="https://claude.ai/chat/db119e6f-ee5e-498b-a842-0e31df3285b3" target="_blank" rel="noopener">the verification chat</a>, type <code>re-verify</code>, paste the new embed code into the Google Sites embed block.</p>
+</footer>
+
+</div>
+
+<script>
+(function () {
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  var cells = document.querySelectorAll('td.dl[data-deadline]');
+  for (var i = 0; i < cells.length; i++) {
+    var td = cells[i];
+    var parts = td.getAttribute('data-deadline').split('-');
+    var due = new Date(+parts[0], parts[1] - 1, +parts[2]);
+    var days = Math.round((due - today) / 86400000);
+    td.classList.add(days < 0 ? 'past' : days <= 30 ? 'soon' : days <= 90 ? 'near' : 'far');
+    var label = td.querySelector('.days');
+    if (label) {
+      label.textContent = days < 0 ? 'deadline passed' : days === 0 ? 'today' : days === 1 ? 'tomorrow' : 'in ' + days + ' days';
+    }
+  }
+
+  // ---- Sortable tables ----
+  function sortKey(row, colIndex, mode) {
+    var cell = row.children[colIndex];
+    if (!cell) return mode === 'date' ? Infinity : '';
+    if (mode === 'date') {
+      var dl = cell.getAttribute('data-deadline');
+      if (dl) return new Date(dl).getTime();
+      return Infinity; // rolling / unverified sink to bottom on ascending
+    }
+    return (cell.textContent || '').trim().toLowerCase();
+  }
+
+  document.querySelectorAll('table').forEach(function (table) {
+    var tbody = table.querySelector('tbody');
+    var defaultOrder = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+    var headers = table.querySelectorAll('thead th');
+    var state = { col: -1, dir: 1 };
+
+    headers.forEach(function (th, idx) {
+      // column 5 (Notes) and 5-based links aren't useful to sort; skip Notes(4) & Links(5)
+      if (idx === 4 || idx === 5) return;
+      th.classList.add('sortable');
+      th.style.cursor = 'pointer';
+      th.title = 'Click to sort';
+      th.innerHTML += ' <span class="arrow">\u2195</span>';
+      th.addEventListener('click', function () {
+        var mode = (idx === 2) ? 'date' : 'text';
+        if (state.col === idx) { state.dir *= -1; } else { state.col = idx; state.dir = 1; }
+        headers.forEach(function (h) {
+          h.classList.remove('sort-active');
+          var a = h.querySelector('.arrow'); if (a) a.textContent = '\u2195';
+        });
+        th.classList.add('sort-active');
+        var arrow = th.querySelector('.arrow');
+        if (arrow) arrow.textContent = state.dir === 1 ? '\u25B2' : '\u25BC';
+        var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+        rows.sort(function (a, b) {
+          var ka = sortKey(a, idx, mode), kb = sortKey(b, idx, mode);
+          if (ka < kb) return -1 * state.dir;
+          if (ka > kb) return 1 * state.dir;
+          return 0;
+        });
+        rows.forEach(function (r) { tbody.appendChild(r); });
+      });
+    });
+
+    // reset control
+    var cap = table.querySelector('caption');
+    if (cap) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'resetbtn';
+      btn.textContent = 'reset to default order';
+      btn.addEventListener('click', function () {
+        defaultOrder.forEach(function (r) { tbody.appendChild(r); });
+        headers.forEach(function (h) {
+          h.classList.remove('sort-active');
+          var a = h.querySelector('.arrow'); if (a) a.textContent = '\u2195';
+        });
+        state.col = -1; state.dir = 1;
+      });
+      cap.appendChild(document.createTextNode('  \u00B7  '));
+      cap.appendChild(btn);
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

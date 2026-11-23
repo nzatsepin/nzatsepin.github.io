@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MX3 SSX scan planner</title>
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f5f7f9; --panel:#ffffff; --ink:#18232e; --muted:#3f4c58; --line:#d5dde5;
+  --drop:#d6eaf4; --dropEdge:#3c7fa6; --accent:#1f6f9c; --warn:#b4471b; --warnBg:#fbeee7;
+  --on:#1f6f9c; --off:#c2571f; --ovh:#7a6a9a; --field:#ffffff; --path:#4f5f6e; --infoBg:#e6f1f8; --tipBg:#18232e; --tipInk:#f5f7f9;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#121a21; --panel:#18222b; --ink:#e3eaf0; --muted:#b9c6d1; --line:#2c3a46;
+    --drop:#1d3a4c; --dropEdge:#6fb3d9; --accent:#6fb3d9; --warn:#f0a07a; --warnBg:#3a2219;
+    --on:#7cc0e6; --off:#f08a52; --ovh:#b6a3dc; --field:#1d2933; --path:#b4c2ce; --infoBg:#16303f; --tipBg:#e3eaf0; --tipInk:#121a21;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#121a21; --panel:#18222b; --ink:#e3eaf0; --muted:#b9c6d1; --line:#2c3a46;
+  --drop:#1d3a4c; --dropEdge:#6fb3d9; --accent:#6fb3d9; --warn:#f0a07a; --warnBg:#3a2219;
+  --on:#7cc0e6; --off:#f08a52; --ovh:#b6a3dc; --field:#1d2933; --path:#b4c2ce; --infoBg:#16303f; --tipBg:#e3eaf0; --tipInk:#121a21;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;}
+.wrap{max-width:1240px;margin:0 auto;padding:16px}
+h1{font-size:20px;font-weight:600;margin:0 0 12px;letter-spacing:-.01em}
+.layout{display:grid;grid-template-columns:350px 1fr;gap:16px;align-items:start}
+@media (max-width:880px){.layout{grid-template-columns:1fr}}
+fieldset{border:1px solid var(--line);background:var(--panel);border-radius:6px;margin:0 0 12px;padding:10px 12px 12px;min-width:0}
+legend{font-weight:600;font-size:13px;padding:0 4px;color:var(--accent)}
+.row{display:grid;grid-template-columns:1fr 118px;gap:8px;align-items:center;margin:6px 0}
+.hide{display:none!important}
+.lab small{display:block;color:var(--muted);font-size:13px}
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0}
+input[type=number],select{width:100%;padding:5px 7px;border:1px solid var(--line);border-radius:4px;background:var(--field);color:var(--ink);font:inherit;font-variant-numeric:tabular-nums;text-align:right}
+select{text-align:left}
+input:disabled,select:disabled{opacity:.7;cursor:not-allowed;background:var(--panel);color:var(--ink);border-style:dashed}
+input[type=file]{font:inherit;font-size:13px;max-width:100%}
+input:focus-visible,select:focus-visible,button:focus-visible,.tip:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.checks{display:flex;gap:16px;margin-top:6px;flex-wrap:wrap;align-items:center}
+.checks label{display:flex;gap:6px;align-items:center}
+.tip{display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;border:1px solid var(--muted);color:var(--muted);font-size:10px;font-weight:600;line-height:1;cursor:help;margin-left:5px;vertical-align:1px;user-select:none}
+.tip:hover{border-color:var(--accent);color:var(--accent)}
+#tipBox{position:fixed;z-index:50;max-width:300px;padding:8px 10px;border-radius:4px;background:var(--tipBg);color:var(--tipInk);font-size:13px;line-height:1.45;pointer-events:none;display:none;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+button{font:inherit;padding:4px 10px;border:1px solid var(--accent);background:transparent;color:var(--accent);border-radius:4px;cursor:pointer}
+button:hover,button.on{background:var(--accent);color:var(--panel)}
+button:disabled{opacity:.55;cursor:default;background:transparent;color:var(--accent)}
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 8px}
+.block{margin:8px 0 4px;padding-top:8px;border-top:1px solid var(--line)}
+.view{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px}
+.toolbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.toolbar .sep{flex:1}
+.calbar{display:none;gap:8px;align-items:center;margin-bottom:8px;font-size:13px;flex-wrap:wrap}
+.calbar.show{display:flex}
+.calbar input{width:110px}
+canvas{display:block;width:100%;touch-action:none;border-radius:4px;background:var(--panel);cursor:grab}
+canvas.draw{cursor:crosshair}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted);margin-top:8px;justify-content:center;align-items:center}
+.sw{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.sw.hatch{border-radius:2px;background:repeating-linear-gradient(45deg,var(--ovh) 0 2px,transparent 2px 4px);border:1px dashed var(--ovh)}
+.fp{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5}
+.fp b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr))}
+@media (max-width:1100px){.stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.stat+.stat{border-left:1px solid var(--line)}
+@media (max-width:1100px){.stat:nth-child(4){border-left:0}.stat:nth-child(n+4){border-top:1px solid var(--line)}}
+.stat{background:var(--panel);padding:8px 10px}
+.stat b{display:block;font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+.stat i{font-style:normal;color:var(--ink);font-size:13px;white-space:nowrap}
+.stat.key b{color:var(--accent)}
+.summary{margin-top:12px;background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.split{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)}
+.split .lab{font-weight:600;font-size:14px}
+.seg{display:inline-flex;border:1px solid var(--accent);border-radius:6px;overflow:hidden}
+.seg button{border:0;border-radius:0;padding:6px 14px;font-size:14px}
+.seg button+button{border-left:1px solid var(--accent)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--panel)}
+.split .pen{display:flex;gap:6px;align-items:center;font-size:14px}
+.split .pen input{width:90px}
+.split .why{font-size:13px;color:var(--muted);flex-basis:100%}
+.howto{margin:-4px 0 12px;font-size:13px;max-width:80ch}.howto summary{cursor:pointer;color:var(--accent)}.howto ol{margin:6px 0 0;padding-left:20px;line-height:1.5}
+.info{margin-top:12px;padding:8px 12px;border-radius:4px;background:var(--infoBg);border-left:3px solid var(--accent);font-size:13px;line-height:1.55}
+.info b{font-variant-numeric:tabular-nums}
+.info details{margin-top:6px}
+.info summary{cursor:pointer;color:var(--accent)}
+.info svg{display:block;max-width:100%;height:auto;margin-top:6px}
+.toolbar label{display:flex;gap:5px;align-items:center;font-size:13px;color:var(--muted)}
+input.attn{outline:2px solid var(--off);outline-offset:1px}
+.msg{margin-top:12px;padding:8px 10px;border-radius:4px;background:var(--warnBg);color:var(--warn);display:none}
+.msg.show{display:block}
+.msg div+div{margin-top:4px}
+.tablehead{display:flex;justify-content:space-between;align-items:center;margin:16px 0 6px;gap:8px;flex-wrap:wrap}
+.tablehead h2{font-size:15px;margin:0;font-weight:600}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:6px;background:var(--panel);max-height:420px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:5px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-weight:600;color:var(--muted);font-size:13px;position:sticky;top:0;background:var(--panel)}
+th:first-child,td:first-child{text-align:left}
+tr:last-child td{border-bottom:0}
+tr.hl td{background:var(--drop)}
+.note{color:var(--muted);font-size:13px;margin-top:8px}
+#copyBuf{position:absolute;left:-9999px;top:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>MX3 SSX scan planner</h1>
+<details class="howto"><summary>How to use</summary>
+<ol>
+<li>Choose the plate and sample shape. For an irregular region, select Freehand, load an image if available, check its scale (µm per pixel, image width or Calibrate), then draw one or more regions.</li>
+<li>Set the beam FWHM, scan mode (fly or step), spacing and timing.</li>
+<li>The planner covers the sample with vertical-column grids: each within the frame limit and fast-scan range, never stacked vertically. “Grid splitting” trades off-sample frames against the number of grids.</li>
+<li>Zoom in to inspect beam footprints, frame start/stop ticks, overhangs and scan direction; hover a table row to highlight its grid.</li>
+<li>Copy the start-position table. Orange boxes are warnings; the blue box is derived information. Hover ? for definitions. Placeholder values are marked in their tooltips.</li>
+</ol></details>
+<div class="layout">
+<div id="controls"></div>
+<div>
+  <div class="view">
+    <div class="toolbar">
+      <button type="button" id="mPan" class="on">Pan</button>
+      <button type="button" id="mDraw">Draw</button>
+      <button type="button" id="mCal">Calibrate</button>
+      <button type="button" id="undo">Undo shape</button>
+      <button type="button" id="clear">Clear shapes</button>
+      <label><input id="showPath" type="checkbox" checked> Scan path</label><span class="sep"></span>
+      <button type="button" id="zOut" aria-label="Zoom out">−</button>
+      <button type="button" id="zIn" aria-label="Zoom in">+</button>
+      <button type="button" id="fit">Fit</button>
+    </div>
+    <div class="calbar" id="calbar">
+      <span id="calInfo"></span>
+      <label for="calLen">Known length (µm)</label><input id="calLen" type="number" min="0" step="any">
+      <button type="button" id="calApply">Apply scale</button>
+      <button type="button" id="calCancel">Cancel</button>
+    </div>
+    <canvas id="cv" aria-label="Fly-scan layout over sample"></canvas>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--on)"></span>Frame on sample</span>
+      <span><span class="sw" style="background:var(--off)"></span>Frame off sample</span>
+      <span><span class="sw hatch"></span>Overhang: exposed, no data (fly)</span><span>┼ Frame start/stop (fly)</span>
+      <span>▼ Grid start</span>
+      <span>➜ Travel direction</span>
+    </div>
+    <div class="note" id="hint"></div>
+  </div>
+  <div class="summary"><div class="split" id="splitBar"></div><div class="stats" id="stats"></div></div>
+  <div id="msg" class="msg" role="alert"></div>
+  <div id="info" class="info"></div>
+  <div class="tablehead">
+    <h2>Grid start positions</h2>
+    <div><button id="copyTsv" type="button">Copy table</button> <button id="copyCsv" type="button">Copy CSV</button></div>
+  </div>
+  <div class="tablewrap"><table id="tbl"><thead></thead><tbody></tbody></table></div>
+  <div class="note">Start = centre of the first data frame (fly) or point (step) in each grid’s top-right column; in fly mode the goniometer begins one overhang above it. Every grid spans the full sample height of its columns, so grids are never stacked vertically and overhangs never cross collected regions. Frame size, acceleration, overheads and fast-scan ranges are placeholders to be set from beamline values.</div>
+  <textarea id="copyBuf" aria-hidden="true" tabindex="-1"></textarea>
+</div>
+</div>
+</div>
+<div id="tipBox" role="tooltip"></div>
+
+<script>
+(function(){
+"use strict";
+const $ = id => document.getElementById(id);
+const num = id => parseFloat($(id).value);
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+const tipHTML = t => t ? '<span class="tip" tabindex="0" data-tip="' + esc(t) + '">?</span>' : "";
+
+// ---------- controls ----------
+const TIPS = {
+  plate: "Sets the default sample shape: 96-well, 2 drops → 1 mm circular drop; 24-well custom → 6 × 6 mm filled window. Well selection is disabled until plate geometry or aligned robot images are integrated.",
+  shape: "Region that may contain sample. Circle and rectangle are centred in the window. Freehand: draw one or more regions, optionally over a loaded image.",
+  dia: "Drop diameter. The window is the square bounding the circle.",
+  rw: "Width of the filled region; also the window. 24-well custom plates: up to 6 mm.",
+  rh: "Height of the filled region; also the window. 24-well custom plates: up to 6 mm.",
+  fw: "Width of the drawing window. Sets the scan lattice and the (0,0) reference. Set automatically from a loaded image (pixels × µm per pixel).",
+  fh: "Height of the drawing window. Set automatically from a loaded image.",
+  img: "Load an image (e.g. a crystallisation-robot photo) and trace the sample region over it. The image is centred in the window and stays in this page; it is not uploaded.",
+  umpp: "Image scale. Check it after loading: enter the imager calibration, the image width, or use Calibrate (draw a line over a feature of known length). Changing the scale rescales shapes already drawn with the image.",
+  op: "Image opacity.",
+  bh: "Horizontal full width at half maximum of the Gaussian focal spot. Used as entered.",
+  bv: "Vertical full width at half maximum of the Gaussian focal spot. Used as entered.",
+  sh: "Horizontal distance between adjacent vertical scan lines (columns). Suggested ≥ 2 × horizontal FWHM. For a Gaussian beam, relative intensity at distance d from the beam centre is 2^(−4(d/FWHM)²): a crystal centred on one column receives 6.25 % of peak intensity from the adjacent column at 1 × FWHM spacing and ≈ 0.002 % at 2 × FWHM. Real beams have non-Gaussian tails, so the actual fraction is likely higher.",
+  sv: "Vertical distance travelled during one detector frame (= scan speed × frame time). When this changes, frame rate stays fixed and scan speed updates.",
+  rate: "Detector frame rate during the scan. Frame rate, frame time and scan speed are linked: edit any one. For reference, DECTRIS specifies 550 Hz maximum for the EIGER2 XE 16M.",
+  ftime: "1 / frame rate.",
+  speed: "Constant vertical goniometer speed during data collection. Editing speed keeps frame spacing fixed and changes frame rate.",
+  mode: "Fly scan: the goniometer moves continuously along each column while the detector records frames at a fixed rate; each frame integrates a vertical trace. It is not a step-and-shoot grid, although it is usually called a grid scan. Step scan: the goniometer stops at each point and exposes there; the X-ray chopper is assumed synchronised, so only the points are exposed. Points are drawn as Gaussian profiles with a dashed FWHM contour.",
+  spc: "Spacing pairs currently available at MX3: 5 × 5, 10 × 10 and 20 × 20 µm (H × V). Other values can be entered for planning.",
+  tstep: "Time to move to the next point and settle before exposing (step scan). Placeholder.",
+  bmove: "Without a fast shutter or chopper synchronised to the goniometer, the beam stays on while moving between points and during the turn between columns. Exposed regions are drawn hatched.",
+  iw: "Width of the whole image in µm. Linked to µm per pixel.",
+  cont: "Dead time between frames is negligible at ms frame times, so exposure ≈ frame time. DECTRIS specifications: EIGER2 X/XE effective dead time < 100 ns; EIGER (first generation, e.g. MX2 EIGER 16M) 3 µs (Casañas et al. 2016 report as low as 3.8 µs). Exact MX3 and MX2 values not confirmed here. Check your master file for your detector’s dead time if this is critical (/entry/instrument/detector/dead_time).",
+  exp: "Recorded exposure per frame when gated shorter than the frame time. The beam still exposes the sample continuously; this changes only what the detector records.",
+  serp: "Serpentine: columns alternate down and up, turning around in the overhang. Unidirectional is disabled (not currently used); the code is retained.",
+  maxpts: "Upper limit on frames in one grid. Columns are never split vertically, so a single column must fit within this limit.",
+  rangeH: "Maximum horizontal travel within one grid (first to last column). 5 mm is your conservative estimate. For comparison, Arinax lists 6 mm range on the MD3-UP AZ alignment axis and 5 mm on the CX/CY centring table; MD5 values not checked.",
+  rangeV: "Maximum vertical travel of one column including both overhangs. 6 mm is a placeholder (stated as longer than 5 mm). Arinax lists 108 mm range on the MD3-UP AY alignment axis; the usable range with a plate holder will be smaller. MD5 values not checked.",
+  acc: "Vertical goniometer acceleration, assumed constant. If observed overhangs are longer than predicted, lower this value or add extra overhang. Gives the overhang v²/(2a) at each column end and the turnaround time 2v/a per column; both grow with scan speed. Default 100 mm/s² is inferred from the Arinax MD3-UP specification (grid U-turn delay < 300 ms at 15 mm/s on AY → a ≥ 2v/t = 100 mm/s²), so it gives an upper estimate of overhang. Not an MD5 value; measure on the beamline.",
+  ovx: "Extra travel at each column end before and after data collection, e.g. settling. Added to v²/(2a). Placeholder.",
+  mbpf: "Stored size of one frame after compression. Depends on detector, compression and diffraction content. Placeholder.",
+  colOH: "Time per column in addition to collection and, in fly mode, the acceleration/deceleration ramps (2v/a, already included): horizontal step between columns, settling and detector re-triggering. 0.2 s is a placeholder; replace with a measured value.",
+  gridOH: "Time per grid: move to the grid start, detector arming, scan set-up and file handling. Placeholder.",
+  opt: "Prioritise collection time or data volume. More, narrower grids follow the sample outline more closely (fewer off-sample frames, less data) but each grid adds set-up time. Shortest time (default): split only when the frames saved take longer to collect than one grid overhead. Least data: split whenever at least one frame is saved. Custom: split only when at least N frames are saved, e.g. for a drop that is not perfectly round, where the circle or traced outline is only approximate and fitting it frame by frame gains nothing.",
+  pen: "Minimum off-sample frames an extra grid must save before the planner splits. Example: an oval drop entered as a 1 mm circle, at 20 µm spacing — with 200, only splits that remove ≥ 200 empty frames (about 0.08 mm² of empty area) are made, so edge fitting to an inexact outline is skipped. 0 = Least data; very large = one grid where the limits allow.",
+  origin: "Reference point for start positions. Window = the circle’s bounding square, the rectangle, or the drawing window. Axes: z along the optical axis; +x right; +y up, as viewed on screen.",
+  unit: "Units for the table and copied output.",
+  inv: "Flip axis signs to match the goniometer convention."
+};
+function row(id, label, unit, value, opts){
+  opts = opts || {};
+  const input = opts.select
+    ? '<select id="' + id + '">' + opts.select.map(o => '<option value="' + o[0] + '">' + o[1] + '</option>').join("") + '</select>'
+    : '<input id="' + id + '" type="number" min="' + (opts.min ?? 0) + '" step="any" value="' + value + '"' + (opts.disabled ? " disabled" : "") + '>';
+  return '<div class="row' + (opts.show ? ' hide" data-for="' + opts.show : '') + '"' + (opts.mode ? ' data-mode="' + opts.mode + '"' : '') + (opts.rowId ? ' id="' + opts.rowId + '"' : "") + '><div class="lab"><label for="' + id + '">' + label + '</label>' + tipHTML(TIPS[id]) + (unit ? '<small>' + unit + '</small>' : "") + '</div>' + input + '</div>';
+}
+$("controls").innerHTML =
+ '<fieldset><legend>Sample</legend>' +
+   row("plate", "Plate", "", "", {select:[["p96","96-well, 2 drops"],["p24","24-well custom"],["other","None / other"]]}) +
+   '<div class="trio"><select id="wRow" disabled aria-label="Well row"></select><select id="wCol" disabled aria-label="Well column"></select><select id="wDrop" disabled aria-label="Drop"><option>Drop 1</option><option>Drop 2</option></select></div>' +
+   row("shape", "Sample shape", "", "", {select:[["circle","Circle"],["rect","Rectangle (filled window)"],["free","Freehand"]]}) +
+   row("dia", "Diameter", "µm", 1000, {min:1, show:"circle"}) +
+   row("rw", "Width", "µm", 6000, {min:1, show:"rect"}) +
+   row("rh", "Height", "µm", 6000, {min:1, show:"rect"}) +
+   row("fw", "Window width", "µm", 1500, {min:1, show:"free"}) +
+   row("fh", "Window height", "µm", 1500, {min:1, show:"free"}) +
+   '<div class="block hide" data-for="free">' +
+     '<div class="lab"><label for="img">Image to trace</label>' + tipHTML(TIPS.img) + '</div>' +
+     '<div class="checks"><input id="img" type="file" accept="image/*"><button type="button" id="imgRm" disabled>Remove</button></div>' +
+     row("umpp", "Image scale", "µm per pixel", 1, {min:0}) +
+     row("iw", "Image width", "µm", "", {min:0}) +
+     '<div class="note" id="imgInfo"></div>' +
+     '<div class="row"><div class="lab"><label for="op">Image opacity</label>' + tipHTML(TIPS.op) + '</div><input id="op" type="range" min="0.1" max="1" step="0.05" value="0.85"></div>' +
+   '</div>' +
+ '</fieldset>' +
+ '<fieldset><legend>Beam (FWHM, Gaussian)</legend><div class="presets">' +
+   ['6.4,4.8','5,5','10,5','18,14'].map(b => '<button type="button" data-b="' + b + '">' + b.replace(",", " × ") + '</button>').join("") +
+   '<button type="button" id="swapB">Swap H/V</button></div>' +
+   row("bh", "Horizontal", "µm", 6.4, {min:0.1}) + row("bv", "Vertical", "µm", 4.8, {min:0.1}) +
+ '</fieldset>' +
+ '<fieldset><legend id="gsLegend">Grid scan (fly scan)</legend>' +
+   row("mode", "Scan mode", "", "", {select:[["fly","Fly scan: continuous columns"],["step","Step scan: stop at each point"]]}) +
+   '<div class="lab">Spacing H × V' + tipHTML(TIPS.spc) + '</div><div class="presets">' + ['5','10','20'].map(v => '<button type="button" data-sp="' + v + '">' + v + ' × ' + v + ' µm</button>').join("") + '</div>' +
+   row("sh", "Column spacing (H)", "µm", 20, {min:0.1}) +
+   row("sv", "Frame spacing (V)", "µm, = speed × frame time", 20, {min:0.01}) +
+   row("rate", "Frame rate", "Hz", 100, {min:0.001, mode:"fly"}) +
+   row("ftime", "Frame time", "ms", 10, {min:0.001, mode:"fly"}) +
+   row("speed", "Scan speed (V)", "µm/s", 2000, {min:0.001, mode:"fly"}) +
+   '<div class="checks" data-mode="fly"><label><input id="cont" type="checkbox" checked> Exposure = frame time</label>' + tipHTML(TIPS.cont) + '</div>' +
+   row("exp", "Exposure time", "ms", 10, {min:0.001, disabled:true}) +
+   row("tstep", "Move + settle per point", "ms", 20, {mode:"step"}) +
+   row("serp", "Column order", "", "", {select:[["s","Serpentine"],["u","Unidirectional (disabled)"]]}) +
+   row("maxpts", "Max frames per grid", "", 2500, {min:1}) +
+   row("rangeH", "Fast-scan range H", "mm per grid", 5, {min:0.001}) +
+   row("rangeV", "Fast-scan range V", "mm per column, incl. overhang", 6, {min:0.001}) +
+   row("acc", "Acceleration (V)", "mm/s²", 100, {min:0.001, mode:"fly"}) +
+   row("ovx", "Extra overhang", "µm per column end", 0, {mode:"fly"}) +
+   row("mbpf", "Data per frame", "MB, compressed", 5) +
+   row("colOH", "Overhead per column", "s", 0.2) +
+   row("gridOH", "Overhead per grid", "s", 5) +
+ '</fieldset>' +
+ '<fieldset><legend>Coordinates</legend>' +
+   row("origin", "(0,0) at", "", "", {select:[["c","Window centre"],["tl","Window top-left"],["tr","Window top-right"]]}) +
+   row("unit", "Table units", "", "", {select:[["um","µm"],["mm","mm"]]}) +
+   '<div class="checks"><label><input id="invx" type="checkbox"> Invert X</label><label><input id="invy" type="checkbox"> Invert Y</label>' + tipHTML(TIPS.inv) + '</div>' +
+   '<div class="note">Axes: z along the optical axis; +x right; +y up, as viewed on screen.</div>' +
+ '</fieldset>';
+$("splitBar").innerHTML =
+  '<span class="lab">Grid splitting' + tipHTML(TIPS.opt) + '</span>' +
+  '<span class="seg" role="group" aria-label="Grid splitting">' +
+    '<button type="button" data-opt="off" aria-pressed="false">Least data</button>' +
+    '<button type="button" data-opt="time" aria-pressed="true">Shortest time</button>' +
+    '<button type="button" data-opt="custom" aria-pressed="false">Custom</button></span>' +
+  '<select id="opt" hidden><option value="off">off</option><option value="time" selected>time</option><option value="custom">custom</option></select>' +
+  '<span id="penRow" class="pen"><label for="pen">Min. frames saved per extra grid</label>' + tipHTML(TIPS.pen) + '<input id="pen" type="number" min="0" step="any" value="200"></span>' +
+  '<span class="why" id="splitWhy"></span>';
+document.querySelectorAll("[data-opt]").forEach(b => b.addEventListener("click", () => {
+  $("opt").value = b.dataset.opt;
+  document.querySelectorAll("[data-opt]").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+  update();
+}));
+$("penRow").classList.add("hide");
+$("serp").querySelector('option[value="u"]').disabled = true;
+
+const STATS = [
+  ["sGrids","Grids","Number of separate grid scans. Set by Grid splitting."],
+  ["sPts","Total frames","Data frames collected, all grids."],
+  ["sTime","Total time","Σ frames ÷ frame rate + columns × (2v/a + overhead per column) + grids × overhead per grid. Depends on Grid splitting: “Least data” minimises frames and data volume but may use many grids and take longer; “Shortest time” minimises this value at the cost of more off-sample frames. Toggle it to compare."],
+  ["sData","Data volume","Total frames × data per frame. Lowest with Grid splitting set to “Least data”."],
+  ["sOff","Off sample","Frames whose centre lies outside every sample region."],
+  ["sOffData","Data off sample","Off-sample frames × data per frame."]
+];
+$("stats").innerHTML = STATS.map((s, i) => '<div class="stat' + (i < 3 ? " key" : "") + '"><i>' + s[1] + tipHTML(s[2]) + '</i><b id="' + s[0] + '">–</b></div>').join("");
+
+// tooltip box
+const tipBox = $("tipBox");
+function showTip(el){
+  tipBox.textContent = el.dataset.tip; tipBox.style.display = "block";
+  const r = el.getBoundingClientRect(), b = tipBox.getBoundingClientRect();
+  let x = r.left - 8, y = r.bottom + 6;
+  if(x + b.width > window.innerWidth - 8) x = window.innerWidth - 8 - b.width;
+  if(x < 8) x = 8;
+  if(y + b.height > window.innerHeight - 8) y = r.top - 6 - b.height;
+  tipBox.style.left = x + "px"; tipBox.style.top = Math.max(8, y) + "px";
+}
+document.addEventListener("mouseover", e => { const t = e.target.closest && e.target.closest(".tip"); if(t) showTip(t); });
+document.addEventListener("mouseout", e => { if(e.target.closest && e.target.closest(".tip")) tipBox.style.display = "none"; });
+document.addEventListener("focusin", e => { if(e.target.classList.contains("tip")) showTip(e.target); });
+document.addEventListener("focusout", e => { if(e.target.classList.contains("tip")) tipBox.style.display = "none"; });
+window.addEventListener("scroll", () => tipBox.style.display = "none", true);
+
+const S = {shapes:[], drawing:null, pan:null, cal:null, mode:"pan", plan:null, view:{k:1,cx:0,cy:0}, winKey:"", hl:-1, img:null};
+
+// ---------- plate & shape ----------
+function fillWells(){
+  const h = $("plate").value, rows = h === "p96" ? "ABCDEFGH" : "ABCD", cols = h === "p96" ? 12 : 6;
+  $("wRow").innerHTML = [...rows].map(r => "<option>" + r + "</option>").join("");
+  $("wCol").innerHTML = Array.from({length:cols}, (_, i) => "<option>" + (i + 1) + "</option>").join("");
+  $("wDrop").style.display = h === "p96" ? "" : "none";
+  $("wRow").parentElement.style.display = h === "other" ? "none" : "";
+}
+$("plate").addEventListener("change", () => {
+  const h = $("plate").value;
+  if(h === "p96" && !S.img){ $("shape").value = "circle"; $("dia").value = 1000; $("fw").value = 1500; $("fh").value = 1500; }
+  if(h === "p24" && !S.img){ $("shape").value = "rect"; $("rw").value = 6000; $("rh").value = 6000; $("fw").value = 6000; $("fh").value = 6000; }
+  fillWells(); shapeUI(); update();
+});
+function shapeUI(){
+  const s = $("shape").value, free = s === "free";
+  document.querySelectorAll("[data-for]").forEach(el => el.classList.toggle("hide", el.dataset.for !== s));
+  $("mDraw").disabled = !free; $("mCal").disabled = !free || !S.img;
+  $("undo").disabled = !free || !S.shapes.length; $("clear").disabled = !free || !S.shapes.length;
+  $("imgRm").disabled = !S.img;
+  if(!free && S.mode !== "pan") setMode("pan");
+  if(free && !S.shapes.length && S.mode === "pan") setMode("draw");
+}
+$("shape").addEventListener("change", () => { shapeUI(); update(); });
+function modeUI(){
+  const fly = $("mode").value === "fly";
+  document.querySelectorAll("[data-mode]").forEach(el => el.classList.toggle("hide", el.dataset.mode !== $("mode").value));
+  $("gsLegend").textContent = fly ? "Grid scan (fly scan: continuous, not stop-and-shoot)" : "Grid scan (step scan: stop at each point)";
+  document.querySelector('label[for="sv"]').textContent = fly ? "Frame spacing (V)" : "Point spacing (V)";
+  document.querySelector('label[for="sv"]').parentElement.querySelector("small").textContent = fly ? "µm, = speed × frame time" : "µm";
+  document.querySelector('label[for="exp"]').textContent = fly ? "Exposure time" : "Exposure per point";
+  $("exp").disabled = fly && $("cont").checked;
+}
+$("mode").addEventListener("change", () => { modeUI(); update(); });
+document.querySelectorAll("[data-sp]").forEach(b => b.addEventListener("click", () => { $("sh").value = b.dataset.sp; $("sv").value = b.dataset.sp; link("sv"); update(); }));
+$("showPath").addEventListener("change", () => draw());
+
+// ---------- image ----------
+$("img").addEventListener("change", e => {
+  const f = e.target.files && e.target.files[0]; if(!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    const im = new Image();
+    im.onload = () => {
+      S.img = {el: im, w: im.naturalWidth, h: im.naturalHeight, umpp: num("umpp") > 0 ? num("umpp") : 1};
+      $("shape").value = "free"; S.shapes = [];
+      setWindowFromImage(); shapeUI(); S.winKey = ""; update();
+      $("umpp").classList.add("attn"); $("umpp").focus();
+      $("hint").textContent = "Image loaded. Check the image scale before drawing: enter µm per pixel or the image width, or use Calibrate.";
+    };
+    im.src = rd.result;
+  };
+  rd.readAsDataURL(f);
+});
+$("imgRm").addEventListener("click", () => { S.img = null; $("img").value = ""; setWindowFromImage(); shapeUI(); update(); });
+function setWindowFromImage(){
+  if(!S.img){ $("imgInfo").textContent = ""; $("iw").value = ""; return; }
+  $("fw").value = fmt(S.img.w * S.img.umpp, 6); $("fh").value = fmt(S.img.h * S.img.umpp, 6);
+  if(document.activeElement !== $("iw")) $("iw").value = fmt(S.img.w * S.img.umpp, 6);
+  $("imgInfo").textContent = S.img.w + " × " + S.img.h + " px = " + fmt(S.img.w * S.img.umpp / 1000, 4) + " × " + fmt(S.img.h * S.img.umpp / 1000, 4) + " mm";
+}
+function rescaleImage(newU){
+  if(!S.img || !(newU > 0)) return;
+  const f = newU / S.img.umpp; S.img.umpp = newU;
+  S.shapes = S.shapes.map(p => p.map(q => ({x:q.x * f, y:q.y * f})));
+  setWindowFromImage(); S.winKey = ""; update();
+}
+$("umpp").addEventListener("input", () => { $("umpp").classList.remove("attn"); if(S.img){ rescaleImage(num("umpp")); } });
+$("iw").addEventListener("input", () => { $("umpp").classList.remove("attn"); if(S.img && num("iw") > 0){ const u = num("iw") / S.img.w; $("umpp").value = fmt(u, 6); rescaleImage(u); } });
+$("op").addEventListener("input", () => draw());
+$("calApply").addEventListener("click", () => {
+  const L = num("calLen"); if(!S.cal || !(L > 0)) return;
+  const d = Math.hypot(S.cal.b.x - S.cal.a.x, S.cal.b.y - S.cal.a.y); if(!(d > 0)) return;
+  const newU = S.img.umpp * L / d; $("umpp").value = fmt(newU, 6);
+  S.cal = null; $("calbar").classList.remove("show"); setMode("pan"); rescaleImage(newU);
+});
+$("calCancel").addEventListener("click", () => { S.cal = null; $("calbar").classList.remove("show"); setMode("pan"); draw(); });
+
+// ---------- beam ----------
+document.querySelectorAll("[data-b]").forEach(b => b.addEventListener("click", () => { const [h, v] = b.dataset.b.split(","); $("bh").value = h; $("bv").value = v; update(); }));
+$("swapB").addEventListener("click", () => { const h = $("bh").value; $("bh").value = $("bv").value; $("bv").value = h; update(); });
+
+// ---------- linked timing ----------
+function fmt(v, sig){ if(!isFinite(v)) return ""; return parseFloat(v.toPrecision(sig || 6)).toString(); }
+function link(src){
+  const sv = num("sv"); let rate;
+  if(src === "ftime") rate = 1000 / num("ftime");
+  else if(src === "speed") rate = num("speed") / sv;
+  else rate = num("rate");
+  if(!(rate > 0) || !(sv > 0)) return;
+  if(src !== "rate") $("rate").value = fmt(rate);
+  if(src !== "ftime") $("ftime").value = fmt(1000 / rate);
+  if(src !== "speed") $("speed").value = fmt(rate * sv);
+  if($("cont").checked) $("exp").value = $("ftime").value;
+}
+["rate","ftime","speed","sv"].forEach(id => $(id).addEventListener("input", () => { link(id); update(); }));
+$("cont").addEventListener("change", () => { modeUI(); link("rate"); update(); });
+["dia","rw","rh","fw","fh","bh","bv","sh","exp","serp","maxpts","rangeH","rangeV","acc","ovx","mbpf","colOH","gridOH","opt","pen","origin","unit","invx","invy","tstep"].forEach(id => {
+  $(id).addEventListener("input", update); $(id).addEventListener("change", update);
+});
+
+// ---------- geometry ----------
+function getSample(){
+  const s = $("shape").value;
+  if(s === "circle"){
+    const R = num("dia") / 2, poly = [];
+    for(let i = 0; i < 360; i++){ const a = i * Math.PI / 180; poly.push({x:R * Math.cos(a), y:R * Math.sin(a)}); }
+    return {polys: R > 0 ? [poly] : [], win:{x0:-R, x1:R, y0:-R, y1:R}};
+  }
+  if(s === "rect"){
+    const w = num("rw") / 2, h = num("rh") / 2;
+    return {polys: w > 0 && h > 0 ? [[{x:-w,y:-h},{x:w,y:-h},{x:w,y:h},{x:-w,y:h}]] : [], win:{x0:-w, x1:w, y0:-h, y1:h}};
+  }
+  const w = num("fw") / 2, h = num("fh") / 2;
+  return {polys: S.shapes, win:{x0:-w, x1:w, y0:-h, y1:h}};
+}
+function polyArea(p){ let a = 0; for(let i = 0, j = p.length - 1; i < p.length; j = i++) a += (p[j].x + p[i].x) * (p[j].y - p[i].y); return Math.abs(a / 2); }
+function bbox(p){ let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity; for(const q of p){ if(q.x < x0) x0 = q.x; if(q.x > x1) x1 = q.x; if(q.y < y0) y0 = q.y; if(q.y > y1) y1 = q.y; } return {x0, x1, y0, y1}; }
+function slabExtent(p, xa, xb){
+  let lo = Infinity, hi = -Infinity;
+  for(let i = 0, j = p.length - 1; i < p.length; j = i++){
+    let x1 = p[j].x, y1 = p[j].y, x2 = p[i].x, y2 = p[i].y;
+    if(x1 > x2){ [x1, x2] = [x2, x1]; [y1, y2] = [y2, y1]; }
+    if(x2 < xa || x1 > xb) continue;
+    if(x2 === x1){ lo = Math.min(lo, y1, y2); hi = Math.max(hi, y1, y2); continue; }
+    const ta = Math.max(x1, xa), tb = Math.min(x2, xb), m = (y2 - y1) / (x2 - x1);
+    const ya = y1 + (ta - x1) * m, yb = y1 + (tb - x1) * m;
+    lo = Math.min(lo, ya, yb); hi = Math.max(hi, ya, yb);
+  }
+  return lo <= hi ? [lo, hi] : null;
+}
+function crossings(p, x){
+  const ys = [];
+  for(let i = 0, j = p.length - 1; i < p.length; j = i++){
+    const a = p[j], b = p[i];
+    if((a.x <= x && x < b.x) || (b.x <= x && x < a.x)) ys.push(a.y + (x - a.x) * (b.y - a.y) / (b.x - a.x));
+  }
+  return ys.sort((u, v) => u - v);
+}
+function insideCol(ys, y){ let n = 0; for(let i = ys.length - 1; i >= 0 && ys[i] > y; i--) n++; return n & 1; }
+
+// ---------- planning (union of regions; full-height columns; no vertical stacking) ----------
+function plan(P){
+  const {sH, sV, win, polys, maxPts, rangeH, rangeV, penalty, ovh} = P;
+  const nC = Math.max(1, Math.ceil((win.x1 - win.x0) / sH - 1e-9));
+  const nR = Math.max(1, Math.ceil((win.y1 - win.y0) / sV - 1e-9));
+  const X0 = (win.x0 + win.x1) / 2 - (nC - 1) * sH / 2;
+  const Y0 = (win.y0 + win.y1) / 2 + (nR - 1) * sV / 2;
+  const span = new Map(), eps = sH * 1e-6;
+  for(const poly of polys){
+    const bb = bbox(poly);
+    const cMin = Math.floor((bb.x0 - sH / 2 - X0) / sH + 1e-9) + 1, cMax = Math.ceil((bb.x1 + sH / 2 - X0) / sH - 1e-9) - 1;
+    for(let c = cMin; c <= cMax; c++){
+      const xc = X0 + c * sH, e = slabExtent(poly, xc - sH / 2 + eps, xc + sH / 2 - eps);
+      if(!e) continue;
+      const t = Math.ceil((Y0 - e[1]) / sV - 0.5 + 1e-9), b = Math.floor((Y0 - e[0]) / sV + 0.5 - 1e-9);
+      const o = span.get(c);
+      if(o){ o.rTop = Math.min(o.rTop, t); o.rBot = Math.max(o.rBot, b); } else span.set(c, {c, rTop:t, rBot:b});
+    }
+  }
+  const cols = [...span.values()].sort((a, b) => a.c - b.c), N = cols.length;
+  const fitsV = rows => rows * sV + 2 * ovh <= rangeV + 1e-9;
+  const bad = cols.find(c => { const r = c.rBot - c.rTop + 1; return r > maxPts || !fitsV(r); });
+  if(bad) return {error: bad.rBot - bad.rTop + 1};
+  const dp = new Float64Array(N + 1).fill(Infinity), prev = new Int32Array(N + 1);
+  dp[0] = 0;
+  for(let j = 0; j < N; j++){
+    let mn = Infinity, mx = -Infinity;
+    for(let i = j; i >= 0; i--){
+      if(cols[i].c !== cols[j].c - (j - i)) break;
+      mn = Math.min(mn, cols[i].rTop); mx = Math.max(mx, cols[i].rBot);
+      const nc = j - i + 1, rows = mx - mn + 1;
+      if((nc - 1) * sH > rangeH + 1e-9 || nc * rows > maxPts) break;
+      if(!fitsV(rows)) break;
+      const cost = dp[i] + nc * rows + penalty + 1e-6;
+      if(cost < dp[j + 1]){ dp[j + 1] = cost; prev[j + 1] = i; }
+    }
+  }
+  const grids = [];
+  for(let j = N; j > 0; ){
+    const i = prev[j]; let mn = Infinity, mx = -Infinity;
+    for(let t = i; t < j; t++){ mn = Math.min(mn, cols[t].rTop); mx = Math.max(mx, cols[t].rBot); }
+    grids.push({c0: cols[i].c, nx: j - i, r0: mn, ny: mx - mn + 1});
+    j = i;
+  }
+  for(const g of grids){
+    g.x0 = X0 + g.c0 * sH; g.yTop = Y0 - g.r0 * sV;
+    g.sx = g.x0 + (g.nx - 1) * sH; g.sy = g.yTop;
+    g.pts = g.nx * g.ny; g.mask = new Uint8Array(g.pts); g.off = 0;
+    for(let i = 0; i < g.nx; i++){
+      const yss = polys.map(p => crossings(p, g.x0 + i * sH));
+      for(let r = 0; r < g.ny; r++){
+        const y = g.yTop - r * sV, on = yss.some(ys => insideCol(ys, y)) ? 1 : 0;
+        g.mask[i * g.ny + r] = on; if(!on) g.off++;
+      }
+    }
+  }
+  grids.sort((a, b) => b.sx - a.sx);
+  return {grids};
+}
+
+const SPACINGS = [5, 10, 20];
+function update(){
+  const msgs = [], mode = $("mode").value, fly = mode === "fly";
+  const bh = num("bh"), bv = num("bv"), sH = num("sh"), sV = num("sv"), rate = num("rate");
+  const exp = fly && $("cont").checked ? 1000 / rate : num("exp");
+  const tstep = num("tstep") || 0;
+  const maxPts = Math.floor(num("maxpts")), rangeH = num("rangeH") * 1000, rangeV = num("rangeV") * 1000;
+  const acc = num("acc"), ovx = num("ovx") || 0, mbpf = num("mbpf"), colOH = num("colOH") || 0, gridOH = num("gridOH") || 0;
+  const smp = getSample(), win = smp.win;
+  const need = fly ? [bh, bv, sH, sV, rate, exp, maxPts, rangeH, rangeV, acc] : [bh, bv, sH, sV, exp, maxPts, rangeH, rangeV];
+  const ok = need.every(v => v > 0) && tstep >= 0 && win.x1 > win.x0 && win.y1 > win.y0;
+  if(!ok) msgs.push("Enter positive values for sample size, beam, spacing, timing, frame limit, fast-scan ranges" + (fly ? " and acceleration." : "."));
+  const ftime = fly ? 1000 / rate : exp + tstep;                 // ms per frame/point
+  const speed = fly ? sV * rate : 0, L = fly ? speed * exp / 1000 : 0;   // µm/s, µm
+  const vmm = speed / 1000, ovh = fly ? vmm * vmm / (2 * acc) * 1000 + ovx : 0, tRamp = fly ? 2 * vmm / acc : 0;
+  if(ok && fly && exp > ftime * (1 + 1e-9)) msgs.push("Exposure time exceeds frame time (" + fmt(ftime, 4) + " ms).");
+  if(ok && bh < bv) msgs.push("Horizontal FWHM (" + fmt(bh) + " µm) is smaller than vertical (" + fmt(bv) + " µm); the beam is usually wider horizontally. Are H and V swapped? Values are used as entered.");
+  if(ok && sH < bh) msgs.push("Column spacing (" + fmt(sH) + " µm) is smaller than the horizontal FWHM (" + fmt(bh) + " µm): adjacent columns overlap.");
+  if(ok && !SPACINGS.some(v => Math.abs(sH - v) < 1e-6 && Math.abs(sV - v) < 1e-6)) msgs.push("Spacing " + fmt(sH) + " × " + fmt(sV) + " µm is not one of the settings currently available at MX3 (5 × 5, 10 × 10, 20 × 20 µm).");
+  if(ok && $("serp").value === "u") msgs.push("Unidirectional scanning is not currently used at MX3; the return move and its exposure are not modelled.");
+  if(ok && $("plate").value === "p24" && $("shape").value !== "free" && (win.x1 - win.x0 > 6000 + 1e-6 || win.y1 - win.y0 > 6000 + 1e-6)) msgs.push("Window exceeds 6 × 6 mm.");
+  if(ok && (win.x1 - win.x0) / sH * (win.y1 - win.y0) / sV > 4e6) msgs.push("More than 4 million frames in the window. Increase spacing.");
+  if(ok && $("shape").value === "free" && !S.shapes.length) msgs.push("No sample region: select Draw and outline the sample on the canvas.");
+
+  renderInfo(ok, {fly, bh, bv, sH, sV, L, exp, speed, ovh, tRamp, tstep, ftime});
+
+  const blocking = !ok || (fly && exp > ftime * (1 + 1e-9)) || msgs.some(m => m.startsWith("More than") || m.startsWith("No sample"));
+  const P = {fly, sH, sV, bh, bv, L, ovh, serp: $("serp").value === "s", bmove: false};   // step scan: X-ray chopper assumed synchronised, only points exposed
+  if(blocking){ S.plan = {smp, grids: [], P}; showMsg(msgs); clearOut(); maybeFit(); draw(); return; }
+
+  const opt = $("opt").value; $("penRow").classList.toggle("hide", opt !== "custom");
+  const penalty = opt === "time" ? gridOH * 1000 / ftime : opt === "custom" ? Math.max(0, num("pen") || 0) : 0;
+  const res = plan({sH, sV, win, polys: smp.polys, maxPts, rangeH, rangeV, penalty, ovh});
+  if(res.error){
+    msgs.push("A column needs " + res.error + " frames (" + fmt((res.error * sV + 2 * ovh) / 1000, 4) + " mm travel" + (fly ? " incl. overhang" : "") + "), exceeding max frames per grid (" + maxPts + ") or fast-scan range V (" + fmt(rangeV / 1000) + " mm). Grids are not stacked vertically: increase frame spacing" + (fly ? ", reduce speed (shorter overhang)" : "") + " or raise the limits.");
+    S.plan = {smp, grids: [], P}; showMsg(msgs); clearOut(); maybeFit(); draw(); return;
+  }
+  const grids = res.grids;
+  let total = 0, off = 0;
+  for(const g of grids){ total += g.pts; off += g.off; g.time = g.pts * ftime / 1000 + g.nx * (tRamp + colOH) + gridOH; }
+  const time = grids.reduce((a, g) => a + g.time, 0);
+  const area = smp.polys.reduce((a, p) => a + polyArea(p), 0);
+  if(S.shapes.length > 1 && $("shape").value === "free") msgs.push("Multiple regions are combined: columns span every region they cross, so frames between vertically separated regions are collected.");
+  showMsg(msgs);
+  S.plan = {smp, grids, P};
+
+  $("sGrids").textContent = grids.length;
+  $("sPts").textContent = total.toLocaleString("en-AU");
+  $("sOff").textContent = total ? (100 * off / total).toFixed(1) + " %" : "–";
+  $("sData").textContent = mbpf >= 0 ? fmtBytes(total * mbpf) : "–";
+  $("sOffData").textContent = mbpf >= 0 ? fmtBytes(off * mbpf) : "–";
+  $("sTime").textContent = fmtTime(time);
+  if(area > 0) $("info").insertAdjacentHTML("beforeend", '<div><b>Sample area scanned:</b> ' + Math.min(100, 100 * (total - off) * sH * sV / area).toFixed(1) + ' % (on-sample frames × spacing H × V ÷ sample area; approximate).</div>');
+  $("splitWhy").textContent = opt === "off" ? "Fewest frames and least data; more grids, so more set-up time." : opt === "time" ? "Fewest total seconds: an extra grid is used only if it saves more collection time than its overhead." : "Splits only where at least the set number of off-sample frames would be saved. Use it when the outline is approximate (e.g. a drop that is not perfectly round, or a freehand trace): small savings at the edge are ignored, so the plan is not driven by outline detail, while large empty areas (a notch, a gap) are still split off.";
+  renderTable(); maybeFit(); draw();
+}
+
+// ---------- info panel with footprint diagram ----------
+function renderInfo(ok, q){
+  const el = $("info");
+  if(!ok){ el.style.display = "none"; return; }
+  el.style.display = "";
+  const f = v => fmt(v, 4);
+  let txt;
+  if(q.fly){
+    const foot = q.L + q.bv, ov = foot - q.sV;
+    txt = "<b>Per frame:</b> the beam centre travels <b>" + f(q.L) + " µm</b> (speed " + f(q.speed) + " µm/s × exposure " + f(q.exp) + " ms). " +
+      "The region above half-maximum is <b>" + f(q.bh) + " × " + f(foot) + " µm</b> (H × V): travel " + f(q.L) + " + vertical FWHM " + f(q.bv) + " µm, because the beam extends half a FWHM beyond each end of the travel.<br>" +
+      (ov > 0 ? "<b>Successive frames overlap by " + f(ov) + " µm</b> (footprint " + f(foot) + " − frame spacing " + f(q.sV) + "): material near each frame boundary is above half-maximum in both frames, so a crystal there can diffract into two consecutive frames."
+              : "<b>Successive frames are separated by " + f(-ov) + " µm</b> at half-maximum.") +
+      " <b>Columns:</b> " + (q.sH >= q.bh ? f(q.sH - q.bh) + " µm gap" : f(q.bh - q.sH) + " µm overlap") + " at FWHM (spacing " + f(q.sH) + " − H FWHM " + f(q.bh) + ")." + spacingNote(q) + "<br>" +
+      "<b>Overhang:</b> " + f(q.ovh) + " µm per column end (exposed, not recorded); acceleration/deceleration time " + f(q.tRamp * 1000) + " ms per column.";
+  } else {
+    txt = "<b>Per point:</b> stationary exposure " + f(q.exp) + " ms, FWHM footprint <b>" + f(q.bh) + " × " + f(q.bv) + " µm</b>; " + f(q.ftime) + " ms per point including move and settle.<br>" +
+      "<b>Between points at FWHM:</b> vertical " + (q.sV >= q.bv ? f(q.sV - q.bv) + " µm gap" : f(q.bv - q.sV) + " µm overlap") + ", horizontal " + (q.sH >= q.bh ? f(q.sH - q.bh) + " µm gap" : f(q.bh - q.sH) + " µm overlap") + "." + spacingNote(q) +
+      " X-ray chopper assumed synchronised with the goniometer: only the points are exposed, nothing between them.";
+  }
+  el.innerHTML = txt + '<details id="diag"' + (S.diagOpen ? " open" : "") + '><summary>Diagram: footprint and overlap of two successive ' + (q.fly ? "frames" : "points") + '</summary>' + diagram(q) + '</details>';
+  $("diag").addEventListener("toggle", e => { S.diagOpen = e.target.open; });
+}
+function spacingNote(q){
+  const rel = d => Math.pow(2, -4 * Math.pow(d, 2));
+  let t = " Suggested column spacing ≥ 2 × H FWHM = <b>" + fmt(2 * q.bh, 4) + " µm</b>";
+  t += q.sH >= 2 * q.bh ? " (met)." : " (<b>not met</b>: Gaussian intensity from the adjacent column at a crystal on this column ≈ " + fmt(100 * rel(q.sH / q.bh), 2) + " % of peak).";
+  if(!q.fly) t += " Point spacing V vs 2 × V FWHM (" + fmt(2 * q.bv, 4) + " µm): " + (q.sV >= 2 * q.bv ? "met." : "<b>not met</b> (≈ " + fmt(100 * rel(q.sV / q.bv), 2) + " % of peak from the adjacent point).");
+  return t;
+}
+function diagram(q){
+  const L = q.L, bv = q.bv, sV = q.sV, foot = L + bv, ov = foot - sV;
+  const total = sV + foot, hpx = 200, k = hpx / total, top = 14, W2 = 600, cx = 140;
+  const w = Math.max(26, Math.min(60, q.bh * k));
+  const y1 = top + foot / 2 * k, y2 = y1 + sV * k, ry = bv / 2 * k, half = L / 2 * k;
+  const stad = (y, cls) => '<path d="M' + (cx - w / 2) + ' ' + (y - half) + ' A' + (w / 2) + ' ' + ry + ' 0 0 1 ' + (cx + w / 2) + ' ' + (y - half) + ' L' + (cx + w / 2) + ' ' + (y + half) + ' A' + (w / 2) + ' ' + ry + ' 0 0 1 ' + (cx - w / 2) + ' ' + (y + half) + ' Z" class="' + cls + '"/>';
+  const dim = (x, ya, yb, label, left) => '<line x1="' + x + '" y1="' + ya + '" x2="' + x + '" y2="' + yb + '" class="dl"/><line x1="' + (x - 4) + '" y1="' + ya + '" x2="' + (x + 4) + '" y2="' + ya + '" class="dl"/><line x1="' + (x - 4) + '" y1="' + yb + '" x2="' + (x + 4) + '" y2="' + yb + '" class="dl"/><text x="' + (x + (left ? -7 : 7)) + '" y="' + ((ya + yb) / 2 + 4) + '" text-anchor="' + (left ? "end" : "start") + '">' + label + '</text>';
+  const guide = y => '<line x1="' + (cx + w / 2) + '" y1="' + y + '" x2="' + (W2 - 20) + '" y2="' + y + '" class="gd"/>';
+  let g = '<svg viewBox="0 0 ' + W2 + ' ' + (hpx + 62) + '" style="max-width:600px" role="img" aria-label="Footprint and overlap diagram"><style>' +
+    '.a{fill:var(--on);fill-opacity:.25;stroke:var(--on)}.b{fill:var(--off);fill-opacity:.2;stroke:var(--off)}.dl{stroke:var(--ink);stroke-width:1}.gd{stroke:var(--muted);stroke-width:.6;stroke-dasharray:2 3}.ct{stroke:var(--ink);stroke-dasharray:3 3}text{font:12px system-ui,sans-serif;fill:var(--ink);paint-order:stroke;stroke:var(--infoBg);stroke-width:4px;stroke-linejoin:round}.m{fill:var(--muted)}</style>';
+  for(const y of [y1, y2, y1 - half - ry, y1 + half + ry, y2 - half - ry]) g += guide(y);
+  if(L > 0) g += guide(y1 - half) + guide(y1 + half);
+  g += stad(y1, "a") + stad(y2, "b");
+  g += '<line x1="' + cx + '" y1="' + (top - 6) + '" x2="' + cx + '" y2="' + (y2 + foot / 2 * k + 6) + '" class="ct"/>';
+  if(L > 0) for(const y of [y1 - half, y1 + half, y2 + half]) g += '<line x1="' + (cx - w / 2 - 6) + '" y1="' + y + '" x2="' + (cx + w / 2 + 6) + '" y2="' + y + '" class="dl"/>';
+  g += '<text x="' + (cx - w / 2 - 34) + '" y="' + (y1 + 4) + '" text-anchor="end">' + (q.fly ? "frame n" : "point n") + '</text><text x="' + (cx - w / 2 - 34) + '" y="' + (y2 + 4) + '" text-anchor="end">' + (q.fly ? "frame n+1" : "point n+1") + '</text>';
+  if(ov > 0) g += dim(cx - w / 2 - 14, y2 - half - ry, y1 + half + ry, "", true) + '<text x="' + (cx - w / 2 - 34) + '" y="' + ((y2 - half - ry + y1 + half + ry) / 2 + 4) + '" text-anchor="end" font-weight="600">overlap ' + fmt(ov, 4) + ' µm</text>';
+  let x = cx + w / 2 + 40;
+  if(L > 0){ g += dim(x, y1 - half, y1 + half, "travel " + fmt(L, 4) + " µm"); x += 140; }
+  g += dim(x, y1, y2, "spacing " + fmt(sV, 4) + " µm"); x += 140;
+  g += dim(x, y1 - half - ry, y1 + half + ry, "footprint " + fmt(foot, 4) + " µm");
+  const yb = hpx + 34;
+  g += '<text x="10" y="' + yb + '" class="m">' + (q.fly ? "travel = speed × exposure;  footprint (FWHM) = travel + V FWHM;  " : "footprint (FWHM) = V FWHM;  ") + (ov > 0 ? "overlap = footprint − spacing" : "gap = spacing − footprint") + '</text>';
+  g += '<text x="10" y="' + (yb + 18) + '" class="m">Scan direction downward.' + (q.fly ? ' Ticks mark the start and stop of each recorded frame.' : '') + ' Width not to scale.</text></svg>';
+  return g;
+}
+function showMsg(m){ const el = $("msg"); el.innerHTML = m.map(t => "<div><strong>WARNING:</strong> " + t + "</div>").join(""); el.classList.toggle("show", m.length > 0); }
+function clearOut(){ STATS.forEach(s => $(s[0]).textContent = "–"); $("tbl").tHead.innerHTML = ""; $("tbl").tBodies[0].innerHTML = ""; }
+function fmtBytes(mb){ if(mb >= 1e6) return (mb / 1e6).toFixed(2) + " TB"; if(mb >= 1e3) return (mb / 1e3).toFixed(2) + " GB"; return mb.toFixed(1) + " MB"; }
+function fmtTime(t){
+  if(!isFinite(t)) return "–";
+  if(t < 60) return t.toFixed(1) + " s";
+  const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = Math.round(t % 60);
+  return (h ? h + " h " : "") + m + " min " + s + " s";
+}
+
+// ---------- table ----------
+function toOut(x, y){
+  const w = S.plan.smp.win, o = $("origin").value;
+  let X = x - (w.x0 + w.x1) / 2, Y = y - (w.y0 + w.y1) / 2;
+  if(o === "tl"){ X = x - w.x0; Y = y - w.y1; } else if(o === "tr"){ X = x - w.x1; Y = y - w.y1; }
+  if($("invx").checked) X = -X;
+  if($("invy").checked) Y = -Y;
+  const mm = $("unit").value === "mm", f = mm ? 1e-3 : 1, dp = mm ? 4 : 2;
+  return [(X * f).toFixed(dp), (Y * f).toFixed(dp)];
+}
+function tableRows(){
+  const mm = $("unit").value === "mm", u = mm ? "mm" : "µm", f = mm ? 1e-3 : 1, dp = mm ? 4 : 1, P = S.plan.P;
+  const head = ["Grid", "Start X (" + u + ")", "Start Y (" + u + ")", "Columns", "Frames/col", "Frames", "Width (" + u + ")", "Height (" + u + ")", "Off sample", "Time (s)"];
+  const rows = S.plan.grids.map((g, i) => {
+    const [X, Y] = toOut(g.sx, g.sy);
+    return [i + 1, X, Y, g.nx, g.ny, g.pts, ((g.nx - 1) * P.sH * f).toFixed(dp), ((g.ny - 1) * P.sV * f).toFixed(dp), g.off, g.time.toFixed(1)];
+  });
+  return {head, rows};
+}
+function renderTable(){
+  const {head, rows} = tableRows(), t = $("tbl");
+  t.tHead.innerHTML = "<tr>" + head.map(h => "<th>" + h + "</th>").join("") + "</tr>";
+  t.tBodies[0].innerHTML = rows.map((r, i) => "<tr data-i='" + i + "'>" + r.map(c => "<td>" + c + "</td>").join("") + "</tr>").join("");
+}
+$("tbl").tBodies[0].addEventListener("mouseover", e => { const tr = e.target.closest("tr"); if(tr && +tr.dataset.i !== S.hl){ S.hl = +tr.dataset.i; markRow(); draw(); } });
+$("tbl").tBodies[0].addEventListener("mouseleave", () => { S.hl = -1; markRow(); draw(); });
+function markRow(){ $("tbl").tBodies[0].querySelectorAll("tr").forEach(tr => tr.classList.toggle("hl", +tr.dataset.i === S.hl)); }
+function copyText(txt, btn){
+  const done = () => { const o = btn.textContent; btn.textContent = "Copied"; setTimeout(() => btn.textContent = o, 1200); };
+  const fallback = () => { const ta = $("copyBuf"); ta.value = txt; ta.select(); try { document.execCommand("copy"); done(); } catch(e) { btn.textContent = "Copy blocked"; } };
+  if(navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(done, fallback); else fallback();
+}
+$("copyTsv").addEventListener("click", e => { if(!S.plan || !S.plan.grids.length) return; const {head, rows} = tableRows(); copyText([head, ...rows].map(r => r.join("\t")).join("\n"), e.currentTarget); });
+$("copyCsv").addEventListener("click", e => { if(!S.plan || !S.plan.grids.length) return; const {head, rows} = tableRows(); copyText([head, ...rows].map(r => r.join(",")).join("\n"), e.currentTarget); });
+
+// ---------- view ----------
+const cv = $("cv"), ctx = cv.getContext("2d");
+let W = 600, H = 520;
+function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function resize(){
+  W = Math.max(200, cv.parentElement.clientWidth - 20);
+  H = Math.round(Math.min(660, Math.max(300, W * 0.85)));
+  const d = window.devicePixelRatio || 1;
+  cv.style.height = H + "px"; cv.width = Math.round(W * d); cv.height = Math.round(H * d);
+  ctx.setTransform(d, 0, 0, d, 0, 0);
+}
+const sx = x => W / 2 + (x - S.view.cx) * S.view.k, sy = y => H / 2 - (y - S.view.cy) * S.view.k;
+function toWorld(e){ const r = cv.getBoundingClientRect(); return {x: S.view.cx + (e.clientX - r.left - W / 2) / S.view.k, y: S.view.cy - (e.clientY - r.top - H / 2) / S.view.k}; }
+function fit(){
+  if(!S.plan) return;
+  const w = S.plan.smp.win, b = {x0:w.x0, x1:w.x1, y0:w.y0, y1:w.y1}, {sH, sV, ovh} = S.plan.P;
+  for(const g of S.plan.grids){ b.x0 = Math.min(b.x0, g.x0 - sH / 2); b.x1 = Math.max(b.x1, g.sx + sH / 2); b.y1 = Math.max(b.y1, g.yTop + sV / 2 + ovh); b.y0 = Math.min(b.y0, g.yTop - (g.ny - 0.5) * sV - ovh); }
+  S.view.cx = (b.x0 + b.x1) / 2; S.view.cy = (b.y0 + b.y1) / 2;
+  S.view.k = 0.92 * Math.min(W / (b.x1 - b.x0 || 1), H / (b.y1 - b.y0 || 1));
+}
+function maybeFit(){ const w = S.plan.smp.win, key = [$("shape").value, w.x0, w.x1, w.y0, w.y1].join(); if(key !== S.winKey){ S.winKey = key; fit(); } }
+function zoomAt(f, px, py){
+  const wx = S.view.cx + (px - W / 2) / S.view.k, wy = S.view.cy - (py - H / 2) / S.view.k;
+  S.view.k = Math.min(Math.max(S.view.k * f, 1e-4), 400);
+  S.view.cx = wx - (px - W / 2) / S.view.k; S.view.cy = wy + (py - H / 2) / S.view.k; draw();
+}
+$("zIn").addEventListener("click", () => zoomAt(1.6, W / 2, H / 2));
+$("zOut").addEventListener("click", () => zoomAt(1 / 1.6, W / 2, H / 2));
+$("fit").addEventListener("click", () => { fit(); draw(); });
+cv.addEventListener("wheel", e => { e.preventDefault(); const r = cv.getBoundingClientRect(); zoomAt(Math.exp(-e.deltaY * 0.0015), e.clientX - r.left, e.clientY - r.top); }, {passive:false});
+
+const HINTS = {
+  pan: "Scroll to zoom, drag to pan. Zoom in to see each frame’s beam footprint (FWHM), overhangs and travel direction.",
+  draw: "Drag to outline a sample region; release to close it. Several regions can be drawn. Scroll to zoom.",
+  cal: "Drag a line along a feature of known length on the image, then enter its length."
+};
+function setMode(m){
+  S.mode = m;
+  $("mPan").classList.toggle("on", m === "pan"); $("mDraw").classList.toggle("on", m === "draw"); $("mCal").classList.toggle("on", m === "cal");
+  cv.classList.toggle("draw", m !== "pan"); $("hint").textContent = HINTS[m];
+}
+$("mPan").addEventListener("click", () => setMode("pan"));
+$("mDraw").addEventListener("click", () => setMode("draw"));
+$("mCal").addEventListener("click", () => setMode("cal"));
+$("undo").addEventListener("click", () => { S.shapes.pop(); shapeUI(); update(); });
+$("clear").addEventListener("click", () => { S.shapes = []; shapeUI(); update(); });
+
+cv.addEventListener("pointerdown", e => {
+  cv.setPointerCapture(e.pointerId);
+  const p = toWorld(e);
+  if(S.mode === "draw" && $("shape").value === "free"){ S.drawing = [p]; S.lastPx = {x:e.clientX, y:e.clientY}; }
+  else if(S.mode === "cal" && S.img){ S.cal = {a:p, b:p, live:true}; }
+  else S.pan = {x:e.clientX, y:e.clientY, cx:S.view.cx, cy:S.view.cy};
+});
+cv.addEventListener("pointermove", e => {
+  if(S.drawing){ if(Math.hypot(e.clientX - S.lastPx.x, e.clientY - S.lastPx.y) >= 3){ S.drawing.push(toWorld(e)); S.lastPx = {x:e.clientX, y:e.clientY}; draw(); } }
+  else if(S.cal && S.cal.live){ S.cal.b = toWorld(e); draw(); }
+  else if(S.pan){ S.view.cx = S.pan.cx - (e.clientX - S.pan.x) / S.view.k; S.view.cy = S.pan.cy + (e.clientY - S.pan.y) / S.view.k; draw(); }
+});
+function endPointer(){
+  if(S.drawing){
+    const p = S.drawing; S.drawing = null;
+    if(p.length >= 3 && polyArea(p) * S.view.k * S.view.k > 50){ S.shapes.push(p); shapeUI(); update(); } else draw();
+  }
+  if(S.cal && S.cal.live){
+    S.cal.live = false;
+    const d = Math.hypot(S.cal.b.x - S.cal.a.x, S.cal.b.y - S.cal.a.y);
+    if(d * S.view.k < 5){ S.cal = null; draw(); }
+    else { $("calInfo").textContent = "Line: " + fmt(d / S.img.umpp, 4) + " px."; $("calbar").classList.add("show"); $("calLen").focus(); draw(); }
+  }
+  S.pan = null;
+}
+cv.addEventListener("pointerup", endPointer);
+cv.addEventListener("pointercancel", endPointer);
+
+// ---------- drawing ----------
+let hatch = null, hatchColor = "";
+function getHatch(color){
+  if(hatch && hatchColor === color) return hatch;
+  const c = document.createElement("canvas"); c.width = c.height = 6;
+  const g = c.getContext("2d"); g.strokeStyle = color; g.lineWidth = 1.2;
+  g.beginPath(); g.moveTo(0, 6); g.lineTo(6, 0); g.moveTo(-3, 3); g.lineTo(3, -3); g.moveTo(3, 9); g.lineTo(9, 3); g.stroke();
+  hatch = ctx.createPattern(c, "repeat"); hatchColor = color; return hatch;
+}
+function stadium(cx, cy, w, len, ry){
+  ctx.beginPath();
+  ctx.ellipse(cx, cy - len / 2, w / 2, ry, 0, Math.PI, 0);
+  ctx.lineTo(cx + w / 2, cy + len / 2);
+  ctx.ellipse(cx, cy + len / 2, w / 2, ry, 0, 0, Math.PI);
+  ctx.closePath();
+}
+function chevron(x, y, s, down, color){
+  ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.5, s / 3.5); ctx.lineCap = "round"; ctx.lineJoin = "round";
+  const d = down ? 1 : -1;
+  ctx.beginPath(); ctx.moveTo(x - s, y - d * s / 2); ctx.lineTo(x, y + d * s / 2); ctx.lineTo(x + s, y - d * s / 2); ctx.stroke();
+}
+function arrow(x1, y1, x2, y2, color, lw){
+  const a = Math.atan2(y2 - y1, x2 - x1), h = 7;
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = lw || 1.5;
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2 - h * Math.cos(a - 0.45), y2 - h * Math.sin(a - 0.45)); ctx.lineTo(x2 - h * Math.cos(a + 0.45), y2 - h * Math.sin(a + 0.45)); ctx.closePath(); ctx.fill();
+}
+function toRGB(c){
+  c = c.trim();
+  if(c[0] === "#"){ if(c.length === 4) c = "#" + [...c.slice(1)].map(h => h + h).join(""); return [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)).join(","); }
+  const m = c.match(/\d+(\.\d+)?/g); return m ? m.slice(0, 3).join(",") : "0,0,0";
+}
+let RGB = {};
+function gaussSpot(x, y, rx, ry, rgb, edge){   // rx, ry = half FWHM in px; I/I0 = 2^-((dx/rx)^2+(dy/ry)^2)
+  const R = 2.2 * rx;
+  ctx.save(); ctx.translate(x, y); ctx.scale(1, ry / rx);
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, R);
+  for(let i = 0; i <= 10; i++){ const u = i / 10 * R / rx; g.addColorStop(i / 10, "rgba(" + rgb + "," + (0.85 * Math.pow(2, -u * u)).toFixed(3) + ")"); }
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, R, 0, 2 * Math.PI); ctx.fill(); ctx.restore();
+  ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, 2 * Math.PI);
+  ctx.setLineDash([2, 2]); ctx.strokeStyle = edge; ctx.lineWidth = 1; ctx.stroke(); ctx.setLineDash([]);
+}
+function niceLen(px){ const target = px / S.view.k, p = Math.pow(10, Math.floor(Math.log10(target))); for(const m of [5, 2, 1]) if(m * p <= target) return m * p; return p; }
+function draw(){
+  ctx.clearRect(0, 0, W, H);
+  if(!S.plan) return;
+  const k = S.view.k, {smp, grids, P} = S.plan, w = smp.win;
+  const C = {ink:css("--ink"), muted:css("--muted"), drop:css("--drop"), edge:css("--dropEdge"), on:css("--on"), off:css("--off"), ovh:css("--ovh"), accent:css("--accent"), panel:css("--panel"), path:css("--path")};
+  const free = $("shape").value === "free";
+  RGB = {on: toRGB(C.on), off: toRGB(C.off)};
+
+  if(free && S.img){
+    ctx.globalAlpha = parseFloat($("op").value);
+    const iw = S.img.w * S.img.umpp, ih = S.img.h * S.img.umpp;
+    ctx.drawImage(S.img.el, sx(-iw / 2), sy(ih / 2), iw * k, ih * k); ctx.globalAlpha = 1;
+  }
+  ctx.setLineDash([5, 4]); ctx.strokeStyle = C.muted; ctx.lineWidth = 1;
+  ctx.strokeRect(sx(w.x0), sy(w.y1), (w.x1 - w.x0) * k, (w.y1 - w.y0) * k); ctx.setLineDash([]);
+  for(const p of smp.polys){
+    ctx.beginPath(); p.forEach((q, i) => i ? ctx.lineTo(sx(q.x), sy(q.y)) : ctx.moveTo(sx(q.x), sy(q.y))); ctx.closePath();
+    if(!(free && S.img)){ ctx.fillStyle = C.drop; ctx.fill(); }
+    ctx.strokeStyle = C.edge; ctx.lineWidth = 1.5; ctx.stroke();
+  }
+  const {fly, sH, sV, bh, bv, L, ovh, serp, bmove} = P, pxV = sV * k, pxH = sH * k, showPath = $("showPath").checked;
+  const vx0 = S.view.cx - W / 2 / k, vx1 = S.view.cx + W / 2 / k, vy0 = S.view.cy - H / 2 / k, vy1 = S.view.cy + H / 2 / k;
+  let vis = 0;
+  const ranges = grids.map(g => {
+    const i0 = Math.max(0, Math.floor((vx0 - g.x0) / sH) - 1), i1 = Math.min(g.nx - 1, Math.ceil((vx1 - g.x0) / sH) + 1);
+    const r0 = Math.max(0, Math.floor((g.yTop - vy1) / sV) - 1), r1 = Math.min(g.ny - 1, Math.ceil((g.yTop - vy0) / sV) + 1);
+    if(i1 >= i0 && r1 >= r0) vis += (i1 - i0 + 1) * (r1 - r0 + 1);
+    return {i0, i1, r0, r1};
+  });
+  const detail = pxV >= 5 && vis < 60000, perFrame = vis < 400000;
+  const hp = getHatch(C.ovh);
+  const isDown = (g, i) => { const n = g.nx - 1 - i; return !serp || n % 2 === 0; };
+
+  grids.forEach((g, gi) => {
+    const R = ranges[gi];
+    const yTopEdge = g.yTop + sV / 2, yBotEdge = g.yTop - (g.ny - 0.5) * sV;
+    const i0 = Math.max(0, Math.floor((vx0 - g.x0) / sH) - 1), i1 = Math.min(g.nx - 1, Math.ceil((vx1 - g.x0) / sH) + 1);
+    for(let i = i0; i <= i1; i++){
+      const xw = g.x0 + i * sH, x = sx(xw), wpx = Math.max(1.5, bh * k);
+      // overhangs: exposed, not recorded
+      for(const [ya, yb] of [[yTopEdge, yTopEdge + ovh], [yBotEdge - ovh, yBotEdge]]){
+        if(ovh <= 0) continue;
+        const top = sy(yb), hpx = (yb - ya) * k;
+        if(wpx >= 4){
+          ctx.fillStyle = hp; ctx.fillRect(x - wpx / 2, top, wpx, hpx);
+          ctx.setLineDash([3, 2]); ctx.strokeStyle = C.ovh; ctx.lineWidth = 1; ctx.strokeRect(x - wpx / 2, top, wpx, hpx); ctx.setLineDash([]);
+        } else { ctx.fillStyle = C.ovh; ctx.globalAlpha = 0.6; ctx.fillRect(x - wpx / 2, top, wpx, Math.max(1, hpx)); ctx.globalAlpha = 1; }
+      }
+      // step scan with beam on during moves: exposure between points and on the turn to the next column
+      if(bmove){
+        const yA = sy(g.yTop), yB = sy(g.yTop - (g.ny - 1) * sV);
+        ctx.fillStyle = hp; ctx.fillRect(x - wpx / 2, yA, wpx, yB - yA);
+        ctx.setLineDash([2, 3]); ctx.strokeStyle = C.ovh; ctx.lineWidth = 1; ctx.strokeRect(x - wpx / 2, yA, wpx, yB - yA); ctx.setLineDash([]);
+        const n = g.nx - 1 - i;
+        if(i > 0){
+          const yy = (serp && n % 2 === 1) ? yA : yB, hh = Math.max(1.5, bv * k), xb = sx(g.x0 + (i - 1) * sH);
+          ctx.fillStyle = hp; ctx.fillRect(xb, yy - hh / 2, x - xb, hh);
+          ctx.setLineDash([2, 3]); ctx.strokeRect(xb, yy - hh / 2, x - xb, hh); ctx.setLineDash([]);
+        }
+      }
+      if(R.i1 < R.i0 || R.r1 < R.r0 || i < R.i0 || i > R.i1) continue;
+      if(!perFrame){
+        ctx.strokeStyle = C.on; ctx.lineWidth = wpx;
+        ctx.beginPath(); ctx.moveTo(x, sy(g.yTop - R.r0 * sV)); ctx.lineTo(x, sy(g.yTop - R.r1 * sV)); ctx.stroke();
+        continue;
+      }
+      for(let r = R.r0; r <= R.r1; r++){
+        const y = sy(g.yTop - r * sV), on = g.mask[i * g.ny + r];
+        if(detail && !fly){
+          gaussSpot(x, y, bh * k / 2, bv * k / 2, on ? RGB.on : RGB.off, on ? C.on : C.off);
+        } else if(detail){
+          stadium(x, y, bh * k, L * k, bv * k / 2);
+          ctx.globalAlpha = 0.28; ctx.fillStyle = on ? C.on : C.off; ctx.fill();
+          ctx.globalAlpha = 0.9; ctx.strokeStyle = on ? C.on : C.off; ctx.lineWidth = 1; ctx.stroke(); ctx.globalAlpha = 1;
+          if(fly && L > 0){   // frame start / stop ticks on the trace
+            ctx.strokeStyle = C.ink; ctx.lineWidth = 1.2; ctx.beginPath();
+            for(const yy of [y - L * k / 2, y + L * k / 2]){ ctx.moveTo(x - bh * k / 2 - 3, yy); ctx.lineTo(x + bh * k / 2 + 3, yy); }
+            ctx.stroke();
+          }
+        } else {
+          const hh = Math.max(1, Math.min(pxV, (L + bv) * k));
+          ctx.fillStyle = on ? C.on : C.off; ctx.fillRect(x - wpx / 2, y - hh / 2, wpx, hh);
+        }
+      }
+    }
+    // travel direction and turnarounds
+    if(showPath && pxH >= 6){
+      const yTe = sy(yTopEdge + ovh), yBe = sy(yBotEdge - ovh), s = Math.min(9, pxH * 0.35);
+      for(let i = i0; i <= i1; i++){
+        const x = sx(g.x0 + i * sH), dn = isDown(g, i);
+        const step = Math.max(70, pxV), y0 = yTe + step / 2 + Math.max(0, Math.floor((-20 - yTe) / step)) * step;
+        for(let y = y0; y < yBe && y < H + 20; y += step) chevron(x, y + (fly ? 0 : pxV / 2), s, dn, C.ink);
+      }
+      ctx.setLineDash([4, 3]); ctx.strokeStyle = C.path; ctx.lineWidth = 1.2;
+      for(let n = 0; n < g.nx - 1; n++){
+        const i = g.nx - 1 - n, xa = sx(g.x0 + i * sH), xb = sx(g.x0 + (i - 1) * sH);
+        ctx.beginPath();
+        if(serp){
+          const bottom = n % 2 === 0, yy = bottom ? yBe : yTe, bulge = bottom ? Math.min(12, pxH / 2) : -Math.min(12, pxH / 2);
+          ctx.moveTo(xa, yy); ctx.bezierCurveTo(xa, yy + bulge, xb, yy + bulge, xb, yy);
+        } else { ctx.moveTo(xa, yBe); ctx.lineTo(xb, yTe); }
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+    }
+  });
+  // outlines, start markers, grid-level direction, labels
+  grids.forEach((g, gi) => {
+    const x1 = sx(g.x0 - sH / 2), y1 = sy(g.yTop + sV / 2), gw = g.nx * sH * k, gh = g.ny * sV * k;
+    ctx.lineWidth = gi === S.hl ? 2.5 : 1; ctx.strokeStyle = gi === S.hl ? C.accent : C.ink; ctx.globalAlpha = gi === S.hl ? 1 : 0.65;
+    ctx.strokeRect(x1, y1, gw, gh); ctx.globalAlpha = 1;
+    const mx = sx(g.sx), my = sy(g.sy + ovh) ;
+    ctx.fillStyle = C.ink; ctx.beginPath(); ctx.moveTo(mx - 5, my - 11); ctx.lineTo(mx + 5, my - 11); ctx.lineTo(mx, my - 3); ctx.closePath(); ctx.fill();
+    if(showPath && pxH < 6 && gh > 30){   // zoomed out: show first-column direction and column progression
+      const ax = x1 + gw + 6;
+      arrow(ax, y1 + 4, ax, y1 + Math.min(40, gh * 0.4), C.path);
+      if(gw > 24) arrow(x1 + gw - 4, y1 - 6, x1 + gw - Math.min(40, gw * 0.6), y1 - 6, C.path);
+    }
+    if(gw > 16 && gh > 16){
+      ctx.font = "600 " + Math.min(14, Math.max(9, gw / 3)) + "px system-ui, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      const lx = x1 + gw / 2, ly = y1 + gh / 2, t = String(gi + 1), tw = ctx.measureText(t).width + 6;
+      if(lx > -20 && lx < W + 20 && ly > -20 && ly < H + 20){
+        ctx.fillStyle = C.panel; ctx.globalAlpha = 0.85; ctx.fillRect(lx - tw / 2, ly - 9, tw, 18);
+        ctx.globalAlpha = 1; ctx.fillStyle = C.ink; ctx.fillText(t, lx, ly);
+      }
+    }
+  });
+  if(S.drawing && S.drawing.length > 1){
+    ctx.strokeStyle = C.accent; ctx.lineWidth = 2; ctx.beginPath();
+    S.drawing.forEach((q, i) => i ? ctx.lineTo(sx(q.x), sy(q.y)) : ctx.moveTo(sx(q.x), sy(q.y))); ctx.stroke();
+  }
+  if(S.cal){
+    ctx.strokeStyle = C.off; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx(S.cal.a.x), sy(S.cal.a.y)); ctx.lineTo(sx(S.cal.b.x), sy(S.cal.b.y)); ctx.stroke();
+    for(const q of [S.cal.a, S.cal.b]){ ctx.beginPath(); ctx.arc(sx(q.x), sy(q.y), 3, 0, 2 * Math.PI); ctx.fillStyle = C.off; ctx.fill(); }
+  }
+  const o = $("origin").value, ox = o === "c" ? (w.x0 + w.x1) / 2 : (o === "tl" ? w.x0 : w.x1), oy = o === "c" ? (w.y0 + w.y1) / 2 : w.y1;
+  ctx.strokeStyle = C.accent; ctx.lineWidth = 1.5; ctx.beginPath();
+  ctx.moveTo(sx(ox) - 8, sy(oy)); ctx.lineTo(sx(ox) + 8, sy(oy)); ctx.moveTo(sx(ox), sy(oy) - 8); ctx.lineTo(sx(ox), sy(oy) + 8); ctx.stroke();
+  ctx.fillStyle = C.accent; ctx.font = "12px system-ui, sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "bottom";
+  ctx.fillText("(0,0)", sx(ox) + 6, sy(oy) - 4);
+  const len = niceLen(W / 5), bw = len * k;
+  ctx.fillStyle = C.panel; ctx.globalAlpha = 0.85; ctx.fillRect(10, H - 30, bw + 70, 22); ctx.globalAlpha = 1;
+  ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(16, H - 15); ctx.lineTo(16 + bw, H - 15); ctx.stroke();
+  ctx.fillStyle = C.ink; ctx.textBaseline = "middle"; ctx.fillText(len >= 1000 ? fmt(len / 1000) + " mm" : fmt(len) + " µm", 22 + bw, H - 15);
+  if(!perFrame){ ctx.fillStyle = C.muted; ctx.textAlign = "center"; ctx.textBaseline = "top"; ctx.fillText("Zoom in to see individual frames", W / 2, 6); }
+}
+
+new ResizeObserver(() => { resize(); draw(); }).observe(cv.parentElement);
+if(window.matchMedia) window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { hatch = null; draw(); });
+fillWells(); shapeUI(); modeUI(); setMode("pan"); resize(); link("rate"); update();
+})();
+</script>
+</body>
+</html>

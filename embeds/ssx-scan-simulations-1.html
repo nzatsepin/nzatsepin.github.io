@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fly scan in the drop</title>
+<style>
+:root{
+  --bg:#ffffff; --surface:#f3f4f6; --ink:#1d2228; --muted:#5d6670; --rule:#d5d9de;
+  --rt:#9b1c31; --cryo:#2c5f8d; --accent2:#c27c0e; --unrec:#2e8b62; --det:#eef0f3; --spot:#1d2228;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#15181c; --surface:#1f2329; --ink:#e8eaed; --muted:#a3abb5; --rule:#3a4048;
+    --rt:#e0566b; --cryo:#6fa8dc; --accent2:#e6b04a; --unrec:#5cc595; --det:#0f1114; --spot:#f2f4f7; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15181c; --surface:#1f2329; --ink:#e8eaed; --muted:#a3abb5; --rule:#3a4048;
+  --rt:#e0566b; --cryo:#6fa8dc; --accent2:#e6b04a; --unrec:#5cc595; --det:#0f1114; --spot:#f2f4f7; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.5 "Helvetica Neue",Arial,sans-serif}
+header{max-width:1400px;margin:0 auto;padding:18px 20px 8px;display:flex;flex-wrap:wrap;gap:10px 24px;align-items:baseline}
+header h1{font-size:22px;font-weight:600;margin:0 auto 0 0}
+nav{display:flex;flex-wrap:wrap;gap:6px}
+nav a{display:block;padding:7px 12px;border:1px solid var(--rule);border-radius:6px;color:var(--ink);text-decoration:none;font-size:17px;line-height:1.25}
+nav a small{display:block;color:var(--ink);font-size:14px}
+nav a[aria-current="page"]{border-color:var(--rt);box-shadow:inset 0 -3px 0 var(--rt)}
+nav a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--cryo);outline-offset:2px}
+#wrap{max-width:1400px;margin:0 auto;padding:0 20px 24px}
+.stage{position:relative;background:var(--bg);border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.stage canvas{display:block;width:100%;height:auto;aspect-ratio:16/9}
+.scene{display:none}
+.scene.on{display:block}
+.scene:not(.on){display:none !important}
+.grid-ctl.on{display:grid}
+.controls{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding:12px 2px;font-size:17px}
+.controls button{font:inherit;padding:6px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer}
+.controls button[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--bg)}
+.controls label{display:flex;gap:8px;align-items:center;color:var(--ink)}
+.controls output{color:var(--ink);min-width:6.5em;font-variant-numeric:tabular-nums}
+.controls input[type=range]{width:140px;accent-color:var(--rt)}
+.grid-ctl{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:6px 18px;width:100%}
+.notes{max-width:92ch;color:var(--ink);font-size:17px;margin:8px 2px 0}
+.notes h2{font-size:19px;margin:18px 0 6px}
+.notes ol{margin:0;padding-left:1.6em}
+.notes li{margin:3px 0}
+.stamp{margin-top:18px;font-size:17px;border-top:1px solid var(--rule);padding-top:10px}
+.keys{color:var(--ink);font-size:15px;margin-left:auto}
+.hideA{}
+#fsbox:fullscreen{background:var(--bg);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:0}
+#fsbox:fullscreen .stage{border:0;border-radius:0;width:min(100vw,calc((100vh - var(--ctlh,0px))*16/9))}
+#fsbox:fullscreen .notes{display:none}
+#fsbox:fullscreen .controls{width:min(100vw,calc((100vh - var(--ctlh,0px))*16/9));padding:8px 14px}
+#fsbox.hidectl .controls{display:none}
+@media (max-width:700px){.controls input[type=range]{width:110px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Fly scan in the drop</h1>
+</header>
+
+<div id="wrap">
+<div id="fsbox">
+  <div class="stage"><canvas id="cv" width="1600" height="900" role="img" aria-label="Animated figure"></canvas></div>
+
+  <div class="controls">
+    <button id="play" class="gctl" aria-pressed="true">Pause</button>
+    <button id="restart" class="gctl">Restart</button>
+    <span class="scene" data-s="A" id="ctlA">
+      <label>Rotation
+        <button id="aRotPlay">Play</button>
+        <button id="aRotReset">Restart</button>
+        <button data-temp="cryo" aria-pressed="true">Frozen, 100 K</button>
+        <button data-temp="rt" aria-pressed="false">Room temperature</button>
+      </label>
+      <label>Serial
+        <button id="aSerPlay">Play</button>
+        <button id="aSerReset">Restart</button>
+      </label>
+    </span>
+    <span class="scene" data-s="B">
+      <label>Time <input type="range" id="bT" min="0" max="1000" value="0"><output id="bTo"></output></label>
+      <label>Cryo/RT D½ ratio <input type="range" id="bR" min="10" max="100" value="75"><output id="bRo"></output></label>
+    </span>
+    <span class="scene" data-s="D">
+      <label>Tape speed <input type="range" id="dV" min="0" max="1000" value="460"><output id="dVo"></output></label>
+      <label>Probe distance <input type="range" id="dX" min="2" max="95" value="20"><output id="dXo"></output></label>
+      <label>Reaction half-time <input type="range" id="dK" min="0" max="1000" value="450"><output id="dKo"></output></label>
+    </span>
+    <button id="fs">Full screen</button>
+    <span class="keys" id="keys"></span>
+    <div class="scene grid-ctl" data-s="C" id="ctlC"></div>
+  </div>
+
+  <section class="notes scene" data-s="C">
+    <h2>Assumptions</h2>
+    <ol>
+      <li>Defaults are the slide 17 MX3 settings: 13 keV, 2.11 × 10¹² ph/s, 6.4 × 4.8 µm FWHM, 1 mm/s, 20 µm column pitch, 50 Hz.</li>
+      <li>Gaussian beam; continuous fly scan, no chopper; each point is crossed once.</li>
+      <li>Fluence per pass F = Φ / (√(2π) σₕ v), independent of frame time and of the beam size along the scan. Peak dose rate uses Φ / (2π σₕ σᵥ).</li>
+      <li>Dose is water-equivalent: D = F · E · (μₑₙ/ρ)water, with NIST values interpolated log-log [1]. Real crystals absorb more (S, Cu, Cl, heavy buffers); use RADDOSE-3D for real samples [2].</li>
+      <li>The recorded grid is a rectangle covering the drop (dashed outline); the scan starts at the top right and runs down the first column. At each column end the beam keeps moving past the grid by the overshoot distance, steps over one pitch and returns, all at scan speed with the beam on and the detector not recording. Real turnarounds include acceleration and settling, so the overshoot slider stands in for the stage’s turnaround distance.</li>
+      <li>Crystals are spread uniformly over the drop footprint (areal density), sizes log-normal (σ = 0.45) around the typical size. A frame counts as a hit if the beam stripe, ± half the FWHM, touches a crystal.</li>
+      <li>Predicted hit rate: P = (π/4)[1 − exp(−n⟨A⟩)], with A = (w + s)(L + s), w the beam FWHM across the scan, L the travel per frame, s the crystal size, and π/4 the fraction of the square grid covered by the circular drop.</li>
+      <li>Not modelled: diffusion of long-lived radiolysis products into neighbouring columns (see slide 17 notes), crystal settling and drop curvature.</li>
+    </ol>
+    <h2>References</h2>
+    <ol>
+      <li>Hubbell, J. H. &amp; Seltzer, S. M. Tables of X-ray mass attenuation coefficients and mass energy-absorption coefficients. NIST Standard Reference Database 126.</li>
+      <li>Zeldin, O. B., Gerstel, M. &amp; Garman, E. F. RADDOSE-3D: time- and space-resolved modelling of dose in macromolecular crystallography. J. Appl. Cryst. 46, 1225–1230 (2013).</li>
+    </ol>
+  </section>
+  <p class="notes stamp">Figures generated 23 November 2026 (Melbourne, AEDT) for CRYSTAL36 / SCANZ, 1 December 2026. Models are illustrative; values are not measurements unless stated.</p>
+</div>
+</div>
+
+<script>
+(function(){
+const W=1600,H=900, FONT='"Helvetica Neue",Arial,sans-serif';
+const cv=document.getElementById('cv');
+let dpr=1, ctx=cv.getContext('2d');
+function sizeCanvas(){dpr=Math.min(2,window.devicePixelRatio||1);cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
+sizeCanvas();
+
+/* ---------- helpers ---------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gauss(r){let u=0;while(u===0)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r())}
+const C={};
+function readColors(){const s=getComputedStyle(document.documentElement);['bg','surface','ink','muted','rule','rt','cryo','accent2','unrec','det','spot'].forEach(k=>C[k]=s.getPropertyValue('--'+k).trim());}
+readColors();
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readColors);
+function rgba(hex,a){const h=hex.replace('#','');const n=parseInt(h,16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${Math.max(0,Math.min(1,a))})`}
+function mix(h1,h2,t){const a=parseInt(h1.slice(1),16),b=parseInt(h2.slice(1),16);const r=Math.round((a>>16&255)*(1-t)+(b>>16&255)*t),g=Math.round((a>>8&255)*(1-t)+(b>>8&255)*t),bl=Math.round((a&255)*(1-t)+(b&255)*t);return `rgb(${r},${g},${bl})`}
+function T(s,x,y,size,color,align='left',weight=400){if(color===C.muted)color=C.ink;if(size<30)size=Math.max(22,Math.round(size*1.2));ctx.font=`${weight} ${size}px ${FONT}`;ctx.fillStyle=color;ctx.textAlign=align;ctx.textBaseline='alphabetic';ctx.fillText(s,x,y)}
+function poly(pts,color,w,dash){ctx.save();ctx.strokeStyle=color;ctx.lineWidth=w;ctx.setLineDash(dash||[]);ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.restore()}
+function axes(x,y,w,h,xt,yt,xl){
+  poly([[x,y],[x,y+h],[x+w,y+h]],C.rule,1.5);
+  xt.forEach(([f,l])=>{const px=x+f*w;poly([[px,y+h],[px,y+h+6]],C.rule,1.5);T(l,px,y+h+26,18,C.muted,'center')});
+  yt.forEach(([f,l])=>{const py=y+h-f*h;poly([[x-6,py],[x,py]],C.rule,1.5);T(l,x-10,py+6,18,C.muted,'right')});
+  if(xl)T(xl,x+w,y+h+50,18,C.muted,'right');
+}
+function sig(x,n=2){if(x===0)return'0';const e=Math.floor(Math.log10(Math.abs(x)));const d=Math.max(0,n-1-e);return x.toFixed(Math.min(d,6))}
+function sci(x){const e=Math.floor(Math.log10(x));const m=x/10**e;const sup={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};return `${m.toFixed(m<9.95?1:0)}×10${String(e).split('').map(c=>sup[c]).join('')}`}
+function fmtT(t){return t<1e-3?sig(t*1e6,2)+' µs':t<1?sig(t*1e3,2)+' ms':sig(t,2)+' s'}
+function arrow(x1,y1,x2,y2,color,w){poly([[x1,y1],[x2,y2]],color,w);const a=Math.atan2(y2-y1,x2-x1),L=12;ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-L*Math.cos(a-0.4),y2-L*Math.sin(a-0.4));ctx.lineTo(x2-L*Math.cos(a+0.4),y2-L*Math.sin(a+0.4));ctx.fill()}
+
+/* ======================================================================
+   A. Rotation vs serial: Ewald construction
+   ====================================================================== */
+const A={temp:'cryo',playRot:false,playSer:false};
+A.init=function(){
+  const r=mulberry32(11);this.refl=[];const as=0.105,Gmax=0.86;
+  for(let h=-9;h<=9;h++)for(let k=-9;k<=9;k++){
+    const gx=h*as,gy=k*as,g=Math.hypot(gx,gy);if(g<0.05||g>Gmax)continue;
+    this.refl.push({gx,gy,g,h,k});
+  }
+  // Friedel mates (h,k) and (-h,-k) share one unique reflection and one intensity
+  const key=(h,k)=>(h>0||(h===0&&k>0))?h+','+k:(-h)+','+(-k);const ids=new Map();this.uI=[];
+  this.refl.forEach(o=>{const kk=key(o.h,o.k);if(!ids.has(kk)){ids.set(kk,this.uI.length);this.uI.push(-Math.log(1-r()*0.999)*Math.exp(-3.5*o.g*o.g));}o.c=ids.get(kk);o.I=this.uI[o.c];});
+  this.nU=this.uI.length;
+  this.Imax=Math.max(...this.refl.map(o=>o.I));this.w=0.006;this.rng=mulberry32(99);
+  this.resetRot();this.resetSer();
+};
+A.geo=function(o,th){const c=Math.cos(th),s=Math.sin(th);const x=o.gx*c-o.gy*s,y=o.gx*s+o.gy*c;return [x,y,Math.hypot(x+1,y)-1]};
+A.resetRot=function(){const n=this.refl.length;this.th=0;this.D=0;this.meas=new Float32Array(this.nU);this.sPrev=new Float32Array(n);
+  this.refl.forEach((o,i)=>this.sPrev[i]=this.geo(o,0)[2]);this.rotHist=[[0,0,1]];this.rotHold=0;this.comp=0;};
+A.resetSer=function(){const n=this.nU;this.N=0;this.sum=new Float64Array(n);this.cnt=new Uint32Array(n);this.serHist=[];this.cur=null;this.acc=0;this.serHold=0;this.cc=0;this.scomp=0;};
+A.restart=function(){this.resetRot();this.resetSer()};
+A.step=function(dt){
+  // rotation: 30 deg/s
+  if(this.playRot&&this.th<180){
+    const dpd=(this.temp==='cryo'?0.4:30)/180; // D-half units per degree
+    let d=30*dt;const sub=Math.ceil(d/0.25);d/=sub;
+    for(let s=0;s<sub&&this.th<180;s++){
+      this.th+=d;this.D+=d*dpd;const f=2**-this.D,th=this.th*Math.PI/180;
+      this.refl.forEach((o,i)=>{const sv=this.geo(o,th)[2];if(this.meas[o.c]===0&&f>0.1&&Math.sign(sv)!==Math.sign(this.sPrev[i]))this.meas[o.c]=f;this.sPrev[i]=sv;});
+    }
+    let m=0;for(const v of this.meas)if(v>0)m++;this.comp=m/this.nU;
+    this.rotHist.push([Math.min(this.th,180),this.comp,2**-this.D]);
+  }else{this.playRot=false;syncA();}
+  // serial
+  const NMAX=100000;
+  if(!this.playSer)return;
+  if(this.N>=NMAX){this.playSer=false;syncA();return;}
+  const rate=this.N<12?2.5:this.N<120?25:this.N*0.9;
+  this.acc+=rate*dt;let k=Math.floor(this.acc);this.acc-=k;k=Math.min(k,NMAX-this.N);
+  for(let j=0;j<k;j++)this.still();
+  if(k>0){
+    let sx=0,sy=0,sxx=0,syy=0,sxy=0,n=0,c=0;
+    for(let i=0;i<this.nU;i++){if(this.cnt[i]>0){c++;const x=this.sum[i]/this.cnt[i],y=this.uI[i];sx+=x;sy+=y;sxx+=x*x;syy+=y*y;sxy+=x*y;n++;}}
+    this.scomp=c/this.nU;
+    this.cc=n>=20?(n*sxy-sx*sy)/Math.sqrt(Math.max(1e-12,(n*sxx-sx*sx)*(n*syy-sy*sy))):0;
+    this.serHist.push([Math.log10(this.N),this.scomp,Math.max(0,this.cc)]);
+  }
+};
+A.still=function(){
+  const r=this.rng,th=r()*2*Math.PI,u=Math.min(4,Math.exp(0.8*gauss(r)-0.3)),ex=[];
+  this.refl.forEach((o,i)=>{const s=this.geo(o,th)[2],p=Math.exp(-s*s/(2*this.w*this.w));
+    if(p>0.02){const I=o.I*u*p;this.sum[o.c]+=Math.max(0,I*(1+0.3*gauss(r)));this.cnt[o.c]++;ex.push([i,p]);}});
+  this.N++;this.cur={th,u,ex};
+};
+A.ewald=function(ox,oy,sc,th,pOf,fade,col,crystalSize){
+  const cx=ox-sc;
+  // detector
+  const dx=ox+0.95*sc;ctx.fillStyle=C.det;ctx.fillRect(dx-4,oy-1.05*sc,10,2.1*sc);ctx.strokeStyle=C.rule;ctx.lineWidth=1;ctx.strokeRect(dx-4,oy-1.05*sc,10,2.1*sc);
+  // sphere
+  ctx.strokeStyle=C.muted;ctx.lineWidth=1.5;ctx.setLineDash([6,6]);ctx.beginPath();ctx.arc(cx,oy,sc,0,2*Math.PI);ctx.stroke();ctx.setLineDash([]);
+  // beam
+  arrow(ox-2.05*sc,oy,cx-14,oy,C.muted,3);T('X-rays',cx-sc*0.45,oy-14,20,C.muted,'center');
+  poly([[cx,oy],[ox,oy]],rgba(C.muted,0.5),1.5);
+  // crystal glyph
+  ctx.save();ctx.translate(cx,oy);ctx.rotate(-th);ctx.fillStyle=col;const cs=crystalSize;ctx.fillRect(-cs/2,-cs*0.35,cs,cs*0.7);ctx.restore();
+  const c=Math.cos(th),s=Math.sin(th);
+  this.refl.forEach((o,i)=>{
+    const x=o.gx*c-o.gy*s,y=o.gx*s+o.gy*c,px=ox+x*sc,py=oy-y*sc,rr=1.8+3.2*Math.sqrt(o.I/this.Imax);
+    ctx.fillStyle=rgba(C.muted,0.32);ctx.beginPath();ctx.arc(px,py,rr,0,6.283);ctx.fill();
+    const p=pOf(i,x,y);if(p<0.02)return;const a=p*fade;
+    if(a<0.02)return;
+    ctx.fillStyle=rgba(col,a);ctx.beginPath();ctx.arc(px,py,rr+5*p,0,6.283);ctx.fill();
+    if(x+1>0.12){const yd=y/(x+1)*1.95;if(Math.abs(yd)<1.03){
+      poly([[cx,oy],[dx,oy-yd*sc]],rgba(col,0.35*a),1.5);
+      ctx.fillStyle=rgba(col,Math.min(1,a*1.3));ctx.beginPath();ctx.arc(dx+1,oy-yd*sc,3+7*Math.sqrt(o.I/this.Imax)*p,0,6.283);ctx.fill();}}
+  });
+  T('Ewald sphere',cx,oy+sc*0.72,18,C.muted,'center');
+  T('detector',dx+1,oy+1.05*sc+24,18,C.muted,'center');
+};
+A.draw=function(){
+  const sc=200,oyy=335;
+  // left
+  const tc=this.temp==='cryo'?C.cryo:C.rt;
+  T('One crystal, rotated',40,56,32,C.ink,'left',700);
+  T(this.temp==='cryo'?'Frozen: full reflections, dose builds in one crystal':'Room temperature: 75× less dose tolerance',40,92,20,C.muted);
+  const thR=this.th*Math.PI/180,f=2**-this.D,w=this.w;
+  this.ewald(450,oyy,sc,thR,(i,x,y)=>{const s=Math.hypot(x+1,y)-1;return Math.exp(-s*s/(2*w*w))},f,tc,26);
+  T(`rotation ${Math.round(Math.min(this.th,180))}°`,60,600,22,C.ink,'left',600);
+  T(`complete ${Math.round(this.comp*100)}%`,265,600,22,C.ink,'left',600);
+  T(`diffraction ${Math.round(f*100)}%`,500,600,22,tc,'left',600);
+  // plot
+  const px=110,py=630,pw=620,ph=170;
+  axes(px,py,pw,ph,[[0,'0°'],[0.5,'90°'],[1,'180°']],[[0,'0'],[0.5,'50%'],[1,'100%']],'rotation angle');
+  poly(this.rotHist.map(h=>[px+h[0]/180*pw,py+ph-h[2]*ph]),tc,3,[8,6]);
+  poly(this.rotHist.map(h=>[px+h[0]/180*pw,py+ph-h[1]*ph]),C.ink,3.5);
+  // divider
+  poly([[800,30],[800,870]],C.rule,1.5);
+  // right
+  T('Many crystals, one still each',840,56,32,C.ink,'left',700);
+  T('Room temperature: partial reflections, random crystals',840,92,20,C.muted);
+  const cur=this.cur;const pmap=new Map();if(cur)cur.ex.forEach(([i,p])=>pmap.set(i,p));
+  this.ewald(1250,oyy,sc,cur?cur.th:0,(i)=>pmap.get(i)||0,1,C.rt,cur?Math.min(40,10+12*cur.u):20);
+  T(`${this.N.toLocaleString('en-AU')} stills`,860,600,22,C.ink,'left',600);
+  T(`complete ${Math.round(this.scomp*100)}%`,1100,600,22,C.ink,'left',600);
+  T(`CC to truth ${this.cc>0?this.cc.toFixed(2):'–'}`,1320,600,22,C.rt,'left',600);
+  const qx=910,qw=620;
+  axes(qx,py,qw,ph,[[0,'1'],[0.2,'10'],[0.4,'100'],[0.6,'1k'],[0.8,'10k'],[1,'100k']],[[0,'0'],[0.5,'0.5'],[1,'1']],'number of stills (log)');
+  poly(this.serHist.map(h=>[qx+h[0]/5*qw,py+ph-h[2]*ph]),C.rt,3,[8,6]);
+  poly(this.serHist.map(h=>[qx+h[0]/5*qw,py+ph-h[1]*ph]),C.ink,3.5);
+  // legend
+  poly([[110,880],[150,880]],C.ink,3.5);T('completeness',158,886,18,C.muted);
+  poly([[330,880],[370,880]],tc,3,[8,6]);T('diffraction strength',378,886,18,C.muted);
+  poly([[910,880],[950,880]],C.ink,3.5);T('completeness',958,886,18,C.muted);
+  poly([[1130,880],[1170,880]],C.rt,3,[8,6]);T('CC, merged vs true',1178,886,18,C.muted);
+};
+
+/* ======================================================================
+   B. Spot fading
+   ====================================================================== */
+const B={u:0,ratio:75,hold:0,rate:4.5,Hc:7.5}; // D-half = Hc*d MGy at 100 K; 7.5 MGy/Å gives 15 MGy at 2 Å (slide 9)
+B.init=function(){
+  const r=mulberry32(5);this.R=270;const lam=12.398/13;this.lam=lam;const th=Math.asin(lam/(2*1.6));this.L=this.R/Math.tan(2*th);
+  // 3D still: tetragonal lattice (lysozyme-like, a=79, c=38 Å) in a random orientation, cut by the Ewald sphere
+  this.spots=[];const k0=1/lam,a=79,c=38,gmax=1/1.6,w=0.0025;
+  const q=[r()-0.5,r()-0.5,r()-0.5,r()-0.5],qn=Math.hypot(...q);const [qw,qx,qy,qz]=q.map(v=>v/qn);
+  const M=[[1-2*(qy*qy+qz*qz),2*(qx*qy-qz*qw),2*(qx*qz+qy*qw)],[2*(qx*qy+qz*qw),1-2*(qx*qx+qz*qz),2*(qy*qz-qx*qw)],[2*(qx*qz-qy*qw),2*(qy*qz+qx*qw),1-2*(qx*qx+qy*qy)]];
+  const H=Math.floor(a*gmax),Lm=Math.floor(c*gmax);
+  for(let h=-H;h<=H;h++)for(let kk=-H;kk<=H;kk++)for(let l=-Lm;l<=Lm;l++){
+    const g0=[h/a,kk/a,l/c],g=Math.hypot(...g0);if(g===0||g>gmax)continue;
+    const G=[0,1,2].map(i=>M[i][0]*g0[0]+M[i][1]*g0[1]+M[i][2]*g0[2]);
+    const kx=G[0],ky=G[1],kz=k0+G[2],sv=Math.hypot(kx,ky,kz)-k0;if(Math.abs(sv)>w||kz<=0)continue;
+    const px=this.L*kx/kz,py=this.L*ky/kz;if(Math.hypot(px,py)>this.R||Math.hypot(px,py)<14)continue;
+    const d=1/g,p=Math.exp(-(sv*sv)/(2*(w/2.2)**2));
+    this.spots.push({x:px,y:py,d,I:p*(-Math.log(1-r()*0.999))*Math.exp(-22/(2*d*d))});
+  }
+  const sI=this.spots.map(o=>o.I).sort((a,b)=>a-b);const q97=sI[Math.floor(sI.length*0.97)];this.spots.forEach(o=>o.b=Math.min(1,Math.sqrt(o.I/q97)));
+  this.rings=[4,3,2].map(d=>[d,this.L*Math.tan(2*Math.asin(lam/(2*d)))]);
+};
+B.t=function(){return 10**(-3+4*this.u)};
+B.restart=function(){this.u=0;this.hold=0};
+B.step=function(dt){if(this.u<1){this.u=Math.min(1,this.u+dt/14);}else{this.hold+=dt;if(this.hold>2.5){this.u=0;this.hold=0;}}syncB();};
+B.det=function(cx,cy,k,col,label){
+  const t=this.t(),D=this.rate*t;
+  ctx.fillStyle=C.det;ctx.beginPath();ctx.arc(cx,cy,this.R+12,0,6.283);ctx.fill();
+  const ang={4:-2.36,3:-1.57,2:-0.79};this.rings.forEach(([d,r])=>{ctx.strokeStyle=rgba(C.muted,0.55);ctx.lineWidth=1.2;ctx.setLineDash([4,6]);ctx.beginPath();ctx.arc(cx,cy,r,0,6.283);ctx.stroke();ctx.setLineDash([]);const a=ang[d],lx=cx+r*Math.cos(a),ly=cy+r*Math.sin(a);ctx.fillStyle=C.det;ctx.fillRect(lx-24,ly-14,48,26);T(d+' Å',lx,ly+8,16,C.muted,'center',600)});
+  for(const s of this.spots){const F=Math.exp(-Math.LN2*D/(this.Hc*s.d*k));const a=s.b*F;if(a<0.03)continue;ctx.fillStyle=rgba(C.spot,a);ctx.fillRect(cx+s.x-2,cy+s.y-2,4.2,4.2);}
+  ctx.fillStyle=C.muted;ctx.beginPath();ctx.arc(cx,cy,9,0,6.283);ctx.fill();
+  T(label,cx,62,30,col,'center',700);
+  T(`t = ${fmtT(t)}`,cx,694,30,C.ink,'center',700);
+  const dh=D/(this.Hc*k);
+  const msg=dh<1.6?'all spots above half intensity':dh>4.5?'every spot below half intensity':`spots finer than ${dh.toFixed(1)} Å below half`;
+  T(`${sig(D,2)} MGy, ${msg}`,cx,726,20,C.muted,'center');
+};
+B.draw=function(){
+  T('Same beam on both, ~4.5 MGy/s',800,30,18,C.muted,'center');
+  this.det(400,375,1,C.cryo,'Frozen, 100 K');
+  this.det(1200,375,1/this.ratio,C.rt,'Room temperature');
+  // strip plot: intensity at 2 Å vs log t
+  const x=170,y=790,w=1260,h=66;
+  axes(x,y,w,h,[[0,'1 ms'],[0.25,'10 ms'],[0.5,'100 ms'],[0.75,'1 s'],[1,'10 s']],[[0,'0'],[1,'1']]);
+  T('intensity of 2 Å spots',x,y-14,18,C.muted);
+  const curve=(k)=>{const pts=[];for(let i=0;i<=200;i++){const lt=-3+4*i/200,t=10**lt;pts.push([x+i/200*w,y+h-Math.exp(-Math.LN2*this.rate*t/(2*this.Hc*k))*h]);}return pts};
+  poly(curve(1),C.cryo,3);poly(curve(1/this.ratio),C.rt,3);
+  const tH=(k)=>2*this.Hc*k/this.rate;[[1,C.cryo],[1/this.ratio,C.rt]].forEach(([k,c])=>{const lt=Math.log10(tH(k));if(lt>-3&&lt<1){const px=x+(lt+3)/4*w;ctx.fillStyle=c;ctx.beginPath();ctx.arc(px,y+h/2,6,0,6.283);ctx.fill();T('D½ '+fmtT(tH(k)),px+10,y+h/2-8,18,c,'left',600);}});
+  const px=x+this.u*w;poly([[px,y-4],[px,y+h]],C.ink,2);
+};
+function syncB(){const bt=document.getElementById('bT');bt.value=Math.round(B.u*1000);document.getElementById('bTo').textContent=fmtT(B.t());document.getElementById('bRo').textContent=B.ratio+'×';}
+
+/* ======================================================================
+   C. Fly scan planner + simulation
+   ====================================================================== */
+const MU=[[8,9.215],[10,4.944],[15,1.374],[20,0.5503],[30,0.1557]]; // NIST water mu_en/rho, cm^2/g
+function muen(E){for(let i=0;i<MU.length-1;i++){const[a,ma]=MU[i],[b,mb]=MU[i+1];if(E<=b||i===MU.length-2){const t=Math.log(E/a)/Math.log(b/a);return Math.exp(Math.log(ma)+t*Math.log(mb/ma));}}}
+const CP=[
+  {k:'flux',l:'Flux',min:10,max:13.3,step:0.01,v:Math.log10(2.11e12),log:true,f:v=>sci(v)+' ph/s'},
+  {k:'fwhmH',l:'Beam width, across',min:1,max:30,step:0.1,v:6.4,f:v=>v.toFixed(1)+' µm'},
+  {k:'fwhmV',l:'Beam width, along',min:1,max:30,step:0.1,v:4.8,f:v=>v.toFixed(1)+' µm'},
+  {k:'E',l:'Energy',min:8,max:25,step:0.1,v:13,f:v=>v.toFixed(1)+' keV'},
+  {k:'v',l:'Scan speed',min:0.1,max:5,step:0.05,v:1,f:v=>v.toFixed(2)+' mm/s'},
+  {k:'pitch',l:'Column pitch',min:5,max:60,step:1,v:20,f:v=>v+' µm'},
+  {k:'fps',l:'Frame rate',min:10,max:500,step:5,v:50,f:v=>v+' Hz'},
+  {k:'drop',l:'Drop diameter',min:200,max:1500,step:10,v:800,f:v=>v+' µm'},
+  {k:'dens',l:'Crystals per mm²',min:10,max:3000,step:10,v:300,f:v=>v+''},
+  {k:'csize',l:'Typical crystal size',min:3,max:60,step:1,v:15,f:v=>v+' µm'},
+  {k:'over',l:'Overshoot past grid',min:0,max:300,step:10,v:120,f:v=>v+' µm'},
+  {k:'simx',l:'Animation speed',min:1,max:30,step:1,v:6,f:v=>v+'× real time'},
+];
+const P={};CP.forEach(c=>P[c.k]=c.log?10**c.v:c.v);
+const Cs={};
+Cs.calc=function(){
+  const sh=P.fwhmH/2.3548,sv=P.fwhmV/2.3548,vum=P.v*1000,mu=muen(P.E),k=P.E*mu*1.602e-11;
+  const F=P.flux/(Math.sqrt(2*Math.PI)*sh*vum);
+  const ncol=Math.max(1,Math.ceil(P.drop/P.pitch)),colLen=P.drop;
+  const stripe=vum/P.fps,Aeff=P.fwhmH*stripe+(P.fwhmH+stripe)*P.csize*Math.exp(0.45*0.45/2)+P.csize*P.csize*Math.exp(2*0.45*0.45),n=P.dens/1e6;
+  const recT=ncol*colLen/vum,turnT=(ncol-1)*(2*P.over+P.pitch)/vum+2*P.over/vum;
+  // fraction of recorded frames that overlap the drop at all (area ratio of circle to square grid)
+  return {F,D:F*k,rate:P.flux/(2*Math.PI*sh*sv)*k,tau:P.fwhmV/vum,stripe,nb:Math.exp(-((P.pitch/2)**2)/(2*sh*sh)),ncol,frames:ncol*colLen/stripe,time:recT+turnT,recT,turnT,hit:(Math.PI/4)*(1-Math.exp(-n*Aeff)),sh};
+};
+Cs.reset=function(seed){
+  const r=mulberry32(seed||Math.floor(Math.random()*1e9));const R=P.drop/2;this.R=R;
+  const N=Math.round(P.dens*Math.PI*(R/1000)**2);this.xtals=[];
+  for(let i=0;i<Math.min(N,4000);i++){const s=Math.max(2,P.csize*Math.exp(0.45*gauss(r)));const rr=(R-s/2)*Math.sqrt(r()),a=r()*6.283;
+    this.xtals.push({x:rr*Math.cos(a),y:rr*Math.sin(a),s,rot:r()*Math.PI,asp:0.5+0.4*r(),hits:0,cols:new Set()});}
+  this.ncol=Math.max(1,Math.ceil(P.drop/P.pitch));this.gw=this.ncol*P.pitch; // grid: rectangle covering the drop
+  this.j=0;this.dir=1;this.phase='rec';this.y=-R;this.x=this.colX(0);this.fAcc=0;this.segStart=this.y;
+  this.frames=0;this.hitFrames=0;this.done=false;this.hold=0;this.flash=0;this.pend=0;
+  this.sc=Math.min(780/(P.drop+2*P.over),780/Math.max(this.gw,1));
+  this.ox=450;this.oy=410;
+  if(!this.trail){this.trail=document.createElement('canvas');}
+  this.trail.width=W*dpr;this.trail.height=H*dpr;this.tctx=this.trail.getContext('2d');this.tctx.setTransform(dpr,0,0,dpr,0,0);
+};
+// column 0 is the rightmost column; the scan starts at the top right and moves down
+Cs.colX=function(j){return this.gw/2-P.pitch*(j+0.5)};
+Cs.paint=function(x0,y0,x1,y1,col,alpha){
+  const t=this.tctx,sc=this.sc,wpx=Math.max(1.5,P.fwhmH*sc),hpx=Math.max(1.5,P.fwhmV*sc);
+  const lx=Math.min(x0,x1),hx=Math.max(x0,x1),ly=Math.min(y0,y1),hy=Math.max(y0,y1);
+  t.fillStyle=rgba(col,alpha);
+  t.fillRect(this.ox+lx*sc-wpx/2,this.oy+ly*sc-hpx/2,(hx-lx)*sc+wpx,(hy-ly)*sc+hpx);
+};
+Cs.frame=function(y0,y1){
+  const x=this.colX(this.j),lo=Math.min(y0,y1),hi=Math.max(y0,y1);this.frames++;let hit=false;
+  for(const c of this.xtals){const r=c.s/2;if(Math.abs(c.x-x)<P.fwhmH/2+r&&c.y>lo-r&&c.y<hi+r){c.hits++;c.cols.add(this.j);hit=true;}}
+  if(hit){this.hitFrames++;this.flash=1;}
+  this.paint(x,lo,x,hi,C.rt,0.28);
+};
+Cs.restart=function(){this.reset()};
+Cs.step=function(dt){
+  if(this.done){this.hold+=dt;if(this.hold>3)this.reset();return;}
+  let ts=dt*P.simx;const vum=P.v*1000,fdt=1/P.fps,R=this.R,O=P.over;this.flash=Math.max(0,this.flash-dt*4);
+  let guard=0;
+  while(ts>1e-9&&guard++<20000){
+    if(this.phase==='rec'){
+      const end=this.dir>0?R:-R;
+      const toEnd=Math.abs(end-this.y)/vum,toFrame=fdt-this.fAcc,st=Math.min(ts,toEnd,toFrame);
+      this.y+=this.dir*vum*st;this.fAcc+=st;ts-=st;
+      if(this.fAcc>=fdt-1e-12){this.frame(this.segStart,this.y);this.segStart=this.y;this.fAcc=0;}
+      if(Math.abs(end-this.y)<1e-6){
+        if(Math.abs(this.y-this.segStart)>1e-6)this.frame(this.segStart,this.y);
+        this.phase='out';this.pend=O;
+      }
+    }else{
+      // overshoot out, step over, overshoot back in: beam on, detector not recording
+      const st=Math.min(ts,this.pend/vum),d=vum*st,x0=this.x,y0=this.y;ts-=st;this.pend-=d;
+      if(this.phase==='out'){this.y+=this.dir*d;}
+      else if(this.phase==='shift'){this.x-=d;}
+      else if(this.phase==='in'){this.y+=this.dir*d;}
+      if(this.phase!=='rec')this.paint(x0,y0,this.x,this.y,C.unrec,0.35);
+      if(this.pend<=1e-6){
+        if(this.phase==='out'){
+          if(this.j>=this.ncol-1){this.done=true;return;}
+          this.phase='shift';this.pend=P.pitch;
+        }else if(this.phase==='shift'){
+          this.j++;this.x=this.colX(this.j);this.dir=-this.dir;this.phase='in';this.pend=O;
+        }else if(this.phase==='in'){
+          this.phase='rec';this.y=this.dir>0?-R:R;this.segStart=this.y;this.fAcc=0;
+        }
+      }
+    }
+  }
+};
+Cs.draw=function(){
+  const sc=this.sc,ox=this.ox,oy=this.oy,R=this.R;
+  // recorded grid (rectangle) and drop
+  ctx.fillStyle=C.surface;ctx.beginPath();ctx.arc(ox,oy,R*sc,0,6.283);ctx.fill();ctx.strokeStyle=C.rule;ctx.lineWidth=2;ctx.stroke();
+  if(P.pitch*sc>4){for(let j=0;j<this.ncol;j++){const x=ox+this.colX(j)*sc;poly([[x,oy-R*sc],[x,oy+R*sc]],rgba(C.muted,0.18),1);}}
+  ctx.drawImage(this.trail,0,0,W,H);
+  ctx.save();ctx.strokeStyle=C.ink;ctx.lineWidth=1.5;ctx.setLineDash([8,6]);ctx.strokeRect(ox-this.gw/2*sc,oy-R*sc,this.gw*sc,2*R*sc);ctx.restore();
+  for(const c of this.xtals){
+    ctx.save();ctx.translate(ox+c.x*sc,oy+c.y*sc);ctx.rotate(c.rot);const w=c.s*sc,h=w*c.asp;
+    const col=c.cols.size>=2?C.accent2:c.hits?C.rt:C.cryo;
+    ctx.fillStyle=rgba(col,c.hits?0.75:0.35);ctx.strokeStyle=col;ctx.lineWidth=1.2;
+    ctx.beginPath();ctx.moveTo(-w/2+h*0.3,-h/2);ctx.lineTo(w/2,-h/2);ctx.lineTo(w/2-h*0.3,h/2);ctx.lineTo(-w/2,h/2);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
+  }
+  if(!this.done){const bx=ox+this.x*sc,by=oy+this.y*sc,rw=Math.max(3,P.fwhmH*sc/2),rh=Math.max(3,P.fwhmV*sc/2),rec=this.phase==='rec';
+    ctx.fillStyle=rgba(rec?C.accent2:C.unrec,0.25+0.5*this.flash);ctx.beginPath();ctx.arc(bx,by,10+10*this.flash,0,6.283);ctx.fill();
+    ctx.fillStyle=C.ink;ctx.beginPath();ctx.ellipse(bx,by,rw,rh,0,0,6.283);ctx.fill();}
+  // scale bar, top left
+  const bar=100*sc;poly([[40,52],[40+bar,52]],C.ink,3);T('100 µm',40+bar/2,40,18,C.ink,'center');
+  // legend, two rows below the scan
+  const sw=(x,y,c,a,l)=>{ctx.fillStyle=rgba(c,a);ctx.fillRect(x,y-16,18,18);ctx.strokeStyle=c;ctx.lineWidth=1;ctx.strokeRect(x,y-16,18,18);T(l,x+26,y,18,C.ink);};
+  sw(40,848,C.cryo,0.35,'not hit');sw(190,848,C.rt,0.75,'hit in one column');sw(470,848,C.accent2,0.75,'hit in ≥2 columns');
+  sw(40,882,C.rt,0.28,'X-ray exposed, recorded');sw(400,882,C.unrec,0.35,'X-ray exposed, not recorded');
+  // right panel
+  const k=this.calc(),x0=900;
+  T('Fly scan in the drop',x0,62,34,C.ink,'left',700);
+  T(`${P.E.toFixed(1)} keV, ${sci(P.flux)} ph/s, ${P.fwhmH.toFixed(1)} × ${P.fwhmV.toFixed(1)} µm beam`,x0,96,19,C.muted);T(`${P.v.toFixed(2)} mm/s, ${P.pitch} µm pitch, ${P.fps} Hz, ${P.over} µm overshoot`,x0,124,19,C.muted);
+  const cells=[
+    [sig(k.D,2)+' MGy','dose per pass (water)',C.rt],
+    [fmtT(k.tau),'beam dwell on any point',C.ink],
+    [sig(k.rate,2)+' MGy/s','peak dose rate',C.ink],
+    [sig(k.stripe,2)+' µm','crystal travel per frame',C.ink],
+    [Math.round(k.frames).toLocaleString('en-AU')+' frames','recorded, '+sig(k.recT,2)+' s',C.ink],
+    [sig(k.time,2)+' s','per drop incl. turnarounds',C.ink],
+    [Math.round(k.hit*100)+'%','predicted hit rate',C.cryo],
+    [this.frames?Math.round(this.hitFrames/this.frames*100)+'%':'–','simulated, '+this.frames.toLocaleString('en-AU')+' frames',C.cryo],
+  ];
+  cells.forEach(([v,l,c],i)=>{const cx=x0+(i%2)*330,cy=190+Math.floor(i/2)*96;T(v,cx,cy,34,c,'left',700);T(l,cx,cy+28,18,C.muted);});
+  const multi=this.xtals.filter(c=>c.cols.size>=2).length,hitX=this.xtals.filter(c=>c.hits).length;
+  T(`${hitX} of ${this.xtals.length} crystals hit; ${multi} in two or more columns`,x0,580,20,C.ink);
+  // beam profile across columns, log scale
+  const px=x0+60,py=630,pw=560,ph=180,span=Math.max(3*P.pitch,4*P.fwhmH);
+  axes(px,py,pw,ph,[[0,'−'+Math.round(span/2)+' µm'],[0.5,'0'],[1,Math.round(span/2)+' µm']],[[0,'10⁻⁴'],[0.5,'10⁻²'],[1,'1']],'');
+  T(`fluence across columns; midway ${k.nb<1e-4?'<0.01%':sig(k.nb*100,2)+'%'} of peak`,px-60,py-12,18,C.muted);
+  for(let c=-2;c<=2;c++){const pts=[];for(let i=0;i<=200;i++){const xu=-span/2+span*i/200,v=Math.exp(-((xu-c*P.pitch)**2)/(2*k.sh*k.sh));const lv=Math.max(-4,Math.log10(Math.max(v,1e-6)));pts.push([px+i/200*pw,py+ph-(lv+4)/4*ph]);}poly(pts,c===0?C.rt:rgba(C.muted,0.7),c===0?3:2);}
+  const mx=px+(P.pitch/2+span/2)/span*pw;poly([[mx,py],[mx,py+ph]],C.accent2,1.5,[5,5]);
+};
+function buildCtlC(){
+  const box=document.getElementById('ctlC');
+  CP.forEach(c=>{const lab=document.createElement('label');lab.textContent=c.l+' ';
+    const inp=document.createElement('input');inp.type='range';inp.min=c.min;inp.max=c.max;inp.step=c.step;inp.value=c.v;
+    const out=document.createElement('output');out.textContent=c.f(P[c.k]);
+    inp.addEventListener('input',()=>{P[c.k]=c.log?10**(+inp.value):+inp.value;out.textContent=c.f(P[c.k]);if(['drop','dens','csize','pitch','over'].includes(c.k))Cs.reset(4242);});
+    inp.addEventListener('change',()=>{if(['fwhmH','fps','v'].includes(c.k))Cs.reset(4242);});
+    lab.append(inp,out);box.append(lab);});
+}
+
+/* ======================================================================
+   D. Mix, wait, probe
+   ====================================================================== */
+const Dm={drops:[],spawn:0,chop:0};
+const DV=()=>10**(0+Math.log10(500)*(+document.getElementById('dV').value/1000)); // 1..500 mm/s
+const DX=()=>+document.getElementById('dX').value/10; // mm
+const DK=()=>10**(-3+Math.log10(5000)*(+document.getElementById('dK').value/1000)); // 1 ms..5 s
+Dm.x0=220;Dm.ppm=120;Dm.ty=320;
+Dm.restart=function(){this.drops=[];this.spawn=0};
+Dm.step=function(dt){
+  this.spawn-=dt;if(this.spawn<=0){this.drops.push({x:this.x0,seed:Math.random()});this.spawn=0.45;}
+  this.drops.forEach(d=>d.x+=150*dt);this.drops=this.drops.filter(d=>d.x<this.x0+10.4*this.ppm);
+  this.chop+=dt*6;syncD();
+};
+Dm.occ=function(t){return 1-2**(-t/DK())};
+Dm.draw=function(){
+  const v=DV(),xd=DX(),th=DK(),ty=this.ty,x0=this.x0,ppm=this.ppm,xp=x0+xd*ppm,dt=xd/v;
+  T('Mix, wait, probe',40,62,34,C.ink,'left',700);
+  T('Each crystal is probed once, at a delay set by where the beam sits on the tape',40,94,20,C.muted);
+  // tape
+  ctx.fillStyle=C.rule;ctx.fillRect(100,ty+22,1420,8);
+  for(let m=0;m<=10;m+=2){const x=x0+m*ppm;poly([[x,ty+34],[x,ty+44]],C.muted,1.5);T(m+' mm',x,ty+66,16,C.muted,'center');}
+  arrow(1380,ty+120,1500,ty+120,C.muted,2);T('tape moves',1440,ty+108,16,C.muted,'center');
+  // mixing nozzle
+  poly([[x0-70,180],[x0,ty-30]],C.cryo,6);poly([[x0+70,180],[x0,ty-30]],C.accent2,6);poly([[x0,ty-30],[x0,ty-8]],C.ink,8);
+  T('crystals',x0-80,170,18,C.cryo,'center');T('ligand',x0+80,170,18,C.accent2,'center');T('mix, t = 0',x0,ty+66+28,18,C.ink,'center',600);
+  // drops
+  this.drops.forEach(d=>{
+    const mm=(d.x-x0)/ppm,age=mm/v,f=this.occ(age),col=mix(C.cryo,C.rt,f);
+    ctx.fillStyle=rgba(C.accent2,0.18);ctx.beginPath();ctx.ellipse(d.x,ty+20,30,22,0,Math.PI,2*Math.PI);ctx.fill();
+    const r=mulberry32(Math.floor(d.seed*1e9));for(let i=0;i<5;i++){ctx.save();ctx.translate(d.x-20+40*r(),ty+14-10*r());ctx.rotate(r()*3);ctx.fillStyle=col;ctx.fillRect(-5,-3,10,6);ctx.restore();}
+  });
+  // chopper + beam
+  const cy=200,open=Math.sin(this.chop)>0.6,under=this.drops.some(d=>Math.abs(d.x-xp)<26);
+  poly([[xp,150],[xp,cy-36]],C.accent2,3);
+  poly([[xp,cy+36],[xp,ty+22]],rgba(C.accent2,open?1:0.18),open&&under?5:3);
+  ctx.save();ctx.translate(xp,cy);ctx.rotate(this.chop);ctx.fillStyle=rgba(C.muted,0.55);ctx.beginPath();ctx.arc(0,0,34,0,6.283);ctx.fill();ctx.fillStyle=C.bg;ctx.fillRect(-4,-34,8,22);ctx.restore();
+  T('chopper',xp+44,cy+6,16,C.muted);
+  T('X-rays',xp,142,18,C.accent2,'center',600);
+  // detector below tape
+  ctx.strokeStyle=C.ink;ctx.lineWidth=2;ctx.strokeRect(xp-50,ty+110,100,14);
+  if(open&&under){ctx.fillStyle=rgba(C.accent2,0.9);for(let i=0;i<7;i++)ctx.fillRect(xp-44+i*13,ty+112,5,10);poly([[xp,ty+30],[xp,ty+110]],rgba(C.accent2,0.6),2);}
+  T('detector',xp+62,ty+122,16,C.muted);
+  // distance bracket, below the tape
+  const by=ty+160;poly([[x0,by],[xp,by]],C.ink,2);poly([[x0,by-8],[x0,by+8]],C.ink,2);poly([[xp,by-8],[xp,by+8]],C.ink,2);
+  T(`Δt = ${xd.toFixed(1)} mm ÷ ${sig(v,2)} mm/s = ${fmtT(dt)}`,x0,by+34,24,C.ink,'left',700);
+  // kinetics plot
+  const px=140,py=600,pw=900,ph=220,lo=-4,hi=1.5,map=t=>(Math.log10(t)-lo)/(hi-lo);
+  axes(px,py,pw,ph,[[map(1e-4),'0.1 ms'],[map(1e-3),'1 ms'],[map(1e-2),'10 ms'],[map(0.1),'100 ms'],[map(1),'1 s'],[map(10),'10 s']],[[0,'0'],[0.5,'50%'],[1,'100%']],'delay Δt (log)');
+  T('ligand bound',px,py-14,18,C.muted);
+  const pts=[];for(let i=0;i<=240;i++){const t=10**(lo+(hi-lo)*i/240);pts.push([px+i/240*pw,py+ph-this.occ(t)*ph]);}poly(pts,C.ink,3);
+  [0.25,1,3,10].forEach((m,i)=>{const t=th*m;if(t<10**lo||t>10**hi)return;const x=px+map(t)*pw,y=py+ph-this.occ(t)*ph;ctx.strokeStyle=C.muted;ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,8,0,6.283);ctx.stroke();T('Δt'+'₁₂₃₄'[i],x,y-14,18,C.muted,'center');});
+  if(dt>=10**lo&&dt<=10**hi){const x=px+map(dt)*pw,y=py+ph-this.occ(dt)*ph;ctx.fillStyle=C.rt;ctx.beginPath();ctx.arc(x,y,10,0,6.283);ctx.fill();}
+  // pocket glyph
+  const f=this.occ(dt),gx=1300,gy=730;
+  T(`at Δt: ${Math.round(f*100)}% bound`,gx,600,24,C.rt,'center',700);
+  const gap=20+50*(1-0.7*f);
+  ctx.strokeStyle=C.ink;ctx.lineWidth=10;ctx.lineCap='round';
+  ctx.beginPath();ctx.arc(gx-gap-60,gy,60,-0.85,0.85);ctx.stroke();
+  ctx.beginPath();ctx.arc(gx+gap+60,gy,60,Math.PI-0.85,Math.PI+0.85);ctx.stroke();ctx.lineCap='butt';
+  const ly=gy-140+140*f;ctx.fillStyle=C.accent2;ctx.beginPath();ctx.arc(gx,ly,16,0,6.283);ctx.fill();
+  T('pocket closes on ligand (cartoon)',gx,850,18,C.muted,'center');
+};
+function syncD(){document.getElementById('dVo').textContent=sig(DV(),2)+' mm/s';document.getElementById('dXo').textContent=DX().toFixed(1)+' mm';document.getElementById('dKo').textContent=fmtT(DK());}
+
+/* ======================================================================
+   framework
+   ====================================================================== */
+const scenes={A,B,C:Cs,D:Dm},hashes={A:'rotation-serial',B:'spot-fading',C:'fly-scan',D:'mix-probe'},labels={A:'Rotation versus serial crystallography, Ewald construction',B:'Diffraction spots fading with dose, frozen versus room temperature',C:'Raster fly scan through a crystallisation drop with dose planner',D:'Mix-and-diffuse time-resolved experiment on a tape'};
+let cur='A',playing=!window.matchMedia('(prefers-reduced-motion: reduce)').matches,last=performance.now();
+A.init();B.init();buildCtlC();Cs.reset(4242);
+function setScene(s){cur=s;document.querySelectorAll('.gctl').forEach(b=>b.style.display=s==='A'?'none':'');document.getElementById('keys').textContent=s==='A'?'1 rotation play/pause, 2 serial play/pause, H hide controls':'Space play/pause, R restart, H hide controls';document.querySelectorAll('.scene').forEach(e=>e.classList.toggle('on',e.dataset.s===s));
+  document.querySelectorAll('nav a').forEach(a=>a.toggleAttribute('aria-current',a.dataset.s===s));if(document.querySelector('nav a[aria-current]'))document.querySelector('nav a[aria-current]').setAttribute('aria-current','page');
+  cv.setAttribute('aria-label',labels[s]);}
+function fromHash(){setScene('C');}
+function go(s){setScene(s);}
+document.querySelectorAll('nav a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();go(a.dataset.s);}));
+window.addEventListener('hashchange',fromHash);try{fromHash();}catch(e){setScene('A');}
+const playBtn=document.getElementById('play');
+function setPlay(p){playing=p;playBtn.textContent=p?'Pause':'Play';playBtn.setAttribute('aria-pressed',String(p));}
+setPlay(playing);
+playBtn.onclick=()=>setPlay(!playing);
+document.getElementById('restart').onclick=()=>scenes[cur].restart();
+document.querySelectorAll('[data-temp]').forEach(b=>b.onclick=()=>{A.temp=b.dataset.temp;document.querySelectorAll('[data-temp]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));A.resetRot();A.playRot=false;syncA();});
+function syncA(){const r=document.getElementById('aRotPlay'),s2=document.getElementById('aSerPlay');r.textContent=A.playRot?'Pause':'Play';r.setAttribute('aria-pressed',String(A.playRot));s2.textContent=A.playSer?'Pause':'Play';s2.setAttribute('aria-pressed',String(A.playSer));}
+window.syncA=syncA;
+document.getElementById('aRotPlay').onclick=()=>{if(A.th>=180)A.resetRot();A.playRot=!A.playRot;syncA();};
+document.getElementById('aSerPlay').onclick=()=>{if(A.N>=100000)A.resetSer();A.playSer=!A.playSer;syncA();};
+document.getElementById('aRotReset').onclick=()=>{A.resetRot();A.playRot=false;syncA();};
+document.getElementById('aSerReset').onclick=()=>{A.resetSer();A.playSer=false;syncA();};
+syncA();
+document.getElementById('bT').oninput=e=>{B.u=e.target.value/1000;B.hold=0;setPlay(false);syncB();};
+document.getElementById('bR').oninput=e=>{B.ratio=+e.target.value;syncB();};
+['dV','dX','dK'].forEach(id=>document.getElementById(id).oninput=syncD);
+syncB();syncD();
+const fsbox=document.getElementById('fsbox');
+document.getElementById('fs').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen();else if(fsbox.requestFullscreen)fsbox.requestFullscreen();};
+function ctlH(){const c=fsbox.querySelector('.controls');fsbox.style.setProperty('--ctlh',fsbox.classList.contains('hidectl')?'0px':c.offsetHeight+'px');}
+document.addEventListener('fullscreenchange',ctlH);
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;const order=['A','B','C','D'];
+  if(cur==='A'&&e.key==='1'){document.getElementById('aRotPlay').click();}
+  else if(cur==='A'&&e.key==='2'){document.getElementById('aSerPlay').click();}
+  else if(e.code==='Space'&&cur!=='A'){e.preventDefault();setPlay(!playing);}
+  else if((e.key==='r'||e.key==='R')&&cur!=='A')scenes[cur].restart();
+  
+  
+  else if(e.key==='h'||e.key==='H'){fsbox.classList.toggle('hidectl');ctlH();}});
+window.addEventListener('resize',()=>{const d=Math.min(2,window.devicePixelRatio||1);if(d!==dpr){sizeCanvas();Cs.reset(4242);}});
+function loop(now){const dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(playing||cur==='A')scenes[cur].step(dt);
+  ctx.fillStyle=C.bg;ctx.fillRect(0,0,W,H);scenes[cur].draw();requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
