@@ -57,4 +57,4 @@
 document.querySelectorAll('.navtoggle').forEach(b=>b.addEventListener('click',()=>document.querySelector('.menu').classList.toggle('open')));
 function fit(f){try{const d=f.contentDocument;if(!d)return;const h=Math.max(d.documentElement.scrollHeight,d.body?d.body.scrollHeight:0);if(h)f.style.height=(h+4)+'px';}catch(e){}}
 document.querySelectorAll('iframe.embed').forEach(f=>{f.addEventListener('load',()=>{fit(f);try{new ResizeObserver(()=>fit(f)).observe(f.contentDocument.documentElement)}catch(e){};setInterval(()=>fit(f),1500)})});
-</script></body></html>
+</script><script>document.querySelectorAll('main section.blk h2').forEach(function(h){if(!h.id){h.id=h.textContent.replace(/\u00a0/g,' ').trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60);h.style.scrollMarginTop='80px'}});if(location.hash){var e=document.getElementById(location.hash.slice(1));if(e)e.scrollIntoView()}</script></body></html>
