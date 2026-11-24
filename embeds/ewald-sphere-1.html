@@ -8,7 +8,7 @@
 /* Layout: instrument console. Controls | reciprocal space (3D) | real space (Bragg planes + detector). Single dark theme by choice: glowing reflections need a dark ground. */
 :root{
   --bg:#0a1019; --panel:#101926; --panel2:#152132; --line:#22324a; --line2:#2c405d;
-  --fg:#e2e8f1; --muted:#8a99b0; --faint:#5c6b82;
+  --fg:#eef2f8; --muted:#bcc7d6; --faint:#a3b0c2;
   --beam:#6cc4ff; --lit:#ffb54a; --dstar:#ff6f5e; --ok:#58d39a; --warn:#ffb54a; --bad:#ff6f5e;
   --bw:#5fe0c8; --div:#b58cff; --mos:#ffd29a;
   --ax-a:#ff7b7b; --ax-b:#62d896; --ax-c:#78acff;
@@ -20,30 +20,30 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{background:var(--bg);color:var(--fg)}
-body{font-family:var(--f-body);font-size:14px;line-height:1.45;
+body{font-family:var(--f-body);font-size:15.5px;line-height:1.45;
   padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:14px 32px}
 header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px;margin-bottom:12px}
 h1{font-family:var(--f-display);font-weight:400;font-size:2rem;letter-spacing:.01em;margin:0;line-height:1.1}
 h1 em{color:var(--beam)}
 .sub{color:var(--muted);font-size:.92rem;max-width:72ch}
-h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:600;margin:0 0 8px}
-.app{display:grid;grid-template-columns:290px minmax(0,1fr) 400px;grid-template-areas:"ctl view side";gap:14px;align-items:start}
+h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:600;margin:0 0 8px}
+.app{display:grid;grid-template-columns:280px minmax(0,1fr) 470px;grid-template-areas:"ctl view side";gap:14px;align-items:start}
 .ctl{grid-area:ctl;display:flex;flex-direction:column;gap:12px}
-.view{grid-area:view;position:relative;height:max(560px, min(calc(100vh - 120px), 780px));border:1px solid var(--line);border-radius:10px;overflow:hidden;
+.view{grid-area:view;position:relative;height:max(560px, min(calc(100vh - 120px), 700px));border:1px solid var(--line);border-radius:10px;overflow:hidden;
   background:radial-gradient(120% 90% at 40% 45%, #111c2c 0%, var(--bg) 70%)}
 .side{grid-area:side;display:flex;flex-direction:column;gap:12px;min-width:0}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:0}
 .row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 8px;margin:6px 0}
-.row label{color:var(--fg);font-size:.86rem}
-.row .val{font-family:var(--f-mono);font-size:.8rem;color:var(--beam);font-variant-numeric:tabular-nums;text-align:right}
+.row label{color:var(--fg);font-size:.92rem}
+.row .val{font-family:var(--f-mono);font-size:.86rem;color:var(--beam);font-variant-numeric:tabular-nums;text-align:right}
 .row input[type=range]{grid-column:1 / -1;width:100%;accent-color:var(--beam);margin:2px 0 0}
-.hint{color:var(--faint);font-size:.76rem;margin:2px 0 0}
+.hint{color:var(--faint);font-size:.86rem;margin:2px 0 0}
 select,input[type=number]{background:var(--panel2);color:var(--fg);border:1px solid var(--line2);border-radius:6px;padding:5px 7px;font:inherit;font-size:.85rem;width:100%}
 input[type=number]{font-family:var(--f-mono);font-size:.8rem}
 .cellgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px}
-.cellgrid label{display:flex;flex-direction:column;gap:2px;font-size:.72rem;color:var(--muted)}
+.cellgrid label{display:flex;flex-direction:column;gap:2px;font-size:.82rem;color:var(--muted)}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-button{font:inherit;font-size:.8rem;background:var(--panel2);color:var(--fg);border:1px solid var(--line2);border-radius:6px;padding:5px 10px;cursor:pointer}
+button{font:inherit;font-size:.86rem;background:var(--panel2);color:var(--fg);border:1px solid var(--line2);border-radius:6px;padding:5px 10px;cursor:pointer}
 button:hover{border-color:var(--beam)}
 button:disabled{opacity:.4;cursor:default}
 button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--beam);outline-offset:1px}
@@ -51,32 +51,33 @@ button.primary{background:#16314a;border-color:#2f6b97;color:#d9efff}
 .seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line2);border-radius:7px;overflow:hidden;margin-bottom:10px}
 .seg button{border:0;border-radius:0;background:transparent;color:var(--muted);padding:7px 6px}
 .seg button[aria-pressed="true"]{background:#16314a;color:#d9efff}
-.toggles{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:.82rem}
+.toggles{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:.9rem}
 .toggles label{display:flex;gap:6px;align-items:center;cursor:pointer}
 .toggles input{accent-color:var(--beam)}
 canvas{display:block}
 #gl{position:absolute;inset:0;width:100%;height:100%}
 .labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.lbl{position:absolute;transform:translate(-50%,-50%);font-family:var(--f-mono);font-size:11.5px;white-space:nowrap;color:var(--muted);text-shadow:0 0 4px var(--bg),0 0 8px var(--bg)}
+.lbl{position:absolute;transform:translate(-50%,-50%);font-family:var(--f-mono);font-size:13.5px;white-space:nowrap;color:var(--muted);text-shadow:0 0 4px var(--bg),0 0 8px var(--bg)}
 .lbl.beam{color:var(--beam)} .lbl.lit{color:var(--lit)} .lbl.ds{color:var(--dstar)} .lbl.a{color:var(--ax-a)} .lbl.b{color:var(--ax-b)} .lbl.c{color:var(--ax-c)} .lbl.fg{color:var(--fg)}
 .ob{text-decoration:overline}
 .toolbar{position:absolute;top:10px;left:10px;right:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;pointer-events:none}
 .toolbar > *{pointer-events:auto}
 .toolbar .spacer{flex:1}
-.envbox{position:absolute;left:10px;top:50px;width:min(300px, calc(100% - 20px));background:rgba(10,16,25,.78);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.tbbreak{flex-basis:100%;height:0}
+.envbox{position:static;width:min(300px, calc(100% - 20px));background:rgba(10,16,25,.78);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
 .envbox .row{margin:2px 0}
-.legend{position:absolute;left:10px;bottom:10px;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.74rem;color:var(--muted);background:rgba(10,16,25,.72);padding:6px 9px;border-radius:6px;max-width:calc(100% - 200px)}
+.legend{position:absolute;left:10px;bottom:10px;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.9rem;color:var(--fg);background:rgba(10,16,25,.82);padding:7px 10px;border-radius:6px;max-width:calc(100% - 210px)}
 .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:-1px}
-.scale{position:absolute;right:10px;bottom:10px;font-family:var(--f-mono);font-size:.72rem;color:var(--muted);background:rgba(10,16,25,.72);padding:6px 9px;border-radius:6px;text-align:right}
+.scale{position:absolute;right:10px;bottom:10px;font-family:var(--f-mono);font-size:.84rem;color:var(--fg);background:rgba(10,16,25,.72);padding:6px 9px;border-radius:6px;text-align:right}
 .scalebar{height:6px;border:1px solid var(--fg);border-top:0;margin:3px 0 2px auto}
-.info{position:absolute;right:10px;top:50px;font-family:var(--f-mono);font-size:.72rem;color:var(--muted);background:rgba(10,16,25,.72);padding:6px 9px;border-radius:6px;text-align:right}
+.info{position:absolute;right:10px;bottom:74px;font-family:var(--f-mono);font-size:.84rem;color:var(--fg);background:rgba(10,16,25,.72);padding:6px 9px;border-radius:6px;text-align:right}
 .panelcanvas{width:100%;border-radius:6px;background:#0c1420;border:1px solid var(--line)}
 #bragg{aspect-ratio:400/270}
 #det{aspect-ratio:1/1}
-.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:.84rem}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:.92rem}
 .kv dt{color:var(--muted)}
-.kv dd{margin:0;font-family:var(--f-mono);font-size:.8rem;text-align:right;font-variant-numeric:tabular-nums}
-.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.74rem;font-weight:500;border:1px solid}
+.kv dd{margin:0;font-family:var(--f-mono);font-size:.88rem;text-align:right;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.86rem;font-weight:500;border:1px solid}
 .pill.ok{color:var(--ok);border-color:rgba(88,211,154,.5);background:rgba(88,211,154,.08)}
 .pill.warn{color:var(--warn);border-color:rgba(255,181,74,.5);background:rgba(255,181,74,.08)}
 .pill.bad{color:var(--bad);border-color:rgba(255,111,94,.5);background:rgba(255,111,94,.08)}
@@ -84,18 +85,20 @@ canvas{display:block}
 .hklin{display:flex;gap:6px;align-items:center;margin-bottom:8px}
 .hklin input{width:58px}
 .hklin span{color:var(--muted);font-size:.8rem}
-.tip{position:absolute;pointer-events:none;background:#08101a;border:1px solid var(--line2);color:var(--fg);font-family:var(--f-mono);font-size:.74rem;padding:3px 7px;border-radius:5px;transform:translate(10px,-120%);white-space:nowrap}
+.tip{position:absolute;pointer-events:none;background:#08101a;border:1px solid var(--line2);color:var(--fg);font-family:var(--f-mono);font-size:.86rem;padding:3px 7px;border-radius:5px;transform:translate(10px,-120%);white-space:nowrap}
 .detwrap{position:relative}
 .theory{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
-.theory p,.theory li{color:#c7d0dd;font-size:.88rem;max-width:70ch}
+.theory p,.theory li{color:#dde3ec;font-size:.95rem;max-width:70ch}
 .eq{font-family:var(--f-display);font-size:1.25rem;color:var(--fg);margin:6px 0 2px;letter-spacing:.01em}
 .eq i{font-style:italic}
-.refs{font-size:.8rem;color:var(--muted);padding-left:18px;margin:6px 0 0}
-.refs li{margin:3px 0;color:var(--muted);font-size:.8rem}
-.note{color:var(--faint);font-size:.76rem}
+.refs{font-size:.88rem;color:var(--muted);padding-left:18px;margin:6px 0 0}
+.refs li{margin:3px 0;color:var(--muted);font-size:.88rem}
+.note{color:var(--faint);font-size:.86rem}
+.warnbox{margin:10px 0 0;padding:9px 11px;border:1px solid rgba(255,181,74,.6);background:rgba(255,181,74,.1);border-radius:7px;color:#ffe2b8;font-size:.88rem;line-height:1.45}
+.warnbox a{color:#ffd29a}
 .dim{opacity:.35;pointer-events:none}
 @media (max-width:1250px){
-  .app{grid-template-columns:minmax(0,1fr) 380px;grid-template-areas:"view side" "ctl ctl"}
+  .app{grid-template-columns:minmax(0,1fr) 430px;grid-template-areas:"view side" "ctl ctl"}
   .ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
   .view{height:max(540px, min(calc(100vh - 140px), 760px))}
 }
@@ -104,13 +107,12 @@ canvas{display:block}
   .view{height:max(440px, 70vh)}
   h1{font-size:1.6rem}
   .lhint,.info{display:none}
-  .envbox{top:88px}
   .legend{max-width:calc(100% - 20px);bottom:56px}
 }
 </style>
 
 <header>
-  <h1>Ewald Sphere <em>Lab</em></h1>
+  <h1>Ewald construction <em>schematic</em></h1>
   <div class="sub">Rotate a crystal, or a single molecule, in the beam. Wherever reciprocal space meets the Ewald sphere, X-rays scatter to the detector. The geometry is the same for both; a crystal concentrates the signal into Bragg peaks.</div>
 </header>
 
@@ -183,7 +185,8 @@ canvas{display:block}
         <option value="mos">Mosaicity: points smeared into arcs</option>
         <option value="none">None</option>
       </select>
-      <p class="hint">Acceptance: |θ − θ<sub>B</sub>| ≤ ½[η + δ + (Δλ/λ) tan θ<sub>B</sub>]. Every term vanishes at O and grows with |<b>d</b>*|.</p>
+      <p class="hint">Acceptance: |θ - θ<sub>B</sub>| ≤ ½[η + δ + (Δλ/λ) tan θ<sub>B</sub>]. Every term vanishes at O and grows with |<b>d</b>*|.</p>
+      <p class="warnbox"><b>Very qualitative.</b> Smearing here is a geometric sketch only. For accurate spot shapes and intensities see the <a href="../nanobragg.html" target="_top">nanoBragg diffraction simulations</a> and the <a href="../nanocrystal-explorer.html" target="_top">nanocrystal diffraction explorer</a>.</p>
     </section>
 
     <section class="card">
@@ -198,7 +201,7 @@ canvas{display:block}
         <input id="osc" type="range" min="0" max="5" step="0.01"></div>
       <div class="row"><label for="spd">Spin rate</label><span class="val" id="spdv"></span>
         <input id="spd" type="range" min="0" max="100" step="0.5"></div>
-      <p class="hint">R = R<sub>y</sub>(φ)·R<sub>z</sub>(α)·R<sub>x</sub>(β). Lab frame: beam along +x, y up.</p>
+      <p class="hint">Rotation R = R<sub>y</sub>(φ)·R<sub>z</sub>(α)·R<sub>x</sub>(β). Lab frame: beam along +x, y up.</p>
     </section>
 
     <section class="card">
@@ -228,6 +231,8 @@ canvas{display:block}
         <label><input type="checkbox" id="tX" checked> Sample sketch</label>
         <label><input type="checkbox" id="tAx" checked> Axes</label>
         <label><input type="checkbox" id="tLbl" checked> Labels</label>
+        <label><input type="checkbox" id="tDet" checked> Detector window</label>
+        <label><input type="checkbox" id="tBsm" checked> Smearing in Bragg panel</label>
       </div>
     </section>
   </aside>
@@ -242,11 +247,12 @@ canvas{display:block}
       <button id="zO">Zoom to O</button>
       <button id="zSel">Zoom to selected</button>
       <button id="resetView">Fit</button>
-    </div>
-    <div class="envbox">
+      <button id="resetAll" class="primary">Reset</button>
+      <div class="tbbreak"></div><div class="envbox">
       <div class="row"><label for="env">Show reciprocal space within</label><span class="val" id="envv"></span>
         <input id="env" type="range" min="0" max="100" step="0.25"></div>
       <div class="hint" style="margin:0">distance from the Ewald sphere surface</div>
+    </div>
     </div>
     <div class="info" id="info"></div>
     <div class="legend" id="legend"></div>
@@ -254,10 +260,19 @@ canvas{display:block}
   </main>
 
   <aside class="side">
+
+    <section class="card">
+      <h2>Detector</h2>
+      <div class="detwrap">
+        <canvas id="det" class="panelcanvas"></canvas>
+        <div class="tip" id="tip" hidden></div>
+      </div>
+      <p class="note" style="margin:6px 0 0" id="detNote"></p>
+    </section>
     <section class="card" id="braggCard">
       <h2 id="braggTitle">Bragg planes</h2>
       <canvas id="bragg" class="panelcanvas"></canvas>
-      <p class="note" style="margin:6px 0 0" id="braggNote">Plane spacing and wavelength share one scale in this panel. Atoms schematic.</p>
+      <p class="note" style="margin:6px 0 0" id="braggNote">Two waves arrive on one wavefront; ray 2 reflects from the second plane and leaves along the same line as ray 1, so you see them add or cancel. At small Bragg angles the angle and wavelength are exaggerated for display; atoms schematic. The teal wedge (acceptance from mosaicity, divergence and bandwidth, with mosaic copies of the plane) is way oversimplified and exaggerated to be visible.</p>
     </section>
 
     <section class="card">
@@ -269,15 +284,6 @@ canvas{display:block}
       </div>
       <div id="status" style="margin-bottom:8px"></div>
       <dl class="kv" id="readout"></dl>
-    </section>
-
-    <section class="card">
-      <h2>Detector</h2>
-      <div class="detwrap">
-        <canvas id="det" class="panelcanvas"></canvas>
-        <div class="tip" id="tip" hidden></div>
-      </div>
-      <p class="note" style="margin:6px 0 0" id="detNote"></p>
     </section>
   </aside>
 </div>
@@ -346,7 +352,7 @@ const S={
   mode:'crystal', preset:'lys', cell:{a:79.1,b:79.1,c:37.9,al:90,be:90,ga:90}, rule:'P43212', dmin:1.0,
   lam:1.0, bw:0.02, div:0.0, eta:0.20, smear:'all', phi:0, alp:14, bet:9, osc:0, spd:2,
   D:150, W:300, B:20, expo:1, env:Infinity, flux:1e5,
-  fade:true, showI:true, showAbs:false, showLim:true, showRes:false, showX:true, showAx:true, showLbl:true,
+  fade:true, showDet:true, showBsm:true, showI:true, showAbs:false, showLim:true, showRes:false, showX:true, showAx:true, showLbl:true,
   sel:[12,7,4], playing:false
 };
 
@@ -502,12 +508,24 @@ ewald.add(circle(1,'xz',COL.beam,0.6)); ewald.add(circle(1,'xy',COL.beam,0.3));
 for(const lat of [-60,-30,30,60]){const r=Math.cos(lat*DEG),c=circle(r,'xz',COL.beam,0.09);c.position.y=Math.sin(lat*DEG);ewald.add(c);}
 for(const lon of [45,90,135]){const c=circle(1,'xy',COL.beam,0.07);c.rotation.y=lon*DEG;ewald.add(c);}
 const limiting=new THREE.Group(); scene.add(limiting);
-limiting.add(new THREE.Mesh(new THREE.SphereGeometry(2,64,40),fresnelMat(0x8aa0c0,0.0,0.14)));
-limiting.add(circle(2,'xz',0x8aa0c0,0.26,true));
+limiting.add(new THREE.Mesh(new THREE.SphereGeometry(2,64,40),fresnelMat(0x8aa0c0,0.0,0.05)));
+limiting.add(circle(2,'xz',0x8aa0c0,0.12,true));
 const resSphere=new THREE.Group(); scene.add(resSphere);
 resSphere.add(new THREE.Mesh(new THREE.SphereGeometry(1,64,40),fresnelMat(0xb58cff,0.0,0.2)));
 resSphere.add(circle(1,'xz',0xb58cff,0.32,true));
 
+/* detector window: directions that hit the flat detector, mapped onto the Ewald sphere */
+const detWin=new THREE.Group(); scene.add(detWin); let detWinKey='';
+function buildDetWin(){
+  const key=S.D+'|'+S.W; if(key===detWinKey) return; detWinKey=key;
+  while(detWin.children.length){const c=detWin.children.pop(); c.geometry&&c.geometry.dispose();}
+  const h=S.W/2,pts=[],n=60,edge=[[-h,-h,h,-h],[h,-h,h,h],[h,h,-h,h],[-h,h,-h,-h]];
+  for(const [x0,y0,x1,y1] of edge) for(let i=0;i<n;i++){const t=i/n,X=x0+(x1-x0)*t,Y=y0+(y1-y0)*t,r=Math.sqrt(S.D*S.D+X*X+Y*Y);
+    pts.push(new THREE.Vector3(S.D/r-1,Y/r,-X/r));}
+  pts.push(pts[0].clone());
+  const g=new THREE.BufferGeometry().setFromPoints(pts);
+  detWin.add(new THREE.Line(g,new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:0.85})));
+}
 /* smearing visuals */
 const smearG=new THREE.Group(); scene.add(smearG);
 function buildSmear(){
@@ -689,7 +707,7 @@ function buildSketch(){
   const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(ep,3));
   xtal.add(new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:0xc9d6e8,transparent:true,opacity:0.75})));
   const P=PRESETS[S.preset];
-  if(P&&P.intens==='mol'){ xtal.add(chainObject(MOL.P.map(p=>add(p,xtalCentre)),0xc9b8ff,0.7,1.2)); }
+  if(P&&P.intens==='mol'){ /* cell edges and axes only: the molecule sketch made the view too busy */ }
   else {
     const atoms=[]; for(const x of [0,1])for(const y of [0,1])for(const z of [0,1]) atoms.push([x,y,z]);
     if(S.rule==='I') atoms.push([.5,.5,.5]);
@@ -779,6 +797,7 @@ function updateUniforms(){
   LU.uBase.value=pBase; CU.uBase.value=0.009;
   if(points) points.visible=S.mode==='crystal';
   if(cloud) cloud.visible=S.mode==='molecule';
+  buildDetWin(); detWin.visible=S.showDet;
   limiting.visible=S.showLim; resSphere.visible=S.showRes&&S.dmin>S.lam/2; resSphere.scale.setScalar(S.lam/S.dmin);
 }
 
@@ -937,62 +956,81 @@ const bc=$('bragg'),bx=bc.getContext('2d'); let braggDirty=true;
 function sizeCanvas(cv){const r=cv.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);const w=Math.max(10,Math.round(r.width*dpr)),h=Math.max(10,Math.round(r.height*dpr));if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}return{w:r.width,h:r.height,dpr};}
 function drawBragg(t){
   const {w:W,h:H,dpr}=sizeCanvas(bc),g=bx; g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W,H);
-  g.font='11.5px "IBM Plex Mono", ui-monospace, monospace';
+  g.font='13px "IBM Plex Mono", ui-monospace, monospace';
   const txt=(str,x,y,color)=>{g.lineJoin='round';g.lineWidth=4;g.strokeStyle='#0c1420';g.strokeText(str,x,y);g.fillStyle=color;g.fillText(str,x,y);};
   const D=SELD;
   if(S.mode==='molecule'){
-    g.fillStyle='#5c6b82'; g.textAlign='center';
-    g.fillText('No lattice planes in a single molecule,',W/2,H/2-8); g.fillText('so there is no Bragg condition.',W/2,H/2+10);
+    g.fillStyle='#bcc7d6'; g.textAlign='center';
+    g.fillText('No lattice planes in a single molecule,',W/2,H/2-8); g.fillText('so there is no Bragg condition.',W/2,H/2+12);
     return;
   }
-  if(!D||!D.ds||!isFinite(D.thB)){g.fillStyle='#8a99b0';g.textAlign='left';g.fillText(D&&D.ds?'d < λ/2: no Bragg angle exists':'Select a reflection',14,24);return;}
-  const lam=S.lam,d=D.d; let th=D.thc; const flip=th<0; if(flip)th=-th;
-  const top=42,bot=22;
-  let dpx=Math.max(42,Math.min(100,8*d/lam)); dpx=Math.min(dpx,(H-top-bot)*0.32);
-  const s=dpx/d,lpx=lam*s,y0=top+(H-top-bot)*0.40,xc=W*0.5;
+  if(!D||!D.ds||!isFinite(D.thB)){g.fillStyle='#bcc7d6';g.textAlign='left';g.fillText(D&&D.ds?'d < λ/2: no Bragg angle exists':'Select a reflection',14,24);return;}
+  const lam=S.lam,d=D.d; let thr=D.thc; const flip=thr<0; if(flip)thr=-thr;
+  const TH_MIN=16*DEG, exag=thr<TH_MIN, th=exag?TH_MIN:thr; // small Bragg angles are drawn exaggerated; the phase shown is the real one
+  const top=46,bot=30, ci=Math.cos(th),si=Math.sin(th), cot=ci/si;
+  const Ax=W*0.66, avail=Ax-14;
+  let dpx=Math.max(18,Math.min(70,(H-top-bot)*0.30,avail/cot));
+  const mReal=2*d*Math.sin(thr)/lam, lpx=2*dpx*si/Math.max(mReal,1e-6), y0=top+(H-top-bot)*0.42;
+  const A=[Ax,y0],B=[Ax-dpx*cot,y0+dpx];
   const nPl=Math.max(2,Math.min(6,Math.floor((H-bot-4-y0)/dpx)+1));
-  for(let i=0;i<nPl;i++){const y=y0+i*dpx;g.strokeStyle=i<2?'rgba(255,111,94,.55)':'rgba(255,111,94,.28)';g.lineWidth=1;g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();
-    g.fillStyle='rgba(219,230,245,.55)';const sp=Math.max(16,dpx*0.55),off=(i%2)*sp/2;for(let x=off%sp;x<W;x+=sp){g.beginPath();g.arc(x,y,2,0,7);g.fill();}}
-  g.strokeStyle='#ff6f5e';g.fillStyle='#ff6f5e';g.lineWidth=1.2;const xm=W-26;
+  for(let i=0;i<nPl;i++){const y=y0+i*dpx;g.strokeStyle=i<2?'rgba(255,111,94,.6)':'rgba(255,111,94,.3)';g.lineWidth=1;g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();
+    g.fillStyle='rgba(219,230,245,.6)';const sp=Math.max(16,dpx*0.55),off=(i%2)*sp/2;for(let x=off%sp;x<W;x+=sp){g.beginPath();g.arc(x,y,2,0,7);g.fill();}}
+  g.strokeStyle='#ff6f5e';g.fillStyle='#ff6f5e';g.lineWidth=1.2;const xm=W-22;
   g.beginPath();g.moveTo(xm,y0);g.lineTo(xm,y0+dpx);g.stroke();
-  [[y0,1],[y0+dpx,-1]].forEach(([y,dir])=>{g.beginPath();g.moveTo(xm,y);g.lineTo(xm-4,y+5*dir);g.lineTo(xm+4,y+5*dir);g.fill();});
-  g.textAlign='right'; txt(`d = ${d.toFixed(3)} Å`,xm-8,y0+dpx/2+4,'#ff6f5e');
-  const ci=Math.cos(th),si=Math.sin(th),uin=[ci,si],uout=[ci,-si],A=[xc,y0],B=[xc,y0+dpx];
-  const L=Math.min(W*0.47,(y0-top)/Math.max(si,0.05)),t2=dpx*si+L;
-  const r1=[[A[0]-L*uin[0],A[1]-L*uin[1]],A,[A[0]+L*uout[0],A[1]+L*uout[1]]];
-  const r2=[[B[0]-t2*uin[0],B[1]-t2*uin[1]],B,[B[0]+t2*uout[0],B[1]+t2*uout[1]]];
+  if(dpx>14)[[y0,1],[y0+dpx,-1]].forEach(([y,dir])=>{g.beginPath();g.moveTo(xm,y);g.lineTo(xm-4,y+5*dir);g.lineTo(xm+4,y+5*dir);g.fill();});
+  g.textAlign='right'; txt(`d = ${d.toFixed(3)} Å`,xm-8,y0+dpx/2+5,'#ff6f5e');
+  const uin=[ci,si],uout=[ci,-si];
+  const L=Math.min(Ax-6,(y0-top+8)/Math.max(si,0.02)), Lout=Math.min(W-Ax,(y0-top+8)/Math.max(si,0.02));
+  const S1=[A[0]-L*uin[0],A[1]-L*uin[1]];
+  const BA=[A[0]-B[0],A[1]-B[1]]; const t2=L-((B[0]-A[0])*uin[0]+(B[1]-A[1])*uin[1]); // both rays start on one incident wavefront
+  const S2=[B[0]-t2*uin[0],B[1]-t2*uin[1]];
+  const OUT=[A[0]+Lout*uout[0],A[1]+Lout*uout[1]];
   const phase=reduceMotion?0:t*0.0018, amp=Math.min(6,Math.max(2.5,lpx*0.28));
-  function wave(poly,color){
-    g.strokeStyle=color;g.lineWidth=1.6;g.beginPath();let sAcc=0,first=true;
-    for(let k=0;k<poly.length-1;k++){const a=poly[k],b=poly[k+1],dx=b[0]-a[0],dy=b[1]-a[1],Ls=Math.hypot(dx,dy),ux=dx/Ls,uy=dy/Ls,nx=-uy,ny=ux,step=Math.max(0.8,lpx/14);
+  function wave(poly,color,lw,s0){
+    g.strokeStyle=color;g.lineWidth=lw;g.beginPath();let sAcc=s0||0,first=true;
+    for(let k=0;k<poly.length-1;k++){const a=poly[k],b=poly[k+1],dx=b[0]-a[0],dy=b[1]-a[1],Ls=Math.hypot(dx,dy);if(Ls<1e-6)continue;const ux=dx/Ls,uy=dy/Ls,nx=-uy,ny=ux,step=Math.max(0.8,lpx/14);
       for(let q=0;q<=Ls;q+=step){const yv=amp*Math.sin(TAU*((sAcc+q)/lpx-phase)),x=a[0]+ux*q+nx*yv,y=a[1]+uy*q+ny*yv;if(first){g.moveTo(x,y);first=false;}else g.lineTo(x,y);}
       sAcc+=Ls;}
-    g.stroke();
+    g.stroke(); return sAcc;
   }
   g.save();g.beginPath();g.rect(0,0,W,H);g.clip();
-  wave(r1,'rgba(108,196,255,0.95)');wave(r2,'rgba(160,214,255,0.80)');
-  g.setLineDash([3,3]);g.strokeStyle='rgba(226,232,241,.45)';g.lineWidth=1;
-  g.beginPath();g.moveTo(...r1[0]);g.lineTo(...r2[0]);g.stroke();
-  g.beginPath();g.moveTo(...r1[2]);g.lineTo(...r2[2]);g.stroke();
-  const P1=[B[0]-dpx*si*uin[0],B[1]-dpx*si*uin[1]],P2=[B[0]+dpx*si*uout[0],B[1]+dpx*si*uout[1]];
-  g.beginPath();g.moveTo(...A);g.lineTo(...P1);g.moveTo(...A);g.lineTo(...P2);g.stroke();g.setLineDash([]);
-  g.strokeStyle='#ffb54a';g.lineWidth=3.2;g.globalAlpha=0.9;g.beginPath();g.moveTo(...P1);g.lineTo(...B);g.lineTo(...P2);g.stroke();g.globalAlpha=1;
+  // simplified smearing: acceptance wedge on the incident beam, mosaic copies of the reflecting plane
+  if(S.showBsm){
+    const wd=(S.eta+S.div)*DEG+(S.bw/100)*Math.tan(D.thB), hw=Math.max(wd/2,0), ex=Math.min(Math.max(hw*(th/Math.max(thr,1e-4)),2.5*DEG),10*DEG);
+    if(hw>0){
+      g.fillStyle='rgba(95,224,200,.16)';g.beginPath();g.moveTo(A[0],A[1]);
+      for(const sg of [-1,1]){const a=th+sg*ex;g.lineTo(A[0]-L*Math.cos(a),A[1]-L*Math.sin(a));}
+      g.closePath();g.fill();
+      g.strokeStyle='rgba(95,224,200,.7)';g.setLineDash([4,3]);g.lineWidth=1;
+      for(const sg of [-1,1]){const a=th+sg*ex;g.beginPath();g.moveTo(A[0],A[1]);g.lineTo(A[0]-L*Math.cos(a),A[1]-L*Math.sin(a));g.stroke();}
+      const em=Math.min(Math.max(S.eta*DEG/2,0),8*DEG);
+      if(em>0){g.strokeStyle='rgba(255,210,154,.65)';for(const sg of [-1,1]){const a=sg*Math.min(Math.max(em*(th/Math.max(thr,1e-4)),2*DEG),8*DEG);g.beginPath();g.moveTo(A[0]-90*Math.cos(a),A[1]-90*Math.sin(a));g.lineTo(A[0]+90*Math.cos(a),A[1]+90*Math.sin(a));g.stroke();}}
+      g.setLineDash([]);
+    }
+  }
+  // ray 1: in to A; ray 2: in to B, then up through A; both leave along the same outgoing line
+  const s1=wave([S1,A],'rgba(108,196,255,0.95)',1.7,0);
+  const s2=wave([S2,B,A],'rgba(255,190,110,0.9)',1.7,0);
+  wave([A,OUT],'rgba(108,196,255,0.95)',1.7,s1);
+  wave([A,OUT],'rgba(255,190,110,0.85)',1.7,s2);
+  g.setLineDash([3,3]);g.strokeStyle='rgba(226,232,241,.5)';g.lineWidth=1;
+  g.beginPath();g.moveTo(...S1);g.lineTo(...S2);g.stroke(); // incident wavefront
+  g.setLineDash([]);
+  g.strokeStyle='#ffb54a';g.lineWidth=3;g.globalAlpha=0.55;g.beginPath();g.moveTo(...B);g.lineTo(...A);g.stroke();g.globalAlpha=1;
   g.restore();
-  g.strokeStyle='#ffb54a';g.lineWidth=1.2;const ra=Math.min(42,L*0.4);
+  g.strokeStyle='#ffb54a';g.lineWidth=1.2;const ra=Math.min(46,L*0.4);
   g.beginPath();g.arc(A[0],A[1],ra,Math.PI,Math.PI+th);g.stroke();
   g.beginPath();g.arc(A[0],A[1],ra,-th,0);g.stroke();
-  g.strokeStyle='rgba(226,232,241,.55)';g.setLineDash([2,3]);g.beginPath();g.moveTo(...A);g.lineTo(A[0]+ra*2.1*ci,A[1]+ra*2.1*si);g.stroke();g.setLineDash([]);
-  g.beginPath();g.arc(A[0],A[1],ra*1.75,-th,th);g.stroke();
   g.textAlign='center';
-  txt('θ',A[0]-(ra+10)*Math.cos(th/2),A[1]-(ra+10)*Math.sin(th/2)+4,'#ffb54a');
-  txt('θ',A[0]+(ra+10)*Math.cos(th/2),A[1]-(ra+10)*Math.sin(th/2)+4,'#ffb54a');
-  txt('2θ',A[0]+ra*1.75+14,A[1]+4,'#e2e8f1');
-  txt('extra path 2d sin θ',B[0],B[1]+18,'#ffb54a');
-  const Dp=2*d*Math.sin(th),m=Dp/lam,mR=Math.round(m),inPh=Math.abs(m-mR)<0.004&&mR>=1;
-  g.textAlign='left'; g.fillStyle='#e2e8f1'; g.fillText(`Path difference 2d sin θ = ${Dp.toFixed(3)} Å = ${m.toFixed(3)} λ`,10,16);
-  g.fillStyle='#8a99b0'; g.fillText(`θ = ${(th/DEG).toFixed(3)}°   θB = ${(D.thB/DEG).toFixed(3)}°   λ = ${lam.toFixed(4)} Å`,10,32);
-  const msg=inPh?(mR===1?'In phase: Bragg condition for this reflection':`In phase: order ${mR}, i.e. reflection (${hklTxt(mR*D.h,mR*D.k,mR*D.l)})`):`Phase mismatch ${(((m%1)+1)%1*360).toFixed(0)}°`;
-  txt(msg+(flip?'  (shown for the Friedel mate)':''),10,H-8,inPh?'#58d39a':'#ffb54a');
+  txt('θ',A[0]-(ra+11)*Math.cos(th/2),A[1]-(ra+11)*Math.sin(th/2)+4,'#ffb54a');
+  txt('θ',A[0]+(ra+11)*Math.cos(th/2),A[1]-(ra+11)*Math.sin(th/2)+4,'#ffb54a');
+  const m=mReal,mR=Math.round(m),inPh=Math.abs(m-mR)<0.004&&mR>=1;
+  g.textAlign='left'; g.fillStyle='#eef2f8'; g.fillText(`Extra path for ray 2: 2d sin θ = ${m.toFixed(3)} λ`,10,17);
+  g.fillStyle='#bcc7d6'; g.fillText(`θ = ${(thr/DEG).toFixed(3)}°  θB = ${(D.thB/DEG).toFixed(3)}°  λ = ${lam.toFixed(4)} Å`,10,35);
+  if(exag){g.fillStyle='#ffd29a';g.fillText('angles and wavelength exaggerated for display',10,53);}
+  const msg=inPh?(mR===1?'In phase: the two outgoing waves add':`In phase at order ${mR}: reflection (${hklTxt(mR*D.h,mR*D.k,mR*D.l)})`):`Out of phase by ${(((m%1)+1)%1*360).toFixed(0)}°: the outgoing waves cancel`;
+  txt(msg+(flip?'  (Friedel mate)':''),10,H-10,inPh?'#58d39a':'#ffb54a');
+  if(S.showBsm&&((S.eta+S.div)>0||S.bw>0)){g.textAlign='right';txt('teal wedge: η+δ+Δλ/λ acceptance; way oversimplified',W-8,H-28,'#7fe9d6');}
 }
 
 /* ================= detector ================= */
@@ -1018,7 +1056,7 @@ function drawDetector(){
   const pad=18,size=Math.min(Wp,Hp)-2*pad,cx=Wp/2,cy=Hp/2,mm=size/S.W;
   g.fillStyle='#0b1522'; g.fillRect(cx-size/2,cy-size/2,size,size);
   g.save(); g.beginPath(); g.rect(cx-size/2,cy-size/2,size,size); g.clip();
-  g.font='10.5px "IBM Plex Mono", ui-monospace, monospace'; g.textAlign='left';
+  g.font='12px "IBM Plex Mono", ui-monospace, monospace'; g.textAlign='left';
   detSpots=[];
   if(S.mode==='molecule'){
     const G=S.playing?72:128; MOLSTATS.G=G;
@@ -1040,20 +1078,30 @@ function drawDetector(){
   }
   // rings
   const rMax=S.W/2*Math.SQRT2;
-  for(const dd of [20,10,6,4,3,2.5,2,1.5,1.2,1.0,0.8,0.6]){ if(dd<S.lam/2)continue; const tt=2*Math.asin(S.lam/(2*dd)); if(tt>=Math.PI/2)continue; const r=S.D*Math.tan(tt); if(r>rMax||r*mm<10)continue;
-    g.strokeStyle='rgba(108,196,255,.22)';g.beginPath();g.arc(cx,cy,r*mm,0,7);g.stroke();
-    g.fillStyle='rgba(108,196,255,.65)';g.fillText(dd+' Å',cx+r*mm*0.7071+3,cy-r*mm*0.7071-3);}
+  if(S.mode==='crystal') for(const dd of [20,10,6,4,3,2.5,2,1.5,1.2,1.0,0.8,0.6]){ if(dd<S.lam/2)continue; const tt=2*Math.asin(S.lam/(2*dd)); if(tt>=Math.PI/2)continue; const r=S.D*Math.tan(tt); if(r>rMax||r*mm<10)continue;
+    g.strokeStyle='rgba(108,196,255,.35)';g.beginPath();g.arc(cx,cy,r*mm,0,7);g.stroke();
+    g.fillStyle='rgba(150,215,255,.9)';g.fillText(dd+' Å',cx+r*mm*0.7071+3,cy-r*mm*0.7071-3);}
+  { // two clear rings: one touching the detector edge, one at lower resolution (about 5x d_edge)
+    const dAtR=r=>S.lam/(2*Math.sin(Math.atan(r/S.D)/2)), dEdge=dAtR(S.W/2);
+    const NICE_D=[1.5,2,2.5,3,4,5,6,8,10,12,15,20,25,30,40,50];
+    let dLow=NICE_D.find(v=>v>=5*dEdge)||50; let rLow=S.D*Math.tan(2*Math.asin(Math.min(1,S.lam/(2*dLow))));
+    g.font='bold 12.5px "IBM Plex Mono", ui-monospace, monospace';
+    const ring=(r,lab)=>{g.lineWidth=1.6;g.strokeStyle='rgba(255,255,255,.75)';g.setLineDash([6,4]);g.beginPath();g.arc(cx,cy,r*mm,0,7);g.stroke();g.setLineDash([]);
+      const lx=cx+r*mm*0.7071+4,ly=cy+r*mm*0.7071+14;g.lineJoin='round';g.lineWidth=4;g.strokeStyle='#0b1522';g.strokeText(lab,lx,ly);g.fillStyle='#ffffff';g.fillText(lab,lx,ly);g.lineWidth=1;};
+    ring(S.W/2,dEdge.toFixed(2)+' Å (edge)'); if(rLow*mm>14) ring(rLow,dLow+' Å');
+    g.font='12px "IBM Plex Mono", ui-monospace, monospace';
+  }
   if(S.mode==='crystal'){
     const now=performance.now(),trail=S.playing?1600:0;
     for(let i=0;i<N;i++){
       if(!OK[i])continue; const live=LIT[i],age=now-TLIT[i]; if(!live&&age>trail)continue;
       const X=SPOT[i*2],Y=SPOT[i*2+1]; if(!isFinite(X)||Math.abs(X)>S.W/2||Math.abs(Y)>S.W/2)continue;
       const px=cx+X*mm,py=cy-Y*mm, fadeA=live?1:Math.max(0,1-age/trail);
-      let b=1; if(S.showI){const I=intensityOf(i)*Math.exp(-S.B*DS[i]*DS[i]/2)*(live?(0.35+0.65*WGT[i]):1); b=Math.min(1,Math.sqrt(S.expo*I*0.5));}
-      if(b<0.02)continue;
+      let b=1; const dsL=1/S.dmin, fz=S.fade?1-Math.max(0,Math.min(1,(DS[i]-0.8*dsL)/(0.2*dsL))):1; if(S.showI){const I=intensityOf(i)*Math.exp(-S.B*DS[i]*DS[i]/2)*(live?(0.35+0.65*WGT[i]):1); b=Math.min(1,Math.sqrt(S.expo*I*0.5));}
+      b*=fz; if(b<0.02)continue;
       const crowd=Math.min(1,Math.sqrt(400/Math.max(1,STATS.lit))); const a=fadeA*(0.3+0.7*b), r=(0.55+0.45*crowd)*(live?1.1:1)*(0.9+2.2*b);
-      const grd=g.createRadialGradient(px,py,0,px,py,r*2.6); grd.addColorStop(0,`rgba(255,226,170,${a})`); grd.addColorStop(0.35,`rgba(255,181,74,${0.85*a})`); grd.addColorStop(1,'rgba(255,181,74,0)');
-      g.fillStyle=grd; g.beginPath(); g.arc(px,py,r*2.6,0,7); g.fill();
+      const grd=g.createRadialGradient(px,py,0,px,py,r*1.6); grd.addColorStop(0,`rgba(255,240,205,${a})`); grd.addColorStop(0.45,`rgba(255,190,90,${0.9*a})`); grd.addColorStop(1,'rgba(255,181,74,0)');
+      g.fillStyle=grd; g.beginPath(); g.arc(px,py,r*1.6,0,7); g.fill();
       if(live) detSpots.push({px,py,i});
     }
     const D=SELD;
@@ -1068,7 +1116,7 @@ function drawDetector(){
   g.restore();
   g.strokeStyle='#2c405d'; g.lineWidth=1; g.strokeRect(cx-size/2+.5,cy-size/2+.5,size-1,size-1);
   g.fillStyle='#0a1019'; g.strokeStyle='rgba(226,232,241,.6)'; g.beginPath(); g.arc(cx,cy,4,0,7); g.fill(); g.stroke();
-  g.fillStyle='#8a99b0'; g.font='10.5px "IBM Plex Mono", ui-monospace, monospace'; g.textAlign='center';
+  g.fillStyle='#bcc7d6'; g.font='12px "IBM Plex Mono", ui-monospace, monospace'; g.textAlign='center';
   g.fillText(`${S.W} mm × ${S.W} mm at D = ${S.D} mm`,cx,Hp-4);
   g.textAlign='left'; g.fillText('↑ y (up)',cx-size/2+4,cy-size/2+12);
   $('detNote').textContent=S.mode==='crystal'
@@ -1147,8 +1195,8 @@ for(const id in RANGES){const R=RANGES[id];setRange(id,S[R.key]);
     detInfo(); update(N<150000||id==='env'?true:false);});
   $(id).addEventListener('change',()=>update());}
 document.querySelectorAll('[data-lam]').forEach(b=>b.addEventListener('click',()=>{S.lam=parseFloat(b.dataset.lam);setRange('lam',S.lam);buildReflections();detInfo();update();}));
-const TOG={tAbs:'showAbs',tLim:'showLim',tRes:'showRes',tX:'showX',tAx:'showAx',tLbl:'showLbl',tFade:'fade',tInt:'showI'};
-for(const id in TOG){$(id).checked=S[TOG[id]];$(id).addEventListener('change',()=>{S[TOG[id]]=$(id).checked;update();});}
+const TOG={tAbs:'showAbs',tLim:'showLim',tRes:'showRes',tX:'showX',tAx:'showAx',tLbl:'showLbl',tFade:'fade',tInt:'showI',tDet:'showDet',tBsm:'showBsm'};
+for(const id in TOG){$(id).checked=S[TOG[id]];$(id).addEventListener('change',()=>{S[TOG[id]]=$(id).checked;braggDirty=true;update();});}
 $('smear').addEventListener('change',()=>{S.smear=$('smear').value;buildSmear();update();});
 function syncSelInputs(){$('sh').value=S.sel[0];$('sk').value=S.sel[1];$('sl').value=S.sel[2];}
 function setSel(h,k,l){S.sel=[h,k,l];syncSelInputs();const pg=xtal.getObjectByName('planes');if(pg)buildPlanes(pg);update();}
@@ -1167,7 +1215,7 @@ function setMode(m){
   S.mode=m; $('mCrystal').setAttribute('aria-pressed',m==='crystal'); $('mMol').setAttribute('aria-pressed',m==='molecule');
   $('crystalCtl').hidden=m!=='crystal'; $('molCtl').hidden=m!=='molecule'; $('hklRow').hidden=m!=='crystal';
   $('braggCard').classList.toggle('dim',m==='molecule'); $('toDiff').disabled=m!=='crystal'; $('zSel').disabled=m!=='crystal';
-  $('braggNote').textContent=m==='crystal'?'Plane spacing and wavelength share one scale in this panel. Atoms schematic.':'Greyed out: Bragg planes exist only for a periodic lattice.';
+  if(!window.__bnote)window.__bnote=$('braggNote').textContent; $('braggNote').textContent=m==='crystal'?window.__bnote:'Greyed out: Bragg planes exist only for a periodic lattice.';
   if(m==='molecule') buildCloud();
   if(m==='molecule') $('nrefl').textContent='dmin sets the fade of the lattice view only; the continuous transform is drawn to 1.8 Å.'; else buildReflections();
   buildSketch(); legend(); update();
@@ -1189,6 +1237,18 @@ function fitCamera(animate){const dir=HOME.pos.clone().sub(HOME.tgt).normalize()
   if(animate){fly={t0:performance.now(),dur:reduceMotion?1:900,fromT:controls.target.clone(),toT:HOME.tgt.clone(),fromP:camera.position.clone(),toP:HOME.tgt.clone().addScaledVector(dir,d)};}
   else{camera.position.copy(HOME.tgt).addScaledVector(dir,d);controls.target.copy(HOME.tgt);controls.update();}}
 $('resetView').addEventListener('click',()=>{userMoved=false;fitCamera(true);});
+function resetAll(){
+  if(S.playing)togglePlay();
+  Object.assign(S,{bw:0.02,div:0,eta:0.20,smear:'all',phi:0,alp:14,bet:9,osc:0,spd:2,expo:1,env:Infinity,flux:1e5,
+    showDet:true,showBsm:true,showI:true,showAbs:false,showLim:true,showRes:false,showX:true,showAx:true,showLbl:true});
+  for(const id in TOG) $(id).checked=S[TOG[id]];
+  $('smear').value='all';
+  for(const id of ['bw','div','eta','phi','alp','bet','osc','spd','expo','env','flux']) setRange(id,S[RANGES[id].key]);
+  if(S.mode!=='crystal') setMode('crystal');
+  applyPreset('lys'); S.lam=1.0; setRange('lam',1.0); buildReflections(); buildSmear(); bringToDiffraction(); detInfo();
+  userMoved=false; fitCamera(true); braggDirty=true; update();
+}
+$('resetAll').addEventListener('click',resetAll);
 const closeDist=()=>{const sp=S.mode==='crystal'?S.lam*Math.min(len(CELL.AS),len(CELL.BS),len(CELL.CS)):S.lam/MOL.size;return Math.max(0.01,12*sp/Math.tan(camera.fov*DEG/2));};
 $('zO').addEventListener('click',()=>{userMoved=true;flyTo(new THREE.Vector3(0,0,0),closeDist());});
 $('zSel').addEventListener('click',()=>{userMoved=true;const p=SELD.p;flyTo(new THREE.Vector3(p[0]*S.lam,p[1]*S.lam,p[2]*S.lam),closeDist());});
