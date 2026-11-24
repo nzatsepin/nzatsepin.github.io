@@ -86,6 +86,6 @@ QT_QPA_PLATFORM=offscreen python -m pytest tests
 <p>Includes a modified CfelPyUtils geometry parser and the histogram clip function of cxiview.</p></main>
 <footer><div class="wrap">DatView: original written by Natasha Stander (Zatsepin lab, 2017–2019). Updated in 2026 in Zatsepin lab.<br>Zatsepin Lab · Department of Physics and Astronomy · Swinburne University of Technology</div></footer><script>
 document.querySelectorAll('.navtoggle').forEach(b=>b.addEventListener('click',()=>document.querySelector('.menu').classList.toggle('open')));
-function fit(f){try{const d=f.contentDocument;if(!d)return;const h=Math.max(d.documentElement.scrollHeight,d.body?d.body.scrollHeight:0);if(h)f.style.height=(h+4)+'px';}catch(e){}}
+function fit(f){try{const d=f.contentDocument;if(!d||!d.body)return;const b=d.body,cs=d.defaultView.getComputedStyle(b);const h=Math.ceil(Math.max(b.scrollHeight,b.getBoundingClientRect().bottom+parseFloat(cs.marginBottom||0)));if(h&&Math.abs(f.getBoundingClientRect().height-h)>2)f.style.height=h+'px';}catch(e){}}
 document.querySelectorAll('iframe.embed').forEach(f=>{f.addEventListener('load',()=>{fit(f);try{new ResizeObserver(()=>fit(f)).observe(f.contentDocument.documentElement)}catch(e){};setInterval(()=>fit(f),1500)})});
 </script></body></html>
