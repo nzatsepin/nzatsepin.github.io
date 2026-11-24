@@ -1,0 +1,1246 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Ewald Sphere Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/* Layout: instrument console. Controls | reciprocal space (3D) | real space (Bragg planes + detector). Single dark theme by choice: glowing reflections need a dark ground. */
+:root{
+  --bg:#0a1019; --panel:#101926; --panel2:#152132; --line:#22324a; --line2:#2c405d;
+  --fg:#e2e8f1; --muted:#8a99b0; --faint:#5c6b82;
+  --beam:#6cc4ff; --lit:#ffb54a; --dstar:#ff6f5e; --ok:#58d39a; --warn:#ffb54a; --bad:#ff6f5e;
+  --bw:#5fe0c8; --div:#b58cff; --mos:#ffd29a;
+  --ax-a:#ff7b7b; --ax-b:#62d896; --ax-c:#78acff;
+  --f-display:"Instrument Serif", Georgia, "Times New Roman", serif;
+  --f-body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--f-body);font-size:14px;line-height:1.45;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:14px 32px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px;margin-bottom:12px}
+h1{font-family:var(--f-display);font-weight:400;font-size:2rem;letter-spacing:.01em;margin:0;line-height:1.1}
+h1 em{color:var(--beam)}
+.sub{color:var(--muted);font-size:.92rem;max-width:72ch}
+h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:600;margin:0 0 8px}
+.app{display:grid;grid-template-columns:290px minmax(0,1fr) 400px;grid-template-areas:"ctl view side";gap:14px;align-items:start}
+.ctl{grid-area:ctl;display:flex;flex-direction:column;gap:12px}
+.view{grid-area:view;position:relative;height:max(560px, calc(100vh - 120px));border:1px solid var(--line);border-radius:10px;overflow:hidden;
+  background:radial-gradient(120% 90% at 40% 45%, #111c2c 0%, var(--bg) 70%)}
+.side{grid-area:side;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:0}
+.row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 8px;margin:6px 0}
+.row label{color:var(--fg);font-size:.86rem}
+.row .val{font-family:var(--f-mono);font-size:.8rem;color:var(--beam);font-variant-numeric:tabular-nums;text-align:right}
+.row input[type=range]{grid-column:1 / -1;width:100%;accent-color:var(--beam);margin:2px 0 0}
+.hint{color:var(--faint);font-size:.76rem;margin:2px 0 0}
+select,input[type=number]{background:var(--panel2);color:var(--fg);border:1px solid var(--line2);border-radius:6px;padding:5px 7px;font:inherit;font-size:.85rem;width:100%}
+input[type=number]{font-family:var(--f-mono);font-size:.8rem}
+.cellgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px}
+.cellgrid label{display:flex;flex-direction:column;gap:2px;font-size:.72rem;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+button{font:inherit;font-size:.8rem;background:var(--panel2);color:var(--fg);border:1px solid var(--line2);border-radius:6px;padding:5px 10px;cursor:pointer}
+button:hover{border-color:var(--beam)}
+button:disabled{opacity:.4;cursor:default}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--beam);outline-offset:1px}
+button.primary{background:#16314a;border-color:#2f6b97;color:#d9efff}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line2);border-radius:7px;overflow:hidden;margin-bottom:10px}
+.seg button{border:0;border-radius:0;background:transparent;color:var(--muted);padding:7px 6px}
+.seg button[aria-pressed="true"]{background:#16314a;color:#d9efff}
+.toggles{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:.82rem}
+.toggles label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.toggles input{accent-color:var(--beam)}
+canvas{display:block}
+#gl{position:absolute;inset:0;width:100%;height:100%}
+.labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lbl{position:absolute;transform:translate(-50%,-50%);font-family:var(--f-mono);font-size:11.5px;white-space:nowrap;color:var(--muted);text-shadow:0 0 4px var(--bg),0 0 8px var(--bg)}
+.lbl.beam{color:var(--beam)} .lbl.lit{color:var(--lit)} .lbl.ds{color:var(--dstar)} .lbl.a{color:var(--ax-a)} .lbl.b{color:var(--ax-b)} .lbl.c{color:var(--ax-c)} .lbl.fg{color:var(--fg)}
+.ob{text-decoration:overline}
+.toolbar{position:absolute;top:10px;left:10px;right:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;pointer-events:none}
+.toolbar > *{pointer-events:auto}
+.toolbar .spacer{flex:1}
+.envbox{position:absolute;left:10px;top:50px;width:min(300px, calc(100% - 20px));background:rgba(10,16,25,.78);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.envbox .row{margin:2px 0}
+.legend{position:absolute;left:10px;bottom:10px;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.74rem;color:var(--muted);background:rgba(10,16,25,.72);padding:6px 9px;border-radius:6px;max-width:calc(100% - 200px)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.scale{position:absolute;right:10px;bottom:10px;font-family:var(--f-mono);font-size:.72rem;color:var(--muted);background:rgba(10,16,25,.72);padding:6px 9px;border-radius:6px;text-align:right}
+.scalebar{height:6px;border:1px solid var(--fg);border-top:0;margin:3px 0 2px auto}
+.info{position:absolute;right:10px;top:50px;font-family:var(--f-mono);font-size:.72rem;color:var(--muted);background:rgba(10,16,25,.72);padding:6px 9px;border-radius:6px;text-align:right}
+.panelcanvas{width:100%;border-radius:6px;background:#0c1420;border:1px solid var(--line)}
+#bragg{aspect-ratio:400/270}
+#det{aspect-ratio:1/1}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:.84rem}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-family:var(--f-mono);font-size:.8rem;text-align:right;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.74rem;font-weight:500;border:1px solid}
+.pill.ok{color:var(--ok);border-color:rgba(88,211,154,.5);background:rgba(88,211,154,.08)}
+.pill.warn{color:var(--warn);border-color:rgba(255,181,74,.5);background:rgba(255,181,74,.08)}
+.pill.bad{color:var(--bad);border-color:rgba(255,111,94,.5);background:rgba(255,111,94,.08)}
+.pill.mol{color:var(--div);border-color:rgba(181,140,255,.5);background:rgba(181,140,255,.08)}
+.hklin{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+.hklin input{width:58px}
+.hklin span{color:var(--muted);font-size:.8rem}
+.tip{position:absolute;pointer-events:none;background:#08101a;border:1px solid var(--line2);color:var(--fg);font-family:var(--f-mono);font-size:.74rem;padding:3px 7px;border-radius:5px;transform:translate(10px,-120%);white-space:nowrap}
+.detwrap{position:relative}
+.theory{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
+.theory p,.theory li{color:#c7d0dd;font-size:.88rem;max-width:70ch}
+.eq{font-family:var(--f-display);font-size:1.25rem;color:var(--fg);margin:6px 0 2px;letter-spacing:.01em}
+.eq i{font-style:italic}
+.refs{font-size:.8rem;color:var(--muted);padding-left:18px;margin:6px 0 0}
+.refs li{margin:3px 0;color:var(--muted);font-size:.8rem}
+.note{color:var(--faint);font-size:.76rem}
+.dim{opacity:.35;pointer-events:none}
+@media (max-width:1250px){
+  .app{grid-template-columns:minmax(0,1fr) 380px;grid-template-areas:"view side" "ctl ctl"}
+  .ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+  .view{height:max(540px, calc(100vh - 140px))}
+}
+@media (max-width:820px){
+  .app{grid-template-columns:minmax(0,1fr);grid-template-areas:"view" "side" "ctl"}
+  .view{height:max(440px, 70vh)}
+  h1{font-size:1.6rem}
+  .lhint,.info{display:none}
+  .envbox{top:88px}
+  .legend{max-width:calc(100% - 20px);bottom:56px}
+}
+</style>
+
+<header>
+  <h1>Ewald Sphere <em>Lab</em></h1>
+  <div class="sub">Rotate a crystal, or a single molecule, in the beam. Wherever reciprocal space meets the Ewald sphere, X-rays scatter to the detector. The geometry is the same for both; a crystal concentrates the signal into Bragg peaks.</div>
+</header>
+
+<div class="app">
+  <aside class="ctl">
+    <section class="card">
+      <h2>Sample</h2>
+      <div class="seg" role="group" aria-label="Sample type">
+        <button id="mCrystal" aria-pressed="true">Crystal</button>
+        <button id="mMol" aria-pressed="false">Single molecule</button>
+      </div>
+      <div id="crystalCtl">
+        <select id="preset" aria-label="Crystal preset"></select>
+        <div class="cellgrid">
+          <label>a (Å)<input id="ca" type="number" step="0.001" min="1"></label>
+          <label>b (Å)<input id="cb" type="number" step="0.001" min="1"></label>
+          <label>c (Å)<input id="cc" type="number" step="0.001" min="1"></label>
+          <label>α (°)<input id="cal" type="number" step="0.1" min="30" max="150"></label>
+          <label>β (°)<input id="cbe" type="number" step="0.1" min="30" max="150"></label>
+          <label>γ (°)<input id="cga" type="number" step="0.1" min="30" max="150"></label>
+        </div>
+        <div style="margin-top:8px">
+          <label class="hint" for="rule">Reflection conditions</label>
+          <select id="rule">
+            <option value="P">P: none</option>
+            <option value="I">I-centred: h+k+l = 2n</option>
+            <option value="F">F-centred: h,k,l all even or all odd</option>
+            <option value="C">C-centred: h+k = 2n</option>
+            <option value="diamond">Diamond (Fd3̄m): F, and h+k+l = 4n if all even</option>
+            <option value="P43212">P4₃2₁2: h00 h = 2n; 00l l = 4n</option>
+            <option value="P3221">P3₂21: 00l l = 3n</option>
+          </select>
+        </div>
+      </div>
+      <div id="molCtl" hidden>
+        <p class="hint" style="margin:0 0 4px">Model: 129-residue chain (one scatterer per residue) packed in a 30 × 30 × 45 Å ellipsoid, roughly lysozyme-sized. Same model as the lysozyme crystal preset.</p>
+        <div class="row"><label for="flux">Scattered photons on detector</label><span class="val" id="fluxv"></span>
+          <input id="flux" type="range" min="0" max="100" step="0.5"></div>
+      </div>
+      <div class="row"><label for="dmin">Resolution limit d<sub>min</sub></label><span class="val" id="dminv"></span>
+        <input id="dmin" type="range" min="0.5" max="12" step="0.05"></div>
+      <p class="hint" id="nrefl"></p>
+    </section>
+
+    <section class="card">
+      <h2>Beam</h2>
+      <div class="row"><label for="lam">Wavelength λ</label><span class="val" id="lamv"></span>
+        <input id="lam" type="range" min="0.5" max="2.5" step="0.0001"></div>
+      <div class="chips">
+        <button data-lam="1.54184">Cu Kα</button>
+        <button data-lam="0.71073">Mo Kα</button>
+        <button data-lam="1.0">1.0 Å</button>
+        <button data-lam="0.61992">20 keV</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Smearing</h2>
+      <div class="row"><label for="bw">Bandwidth Δλ/λ</label><span class="val" id="bwv"></span>
+        <input id="bw" type="range" min="0" max="100" step="0.5"></div>
+      <div class="row"><label for="div">Beam divergence δ</label><span class="val" id="divv"></span>
+        <input id="div" type="range" min="0" max="3" step="0.01"></div>
+      <div class="row"><label for="eta">Mosaic spread η</label><span class="val" id="etav"></span>
+        <input id="eta" type="range" min="0" max="3" step="0.01"></div>
+      <label class="hint" for="smear">Show in 3D</label>
+      <select id="smear">
+        <option value="all">All three</option>
+        <option value="bw">Bandwidth: shell between 1/λ<sub>max</sub> and 1/λ<sub>min</sub></option>
+        <option value="div">Divergence: sphere rotated about O</option>
+        <option value="mos">Mosaicity: points smeared into arcs</option>
+        <option value="none">None</option>
+      </select>
+      <p class="hint">Acceptance: |θ − θ<sub>B</sub>| ≤ ½[η + δ + (Δλ/λ) tan θ<sub>B</sub>]. Every term vanishes at O and grows with |<b>d</b>*|.</p>
+    </section>
+
+    <section class="card">
+      <h2>Orientation</h2>
+      <div class="row"><label for="phi">φ, spindle (vertical, ⟂ beam)</label><span class="val" id="phiv"></span>
+        <input id="phi" type="range" min="-180" max="180" step="0.01"></div>
+      <div class="row"><label for="alp">Mount tilt α (about z)</label><span class="val" id="alpv"></span>
+        <input id="alp" type="range" min="-90" max="90" step="0.1"></div>
+      <div class="row"><label for="bet">Mount roll β (about x)</label><span class="val" id="betv"></span>
+        <input id="bet" type="range" min="-180" max="180" step="0.1"></div>
+      <div class="row"><label for="osc">Oscillation width Δφ</label><span class="val" id="oscv"></span>
+        <input id="osc" type="range" min="0" max="5" step="0.01"></div>
+      <div class="row"><label for="spd">Spin rate</label><span class="val" id="spdv"></span>
+        <input id="spd" type="range" min="0" max="100" step="0.5"></div>
+      <p class="hint">R = R<sub>y</sub>(φ)·R<sub>z</sub>(α)·R<sub>x</sub>(β). Lab frame: beam along +x, y up.</p>
+    </section>
+
+    <section class="card">
+      <h2>Detector</h2>
+      <div class="row"><label for="dd">Distance D</label><span class="val" id="ddv"></span>
+        <input id="dd" type="range" min="40" max="1000" step="1"></div>
+      <div class="row"><label for="dw">Width (square)</label><span class="val" id="dwv"></span>
+        <input id="dw" type="range" min="50" max="450" step="1"></div>
+      <div class="row"><label for="bfac">B-factor (display model)</label><span class="val" id="bfacv"></span>
+        <input id="bfac" type="range" min="0" max="80" step="0.5"></div>
+      <div class="row"><label for="expo">Display gain</label><span class="val" id="expov"></span>
+        <input id="expo" type="range" min="0" max="100" step="0.5"></div>
+      <dl class="kv" style="margin-top:6px">
+        <dt>d at edge</dt><dd id="dedge"></dd>
+        <dt>d at corner</dt><dd id="dcorner"></dd>
+      </dl>
+    </section>
+
+    <section class="card">
+      <h2>Display</h2>
+      <div class="toggles">
+        <label><input type="checkbox" id="tFade"> Fade to d<sub>min</sub></label>
+        <label><input type="checkbox" id="tInt" checked> Intensities</label>
+        <label><input type="checkbox" id="tAbs"> Absent hkl</label>
+        <label><input type="checkbox" id="tLim" checked> Limiting sphere</label>
+        <label><input type="checkbox" id="tRes"> Resolution sphere</label>
+        <label><input type="checkbox" id="tX" checked> Sample sketch</label>
+        <label><input type="checkbox" id="tAx" checked> Axes</label>
+        <label><input type="checkbox" id="tLbl" checked> Labels</label>
+      </div>
+    </section>
+  </aside>
+
+  <main class="view" id="view">
+    <canvas id="gl" aria-label="3D view of reciprocal space and the Ewald sphere"></canvas>
+    <div class="labels" id="labels"></div>
+    <div class="toolbar">
+      <button id="play" class="primary">▶ Spin φ</button>
+      <button id="toDiff">Bring selected into condition</button>
+      <span class="spacer"></span>
+      <button id="zO">Zoom to O</button>
+      <button id="zSel">Zoom to selected</button>
+      <button id="resetView">Fit</button>
+    </div>
+    <div class="envbox">
+      <div class="row"><label for="env">Show reciprocal space within</label><span class="val" id="envv"></span>
+        <input id="env" type="range" min="0" max="100" step="0.25"></div>
+      <div class="hint" style="margin:0">distance from the Ewald sphere surface</div>
+    </div>
+    <div class="info" id="info"></div>
+    <div class="legend" id="legend"></div>
+    <div class="scale" id="scale"><div id="scaleTxt"></div><div class="scalebar" id="scaleBar"></div><div id="scaleSub"></div></div>
+  </main>
+
+  <aside class="side">
+    <section class="card" id="braggCard">
+      <h2 id="braggTitle">Bragg planes</h2>
+      <canvas id="bragg" class="panelcanvas"></canvas>
+      <p class="note" style="margin:6px 0 0" id="braggNote">Plane spacing and wavelength share one scale in this panel. Atoms schematic.</p>
+    </section>
+
+    <section class="card">
+      <h2 id="selTitle">Selected reflection</h2>
+      <div class="hklin" id="hklRow">
+        <span>h</span><input id="sh" type="number" step="1" aria-label="h">
+        <span>k</span><input id="sk" type="number" step="1" aria-label="k">
+        <span>l</span><input id="sl" type="number" step="1" aria-label="l">
+      </div>
+      <div id="status" style="margin-bottom:8px"></div>
+      <dl class="kv" id="readout"></dl>
+    </section>
+
+    <section class="card">
+      <h2>Detector</h2>
+      <div class="detwrap">
+        <canvas id="det" class="panelcanvas"></canvas>
+        <div class="tip" id="tip" hidden></div>
+      </div>
+      <p class="note" style="margin:6px 0 0" id="detNote"></p>
+    </section>
+  </aside>
+</div>
+
+<section class="theory">
+  <div class="card">
+    <h2>Bragg's law</h2>
+    <div class="eq"><i>λ</i> = 2 <i>d</i><sub>hkl</sub> sin <i>θ</i></div>
+    <p>θ is the glancing angle between the incident beam and the lattice planes (hkl); the diffracted beam leaves at 2θ from the incident direction. Higher orders are written as separate reflections: the n-th order of (hkl) is (nh nk nl), with d<sub>nh,nk,nl</sub> = d<sub>hkl</sub>/n [1, 2].</p>
+  </div>
+  <div class="card">
+    <h2>Reciprocal lattice</h2>
+    <div class="eq"><b>d</b>*<sub>hkl</sub> = h<b>a</b>* + k<b>b</b>* + l<b>c</b>*,&nbsp; |<b>d</b>*<sub>hkl</sub>| = 1/<i>d</i><sub>hkl</sub></div>
+    <p><b>a</b>* = (<b>b</b>×<b>c</b>)/V and cyclic. <b>d</b>*<sub>hkl</sub> is normal to the planes (hkl). Rotating the crystal rotates the reciprocal lattice rigidly about its origin O [3, 4].</p>
+  </div>
+  <div class="card">
+    <h2>Ewald construction</h2>
+    <div class="eq"><b>k</b> − <b>k</b><sub>0</sub> = <b>q</b>,&nbsp; |<b>k</b>| = |<b>k</b><sub>0</sub>| = 1/<i>λ</i></div>
+    <p>The sphere of radius 1/λ is centred at C = O − <b>k</b><sub>0</sub>, so O lies on its surface. Elastic scattering samples reciprocal space only on this sphere. For a crystal, intensity is non-zero only at <b>q</b> = <b>d</b>*<sub>hkl</sub>, which is equivalent to Bragg's law with sin θ = λ|<b>d</b>*|/2. For a single molecule, the continuous transform |F(<b>q</b>)|² is sampled everywhere on the sphere. Only |<b>q</b>| ≤ 2/λ is reachable (limiting sphere), so d<sub>min</sub> ≥ λ/2 [3, 5]. Convention: |<b>k</b>| = 1/λ (physics texts often use 2π/λ).</p>
+  </div>
+  <div class="card">
+    <h2>Crystal versus single molecule</h2>
+    <div class="eq">I<sub>crystal</sub>(<b>q</b>) = |F<sub>mol</sub>(<b>q</b>)|² · |Σ<sub>n</sub> e<sup>2πi <b>q</b>·<b>r</b><sub>n</sub></sup>|²</div>
+    <p>The lattice sum is N² at reciprocal-lattice points and near zero elsewhere, so Bragg peaks sample the molecular transform with a gain of order N (number of unit cells). A single molecule gives the same transform without that gain, which is why its continuous pattern needs vastly higher fluence to record [6]. The detector intensities here are a display model: |F|² of the toy molecule (lysozyme preset), F from atom positions with Z·exp(−s²) form factors (NaCl, Si, Fe, simple cubic), or Wilson-distributed random values (other presets), all × exp(−B s²/2).</p>
+  </div>
+  <div class="card">
+    <h2>Smearing and the rotation method</h2>
+    <p>Bandwidth spreads the sphere into a shell bounded by radii 1/λ<sub>max</sub> and 1/λ<sub>min</sub>, all passing through O. Divergence rotates the sphere about O; mosaic spread rotates the lattice about O, which smears each point into an arc of length η|<b>d</b>*|. All three give zero width at O, growing with |<b>d</b>*|. The angular acceptance η + δ + (Δλ/λ) tan θ<sub>B</sub> follows from differentiating Bragg's law; it treats divergence as in-plane and ignores the Lorentz factor. Spinning about φ sweeps points through the sphere; points near the spindle axis that never cross it form the blind region [5]. Spot position on a flat detector: r = D tan 2θ. Photon energy E [keV] = 12.398 / λ [Å] [7].</p>
+    <ol class="refs">
+      <li>W. L. Bragg (1913). Proc. Camb. Phil. Soc. 17, 43–57.</li>
+      <li>W. H. Bragg &amp; W. L. Bragg (1913). Proc. R. Soc. Lond. A 88, 428–438.</li>
+      <li>P. P. Ewald (1921). Z. Kristallogr. 56, 129–156.</li>
+      <li>U. Shmueli (2008). Int. Tables Crystallogr. B, ch. 1.1, Reciprocal space in crystallography.</li>
+      <li>U. W. Arndt &amp; A. J. Wonacott (eds) (1977). The Rotation Method in Crystallography. North-Holland.</li>
+      <li>R. Neutze, R. Wouts, D. van der Spoel, E. Weckert &amp; J. Hajdu (2000). Nature 406, 752–757.</li>
+      <li>CODATA 2018: hc = 12.3984198 keV·Å.</li>
+    </ol>
+    <p class="note">Cell constants: NaCl a = 5.640 Å; Si a = 5.431 Å; α-Fe a = 2.8665 Å; α-quartz a = 4.916, c = 5.405 Å; tetragonal hen egg-white lysozyme a = 79.1, c = 37.9 Å (typical, varies with conditions). Lysozyme intensities ignore symmetry mates. Feature set informed by XRayView (G. N. Phillips Jr.).</p>
+  </div>
+</section>
+
+<script src="vendor/three.min.js"></script>
+<script src="vendor/OrbitControls.js"></script>
+<script>
+(function(){
+'use strict';
+const DEG=Math.PI/180, HC=12.3984198, TAU=2*Math.PI;
+const $=id=>document.getElementById(id);
+const reduceMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ================= presets ================= */
+const FC=[[0,0,0],[0,.5,.5],[.5,0,.5],[.5,.5,0]], IC=[[0,0,0],[.5,.5,.5]];
+const PRESETS={
+  lys:{name:'Lysozyme, tetragonal (P4₃2₁2)',a:79.1,b:79.1,c:37.9,al:90,be:90,ga:90,rule:'P43212',dmin:1.0,lam:1.0,B:20,sel:[12,7,4],fade:true,env:Infinity,intens:'mol',D:150,W:300},
+  nacl:{name:'NaCl, halite (Fm3̄m)',a:5.640,b:5.640,c:5.640,al:90,be:90,ga:90,rule:'F',dmin:0.8,lam:1.54184,B:1.5,sel:[2,0,0],motif:{atoms:[[11,[0,0,0]],[17,[.5,.5,.5]]],cen:FC},D:150,W:300},
+  sc:{name:'Simple cubic, didactic (P)',a:4,b:4,c:4,al:90,be:90,ga:90,rule:'P',dmin:0.9,lam:1.54184,B:1,sel:[1,1,0],motif:{atoms:[[8,[0,0,0]]],cen:[[0,0,0]]},D:150,W:300},
+  si:{name:'Silicon, diamond (Fd3̄m)',a:5.431,b:5.431,c:5.431,al:90,be:90,ga:90,rule:'diamond',dmin:0.8,lam:1.54184,B:0.5,sel:[1,1,1],motif:{atoms:[[14,[0,0,0]],[14,[.25,.25,.25]]],cen:FC},D:150,W:300},
+  fe:{name:'α-Iron, bcc (Im3̄m)',a:2.8665,b:2.8665,c:2.8665,al:90,be:90,ga:90,rule:'I',dmin:0.6,lam:1.54184,B:0.4,sel:[1,1,0],motif:{atoms:[[26,[0,0,0]]],cen:IC},D:150,W:300},
+  qtz:{name:'α-Quartz, hexagonal (P3₂21)',a:4.916,b:4.916,c:5.405,al:90,be:90,ga:120,rule:'P3221',dmin:1.0,lam:1.54184,B:1,sel:[1,0,1],D:150,W:300},
+  ortho:{name:'Orthorhombic, didactic (P)',a:3.5,b:5,c:7,al:90,be:90,ga:90,rule:'P',dmin:1.0,lam:1.54184,B:1,sel:[1,1,1],D:150,W:300},
+  mono:{name:'Monoclinic, didactic (C, β = 110°)',a:6,b:4,c:5,al:90,be:110,ga:90,rule:'C',dmin:1.0,lam:1.54184,B:1,sel:[1,1,0],D:150,W:300},
+  custom:{name:'Custom (edit cell)'}
+};
+
+const S={
+  mode:'crystal', preset:'lys', cell:{a:79.1,b:79.1,c:37.9,al:90,be:90,ga:90}, rule:'P43212', dmin:1.0,
+  lam:1.0, bw:0.02, div:0.0, eta:0.20, smear:'all', phi:0, alp:14, bet:9, osc:0, spd:2,
+  D:150, W:300, B:20, expo:1, env:Infinity, flux:1e5,
+  fade:true, showI:true, showAbs:false, showLim:true, showRes:false, showX:true, showAx:true, showLbl:true,
+  sel:[12,7,4], playing:false
+};
+
+function allowed(h,k,l,rule){
+  const ah=Math.abs(h),ak=Math.abs(k),al=Math.abs(l);
+  switch(rule){
+    case 'I': return (ah+ak+al)%2===0;
+    case 'C': return (ah+ak)%2===0;
+    case 'F': {const p=ah%2,q=ak%2,r=al%2;return p===q&&q===r;}
+    case 'diamond': {const p=ah%2,q=ak%2,r=al%2;if(!(p===q&&q===r))return false;if(p===0)return Math.abs(h+k+l)%4===0;return true;}
+    case 'P43212': if(h===0&&k===0)return al%4===0; if(k===0&&l===0)return ah%2===0; if(h===0&&l===0)return ak%2===0; return true;
+    case 'P3221': if(h===0&&k===0)return al%3===0; return true;
+    default: return true;
+  }
+}
+
+/* ================= math ================= */
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const scl=(a,s)=>[a[0]*s,a[1]*s,a[2]*s];
+const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]];
+const len=a=>Math.hypot(a[0],a[1],a[2]);
+const mulMV=(M,v)=>[M[0]*v[0]+M[1]*v[1]+M[2]*v[2],M[3]*v[0]+M[4]*v[1]+M[5]*v[2],M[6]*v[0]+M[7]*v[1]+M[8]*v[2]];
+const mulMTV=(M,v)=>[M[0]*v[0]+M[3]*v[1]+M[6]*v[2],M[1]*v[0]+M[4]*v[1]+M[7]*v[2],M[2]*v[0]+M[5]*v[1]+M[8]*v[2]];
+function mulMM(A,B){const C=new Array(9);for(let i=0;i<3;i++)for(let j=0;j<3;j++)C[i*3+j]=A[i*3]*B[j]+A[i*3+1]*B[3+j]+A[i*3+2]*B[6+j];return C;}
+const Rx=t=>{const c=Math.cos(t),s=Math.sin(t);return[1,0,0,0,c,-s,0,s,c];};
+const Ry=t=>{const c=Math.cos(t),s=Math.sin(t);return[c,0,s,0,1,0,-s,0,c];};
+const Rz=t=>{const c=Math.cos(t),s=Math.sin(t);return[c,-s,0,s,c,0,0,0,1];};
+const wrapRad=x=>{x%=TAU;return x<0?x+TAU:x;};
+const wrapDeg=x=>((x+180)%360+360)%360-180;
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+let CELL=null;
+function computeCell(){
+  const p=S.cell,ca=Math.cos(p.al*DEG),cb=Math.cos(p.be*DEG),cg=Math.cos(p.ga*DEG),sg=Math.sin(p.ga*DEG);
+  const A=[p.a,0,0],B=[p.b*cg,p.b*sg,0];
+  const cx=p.c*cb,cy=p.c*(ca-cb*cg)/sg,cz2=p.c*p.c-cx*cx-cy*cy;
+  const C=[cx,cy,Math.sqrt(Math.max(cz2,1e-6))];
+  const V=dot(A,cross(B,C));
+  CELL={A,B,C,V,AS:scl(cross(B,C),1/V),BS:scl(cross(C,A),1/V),CS:scl(cross(A,B),1/V),valid:cz2>1e-6};
+}
+const hklVec=(h,k,l)=>add(add(scl(CELL.AS,h),scl(CELL.BS,k)),scl(CELL.CS,l));
+function hklHTML(h,k,l){const big=Math.abs(h)>9||Math.abs(k)>9||Math.abs(l)>9;return[h,k,l].map(x=>x<0?`<span class="ob">${-x}</span>`:String(x)).join(big?' ':'');}
+function hklTxt(h,k,l){const big=Math.abs(h)>9||Math.abs(k)>9||Math.abs(l)>9;return[h,k,l].map(x=>x<0?String(-x).split('').map(d=>d+'̅').join(''):String(x)).join(big?' ':'');}
+
+/* ================= toy molecule ================= */
+const MOL=(function(){
+  const rnd=mulberry32(1955), ax=[15,15,22.5], n=129, pts=[[0,0,-14]];
+  const unit=()=>{const z=2*rnd()-1,t=TAU*rnd(),r=Math.sqrt(1-z*z);return[r*Math.cos(t),r*Math.sin(t),z];};
+  let dir=[0,0,1];
+  for(let i=1;i<n;i++){
+    let best=null;
+    for(let tries=0;tries<400&&!best;tries++){
+      let u=unit(); if(dot(u,dir)<-0.2) continue; // avoid immediate reversal
+      const c=add(pts[i-1],scl(u,3.8));
+      if((c[0]/ax[0])**2+(c[1]/ax[1])**2+(c[2]/ax[2])**2>1) continue;
+      let ok=true; for(let j=0;j<i-1;j++){const d=[c[0]-pts[j][0],c[1]-pts[j][1],c[2]-pts[j][2]]; if(dot(d,d)<4.4*4.4){ok=false;break;}}
+      if(ok){best=c;dir=u;}
+    }
+    if(!best){const u=unit();best=add(pts[i-1],scl(u,3.8));dir=u;}
+    pts.push(best);
+  }
+  const cen=scl(pts.reduce((s,p)=>add(s,p),[0,0,0]),1/n); const P=pts.map(p=>add(p,scl(cen,-1)));
+  const X=new Float64Array(n),Y=new Float64Array(n),Z=new Float64Array(n);
+  P.forEach((p,i)=>{X[i]=TAU*p[0];Y[i]=TAU*p[1];Z[i]=TAU*p[2];});
+  let ext=0; for(const p of P) ext=Math.max(ext,len(p));
+  return {P,X,Y,Z,n,size:2*ext};
+})();
+function molI(qx,qy,qz){ // |Σ exp(2πi q·r)|² / n  (Wilson-normalised, mean ≈ 1 away from q = 0)
+  let re=0,im=0; const X=MOL.X,Y=MOL.Y,Z=MOL.Z;
+  for(let j=0;j<MOL.n;j++){const ph=qx*X[j]+qy*Y[j]+qz*Z[j]; re+=Math.cos(ph); im+=Math.sin(ph);}
+  return (re*re+im*im)/MOL.n;
+}
+
+/* ================= reflection table ================= */
+let N=0,HKL=null,VC=null,DS=null,OK=null,LIT=null,SPOT=null,TLIT=null,INT=null,WGT=null;
+let dsMax=0,dEff=0,truncated=false,motifSum2=1;
+function buildReflections(){
+  computeCell();
+  dEff=Math.max(S.dmin,S.lam/2); dsMax=1/dEff;
+  const hm=Math.ceil(len(CELL.A)*dsMax),km=Math.ceil(len(CELL.B)*dsMax),lm=Math.ceil(len(CELL.C)*dsMax);
+  const CAP=1600000; truncated=false;
+  const est=Math.min(CAP,Math.ceil(4/3*Math.PI*dsMax**3*CELL.V*1.05)+64);
+  let hk=new Int16Array(est*3),vc=new Float32Array(est*3),ds=new Float32Array(est),ok=new Uint8Array(est); let n=0;
+  const AS=CELL.AS,BS=CELL.BS,CS=CELL.CS, d2max=dsMax*dsMax;
+  outer: for(let h=-hm;h<=hm;h++)for(let k=-km;k<=km;k++){
+    const bx=h*AS[0]+k*BS[0],by=h*AS[1]+k*BS[1],bz=h*AS[2]+k*BS[2];
+    for(let l=-lm;l<=lm;l++){
+      if(!h&&!k&&!l)continue;
+      const x=bx+l*CS[0],y=by+l*CS[1],z=bz+l*CS[2],d2=x*x+y*y+z*z;
+      if(d2>d2max)continue;
+      if(n>=hk.length/3){ if(n>=CAP){truncated=true;break outer;} const m=Math.min(CAP,Math.ceil(n*1.3));
+        const h2=new Int16Array(m*3);h2.set(hk);hk=h2;const v2=new Float32Array(m*3);v2.set(vc);vc=v2;const s2=new Float32Array(m);s2.set(ds);ds=s2;const o2=new Uint8Array(m);o2.set(ok);ok=o2;}
+      hk[n*3]=h;hk[n*3+1]=k;hk[n*3+2]=l; vc[n*3]=x;vc[n*3+1]=y;vc[n*3+2]=z; ds[n]=Math.sqrt(d2); ok[n]=allowed(h,k,l,S.rule)?1:0; n++;
+    }
+  }
+  N=n; HKL=hk.subarray(0,n*3); VC=vc.subarray(0,n*3); DS=ds.subarray(0,n); OK=ok.subarray(0,n);
+  LIT=new Uint8Array(N); SPOT=new Float32Array(N*2); TLIT=new Float64Array(N).fill(-1e9); INT=new Float32Array(N).fill(NaN); WGT=new Float32Array(N);
+  const P=PRESETS[S.preset]; motifSum2=1;
+  if(P&&P.motif){motifSum2=0;for(const [Z] of P.motif.atoms) motifSum2+=Z*Z*P.motif.cen.length;}
+  let nOk=0; for(let i=0;i<N;i++) nOk+=OK[i];
+  $('nrefl').textContent=`${nOk.toLocaleString()} allowed reflections with d ≥ ${dEff.toFixed(2)} Å`+(S.dmin<S.lam/2?' (limited by λ/2)':'')+(truncated?'. List truncated: raise dmin':'')+'.';
+  buildPointsGeometry(); buildSketch();
+}
+
+/* modelled intensity (display only): |F|²·exp(−B s²/2), Wilson-normalised so ⟨I⟩ ≈ 1 at low resolution */
+function hash3(h,k,l){if(h<0||(h===0&&(k<0||(k===0&&l<0)))){h=-h;k=-k;l=-l;} let x=(h*73856093)^(k*19349663)^(l*83492791); x=Math.imul(x^(x>>>16),0x45d9f3b); x=Math.imul(x^(x>>>16),0x45d9f3b); x^=x>>>16; return ((x>>>0)+0.5)/4294967296;}
+function intensityOf(i){
+  if(!isNaN(INT[i])) return INT[i];
+  const h=HKL[i*3],k=HKL[i*3+1],l=HKL[i*3+2], s=DS[i]; const P=PRESETS[S.preset]; let I;
+  if(P&&P.intens==='mol'){ I=molI(VC[i*3],VC[i*3+1],VC[i*3+2]); }
+  else if(P&&P.motif){ let re=0,im=0; const fs=Math.exp(-s*s);
+    for(const [Z,x] of P.motif.atoms) for(const t of P.motif.cen){const ph=TAU*(h*(x[0]+t[0])+k*(x[1]+t[1])+l*(x[2]+t[2])); re+=Z*fs*Math.cos(ph); im+=Z*fs*Math.sin(ph);}
+    I=(re*re+im*im)/motifSum2; }
+  else I=-Math.log(hash3(h,k,l));
+  INT[i]=I; return I;
+}
+
+/* ================= three.js scene ================= */
+const view=$('view'),glc=$('gl');
+const renderer=new THREE.WebGLRenderer({canvas:glc,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(36,1,0.0005,100);
+const HOME={pos:new THREE.Vector3(-0.3,1.9,5.0),tgt:new THREE.Vector3(-0.55,-0.05,0)};
+camera.position.copy(HOME.pos);
+const controls=new THREE.OrbitControls(camera,glc);
+controls.target.copy(HOME.tgt); controls.enableDamping=true; controls.dampingFactor=0.08; controls.minDistance=0.003; controls.maxDistance=14; controls.zoomSpeed=1.2; controls.update();
+const COL={beam:0x6cc4ff,lit:0xffb54a,ds:0xff6f5e,a:0xff7b7b,b:0x62d896,c:0x78acff,bw:0x5fe0c8,div:0xb58cff,mos:0xffd29a};
+
+function fresnelMat(color,base,rim){
+  return new THREE.ShaderMaterial({uniforms:{uC:{value:new THREE.Color(color)},uB:{value:base},uR:{value:rim}},
+    vertexShader:`varying vec3 vN;varying vec3 vV;void main(){vec4 mv=modelViewMatrix*vec4(position,1.);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}`,
+    fragmentShader:`uniform vec3 uC;uniform float uB;uniform float uR;varying vec3 vN;varying vec3 vV;void main(){float f=1.-abs(dot(normalize(vN),normalize(vV)));gl_FragColor=vec4(uC,uB+uR*pow(f,3.));}`,
+    transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending});
+}
+function circlePts(r,plane,cx){const pts=[],n=256;for(let i=0;i<=n;i++){const t=i/n*TAU,c=Math.cos(t)*r,s=Math.sin(t)*r;pts.push(plane==='xz'?new THREE.Vector3(cx+c,0,s):new THREE.Vector3(cx+c,s,0));}return pts;}
+function circle(r,plane,color,opacity,dashed,cx){
+  const g=new THREE.BufferGeometry().setFromPoints(circlePts(r,plane,cx||0));
+  const m=dashed?new THREE.LineDashedMaterial({color,transparent:true,opacity,dashSize:0.04,gapSize:0.03}):new THREE.LineBasicMaterial({color,transparent:true,opacity});
+  const L=new THREE.Line(g,m); if(dashed)L.computeLineDistances(); return L;
+}
+function line(a,b,color,opacity,dashed){
+  const g=new THREE.BufferGeometry().setFromPoints([a,b]);
+  const m=dashed?new THREE.LineDashedMaterial({color,transparent:true,opacity,dashSize:0.05,gapSize:0.04}):new THREE.LineBasicMaterial({color,transparent:true,opacity});
+  const L=new THREE.Line(g,m); if(dashed)L.computeLineDistances(); return L;
+}
+
+/* Ewald sphere: radius 1 in scene units (scene length = λ × Å⁻¹), centre C = (−1,0,0) */
+const ewald=new THREE.Group(); ewald.position.set(-1,0,0); scene.add(ewald);
+ewald.add(new THREE.Mesh(new THREE.SphereGeometry(1,96,64),fresnelMat(COL.beam,0.022,0.40)));
+ewald.add(circle(1,'xz',COL.beam,0.6)); ewald.add(circle(1,'xy',COL.beam,0.3));
+for(const lat of [-60,-30,30,60]){const r=Math.cos(lat*DEG),c=circle(r,'xz',COL.beam,0.09);c.position.y=Math.sin(lat*DEG);ewald.add(c);}
+for(const lon of [45,90,135]){const c=circle(1,'xy',COL.beam,0.07);c.rotation.y=lon*DEG;ewald.add(c);}
+const limiting=new THREE.Group(); scene.add(limiting);
+limiting.add(new THREE.Mesh(new THREE.SphereGeometry(2,64,40),fresnelMat(0x8aa0c0,0.0,0.14)));
+limiting.add(circle(2,'xz',0x8aa0c0,0.26,true));
+const resSphere=new THREE.Group(); scene.add(resSphere);
+resSphere.add(new THREE.Mesh(new THREE.SphereGeometry(1,64,40),fresnelMat(0xb58cff,0.0,0.2)));
+resSphere.add(circle(1,'xz',0xb58cff,0.32,true));
+
+/* smearing visuals */
+const smearG=new THREE.Group(); scene.add(smearG);
+function buildSmear(){
+  while(smearG.children.length){const c=smearG.children.pop(); c.geometry&&c.geometry.dispose();}
+  const show=S.smear;
+  // bandwidth: spheres for λ' in [λ(1−bw/2), λ(1+bw/2)] all through O; scene radius λ/λ'
+  const bw=S.bw/100;
+  if((show==='bw'||show==='all')&&bw>0){
+    const steps=13;
+    for(let i=0;i<steps;i++){const f=-0.5+i/(steps-1), r=1/(1+f*bw), edge=(i===0||i===steps-1);
+      smearG.add(circle(r,'xz',COL.bw,edge?0.75:0.16,false,-r)); smearG.add(circle(r,'xy',COL.bw,edge?0.45:0.08,false,-r));}
+    for(const f of [-0.5,0.5]){const r=1/(1+f*bw), m=new THREE.Mesh(new THREE.SphereGeometry(r,64,40),fresnelMat(COL.bw,0.0,0.16)); m.position.set(-r,0,0); smearG.add(m);}
+  }
+  // divergence: sphere rotated about O by ±δ/2 (horizontal and vertical components)
+  const dv=S.div*DEG;
+  if((show==='div'||show==='all')&&dv>0){
+    const steps=11;
+    for(const axis of ['y','z']) for(let i=0;i<steps;i++){const a=(-0.5+i/(steps-1))*dv, edge=(i===0||i===steps-1);
+      const g=new THREE.Group(); const c=circle(1,axis==='y'?'xz':'xy',COL.div,edge?0.7:0.14,false,-1); g.add(c); g.rotation[axis]=a; smearG.add(g);}
+  }
+}
+/* mosaic arcs (built on CPU for points near the sphere) */
+const ARC_MAX=6000, ARC_SEG=8;
+const arcBuf=new Float32Array(ARC_MAX*ARC_SEG*2*2*3);
+const arcGeoM=new THREE.BufferGeometry(); arcGeoM.setAttribute('position',new THREE.BufferAttribute(arcBuf,3));
+const mosArcs=new THREE.LineSegments(arcGeoM,new THREE.LineBasicMaterial({color:COL.mos,transparent:true,opacity:0.7,blending:THREE.AdditiveBlending,depthWrite:false}));
+mosArcs.frustumCulled=false; scene.add(mosArcs);
+
+/* beam & axes */
+(function(){
+  const g=new THREE.Group();
+  const geo=new THREE.CylinderGeometry(0.01,0.01,1,16); geo.rotateZ(-Math.PI/2); geo.translate(0.5,0,0);
+  g.add(new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:COL.beam,transparent:true,opacity:0.95})));
+  const geo2=new THREE.CylinderGeometry(0.03,0.03,1,16); geo2.rotateZ(-Math.PI/2); geo2.translate(0.5,0,0);
+  g.add(new THREE.Mesh(geo2,new THREE.MeshBasicMaterial({color:COL.beam,transparent:true,opacity:0.12,blending:THREE.AdditiveBlending,depthWrite:false})));
+  g.position.set(-3.4,0,0); g.scale.set(2.4,1,1); scene.add(g);
+})();
+scene.add(line(new THREE.Vector3(0,0,0),new THREE.Vector3(2.4,0,0),COL.beam,0.35,true));
+scene.add(line(new THREE.Vector3(0,-1.7,0),new THREE.Vector3(0,1.7,0),0x9fb0c8,0.45,true));
+const spinRing=circle(0.12,'xz',0x9fb0c8,0.6); spinRing.position.y=1.55; scene.add(spinRing);
+
+const UP=new THREE.Vector3(0,1,0);
+function makeArrow(color,opacity){
+  const g=new THREE.Group(),mat=new THREE.MeshBasicMaterial({color,transparent:(opacity??1)<1,opacity:opacity??1});
+  const shaft=new THREE.Mesh(new THREE.CylinderGeometry(1,1,1,12),mat),head=new THREE.Mesh(new THREE.ConeGeometry(3.2,1,18),mat);
+  g.add(shaft,head); g.userData={shaft,head,from:new THREE.Vector3(),to:new THREE.Vector3(),w:1,on:false}; scene.add(g); return g;
+}
+function setArrow(g,from,to,w){g.userData.from.copy(from);g.userData.to.copy(to);if(w)g.userData.w=w;g.userData.on=true;}
+function layoutArrow(g,r){
+  const u=g.userData; if(!u.on){g.visible=false;return;}
+  const d=new THREE.Vector3().subVectors(u.to,u.from),L=d.length(); if(L<1e-7){g.visible=false;return;}
+  g.visible=true; d.divideScalar(L); r*=u.w;
+  const h=Math.min(r*9,L*0.4);
+  g.position.copy(u.from); g.quaternion.setFromUnitVectors(UP,d);
+  u.shaft.scale.set(r,Math.max(L-h,1e-6),r); u.shaft.position.set(0,(L-h)/2,0);
+  u.head.scale.set(r,h,r); u.head.position.set(0,L-h/2,0);
+}
+const arK0=makeArrow(COL.beam),arK=makeArrow(COL.lit),arDs=makeArrow(COL.ds);
+const arAS=makeArrow(COL.a,0.9),arBS=makeArrow(COL.b,0.9),arCS=makeArrow(COL.c,0.9);
+const ARROWS=[arK0,arK,arDs,arAS,arBS,arCS];
+const offLine=line(new THREE.Vector3(),new THREE.Vector3(1,0,0),COL.lit,0.6,true); scene.add(offLine);
+const triGeo=new THREE.BufferGeometry(); triGeo.setAttribute('position',new THREE.Float32BufferAttribute(new Float32Array(9),3));
+const tri=new THREE.Mesh(triGeo,new THREE.MeshBasicMaterial({color:COL.lit,transparent:true,opacity:0.08,side:THREE.DoubleSide,depthWrite:false})); scene.add(tri);
+const arcGeo=new THREE.BufferGeometry(); arcGeo.setAttribute('position',new THREE.Float32BufferAttribute(new Float32Array(3*41),3));
+const arc2t=new THREE.Line(arcGeo,new THREE.LineBasicMaterial({color:COL.lit,transparent:true,opacity:0.9})); scene.add(arc2t);
+const oDot=new THREE.Mesh(new THREE.SphereGeometry(1,20,14),new THREE.MeshBasicMaterial({color:0xffffff})); scene.add(oDot);
+const cDot=new THREE.Mesh(new THREE.SphereGeometry(1,20,14),new THREE.MeshBasicMaterial({color:COL.beam})); cDot.position.set(-1,0,0); scene.add(cDot);
+
+/* ---- reciprocal lattice points: rotation, shell test, envelope and fade run on the GPU ---- */
+const latticeVS=`
+attribute vec3 aV; attribute float aOk;
+uniform mat3 uR; uniform mat3 uM0; uniform float uLam,uAng,uBw,uEnv,uShowAbs,uFade0,uFade1,uScale,uBase,uPhi,uOsc;
+varying vec3 vC; varying float vA;
+void main(){
+  vec3 p=uR*aV; float ds=length(aV);
+  vec4 mv=modelViewMatrix*vec4(p*uLam,1.);
+  float sB=uLam*ds*0.5; float lit=0.;
+  if(aOk>0.5&&sB<1.){
+    float thB=asin(sB); float thc=asin(clamp(-p.x/ds,-1.,1.));
+    float w=uAng+uBw*tan(thB);
+    if(abs(thc-thB)<=0.5*w+1e-7) lit=1.;
+    else if(uOsc>0.){ vec3 p0=uM0*aV; float R=length(p0.xz); float C=uLam*ds*ds*0.5;
+      if(R>=C){ float psi=atan(p0.z,p0.x); float a=acos(-C/R);
+        if(mod(psi+a-uPhi,6.2831853)<=uOsc||mod(psi-a-uPhi,6.2831853)<=uOsc) lit=1.; } }
+  }
+  float k0=1./uLam; float dist=abs(length(p+vec3(k0,0.,0.))-k0);
+  float vis=1.; if(uEnv<1e3) vis=1.-smoothstep(uEnv*0.5,uEnv,dist);
+  float fade=1.; if(uFade1>0.) fade=1.-smoothstep(uFade0,uFade1,ds);
+  float a=(aOk>0.5?0.85:0.45*uShowAbs)*vis*fade;
+  vec3 col=aOk>0.5?vec3(.55,.63,.78):vec3(.32,.36,.45);
+  float size=uBase*(aOk>0.5?1.:0.7);
+  if(lit>0.5){ a=max(fade,0.45); col=vec3(1.,.71,.29); size=uBase*2.4; }
+  float px=size*uScale/(-mv.z);
+  float dens=clamp(px*px/10.,0.03,1.); if(lit>0.5) dens=max(dens,0.8);
+  vA=a*dens; vC=col;
+  if(vA<0.004){ gl_Position=vec4(2.,2.,2.,1.); gl_PointSize=0.; }
+  else { gl_PointSize=clamp(px,1.6,64.); gl_Position=projectionMatrix*mv; }
+}`;
+const pointFS=`varying vec3 vC;varying float vA;void main(){vec2 c=gl_PointCoord-vec2(.5);float r=length(c)*2.;if(r>1.)discard;
+  float core=smoothstep(.62,.36,r);float halo=pow(1.-r,2.);gl_FragColor=vec4(vC,vA*(core*.85+halo*.5));}`;
+const LU={uR:{value:new THREE.Matrix3()},uM0:{value:new THREE.Matrix3()},uLam:{value:1},uAng:{value:0},uBw:{value:0},uEnv:{value:1e9},uShowAbs:{value:0},
+  uFade0:{value:0},uFade1:{value:0},uScale:{value:600},uBase:{value:0.03},uPhi:{value:0},uOsc:{value:0}};
+const pMat=new THREE.ShaderMaterial({uniforms:LU,vertexShader:latticeVS,fragmentShader:pointFS,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
+let points=null,pGeo=null,pBase=0.03;
+function buildPointsGeometry(){
+  if(points){scene.remove(points);pGeo.dispose();}
+  pGeo=new THREE.BufferGeometry();
+  pGeo.setAttribute('aV',new THREE.BufferAttribute(VC,3));
+  pGeo.setAttribute('aOk',new THREE.BufferAttribute(Float32Array.from(OK),1));
+  pGeo.setAttribute('position',pGeo.attributes.aV); // three.js requires a position attribute for draw-range sizing
+  pGeo.setDrawRange(0,N);
+  points=new THREE.Points(pGeo,pMat); points.frustumCulled=false; scene.add(points);
+}
+
+/* ---- single-molecule continuous transform cloud ---- */
+const cloudVS=`
+attribute vec3 aV; attribute float aI;
+uniform mat3 uR; uniform float uLam,uAng,uBw,uEnv,uScale,uBase;
+varying vec3 vC; varying float vA;
+void main(){
+  vec3 p=uR*aV; float ds=length(aV);
+  vec4 mv=modelViewMatrix*vec4(p*uLam,1.);
+  float k0=1./uLam; float dist=abs(length(p+vec3(k0,0.,0.))-k0);
+  float sB=uLam*ds*0.5; float lit=0.;
+  if(sB<1.&&ds>0.){ float thB=asin(sB); float thc=asin(clamp(-p.x/ds,-1.,1.)); float w=uAng+uBw*tan(thB);
+    if(abs(thc-thB)<=0.5*w||dist<=0.004) lit=1.; }
+  float vis=1.; if(uEnv<1e3) vis=1.-smoothstep(uEnv*0.5,uEnv,dist);
+  vec3 col=mix(vec3(.25,.22,.55),vec3(.80,.62,1.),aI);
+  float a=(0.18+0.82*aI*aI)*vis; float size=uBase*(0.7+1.1*aI);
+  if(lit>0.5){ col=mix(vec3(.6,.35,.1),vec3(1.,.8,.45),aI); a=0.25+0.75*aI; size=uBase*(1.+1.6*aI); }
+  float px=size*uScale/(-mv.z); float dens=clamp(px*px/8.,0.16,1.); if(lit>0.5) dens=max(dens,0.8);
+  vA=a*dens; vC=col;
+  if(vA<0.004){ gl_Position=vec4(2.,2.,2.,1.); gl_PointSize=0.; } else { gl_PointSize=clamp(px,1.5,48.); gl_Position=projectionMatrix*mv; }
+}`;
+const CU={uR:LU.uR,uLam:LU.uLam,uAng:LU.uAng,uBw:LU.uBw,uEnv:LU.uEnv,uScale:LU.uScale,uBase:{value:0.01}};
+const cMat=new THREE.ShaderMaterial({uniforms:CU,vertexShader:cloudVS,fragmentShader:pointFS,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
+let cloud=null; const CLOUD_QMAX=0.55, CLOUD_N=140000;
+function buildCloud(){
+  if(cloud) return;
+  const rnd=mulberry32(7); const V=new Float32Array(CLOUD_N*3), I=new Float32Array(CLOUD_N);
+  for(let i=0;i<CLOUD_N;i++){
+    let x,y,z; do{x=2*rnd()-1;y=2*rnd()-1;z=2*rnd()-1;}while(x*x+y*y+z*z>1);
+    x*=CLOUD_QMAX;y*=CLOUD_QMAX;z*=CLOUD_QMAX;
+    V[i*3]=x;V[i*3+1]=y;V[i*3+2]=z;
+    const s2=x*x+y*y+z*z, Iq=molI(x,y,z)*Math.exp(-S.B*s2/2);
+    I[i]=Math.max(0,Math.min(1,(Math.log10(Iq+1e-9)+3)/4)); // log display: 10⁻³ … 10¹ of the Wilson mean
+  }
+  const g=new THREE.BufferGeometry(); g.setAttribute('aV',new THREE.BufferAttribute(V,3)); g.setAttribute('aI',new THREE.BufferAttribute(I,1)); g.setAttribute('position',g.attributes.aV);
+  cloud=new THREE.Points(g,cMat); cloud.frustumCulled=false; scene.add(cloud);
+}
+
+const selMarker=new THREE.Points(new THREE.BufferGeometry().setAttribute('position',new THREE.BufferAttribute(new Float32Array(3),3)),
+  new THREE.ShaderMaterial({uniforms:{uScale:LU.uScale,uSize:{value:0.08}},
+    vertexShader:`uniform float uScale;uniform float uSize;void main(){vec4 mv=modelViewMatrix*vec4(position,1.);gl_PointSize=clamp(uSize*uScale/(-mv.z),14.,48.);gl_Position=projectionMatrix*mv;}`,
+    fragmentShader:`void main(){float r=length(gl_PointCoord-vec2(.5))*2.;if(r>1.||r<.74)discard;gl_FragColor=vec4(1.,.435,.369,.95);}`,
+    transparent:true,depthWrite:false,depthTest:false}));
+selMarker.frustumCulled=false; scene.add(selMarker);
+
+/* ---- sample sketch at C ---- */
+const xtal=new THREE.Group(); xtal.matrixAutoUpdate=false; scene.add(xtal);
+let xtalScale=1,xtalCentre=[0,0,0];
+function chainObject(P,color,opacity,rad){
+  const g=new THREE.Group();
+  g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(P.map(p=>new THREE.Vector3(...p))),new THREE.LineBasicMaterial({color,transparent:true,opacity})));
+  const ig=new THREE.SphereGeometry(rad,8,6), im=new THREE.InstancedMesh(ig,new THREE.MeshBasicMaterial({color}),P.length);
+  const m=new THREE.Matrix4(); P.forEach((p,i)=>{m.makeTranslation(...p);im.setMatrixAt(i,m);}); g.add(im); return g;
+}
+function buildSketch(){
+  while(xtal.children.length) xtal.remove(xtal.children[0]);
+  if(S.mode==='molecule'){
+    xtalScale=0.34/MOL.size; xtalCentre=[0,0,0];
+    xtal.add(chainObject(MOL.P,0xc9b8ff,0.8,1.3)); return;
+  }
+  const {A,B,C}=CELL,Lmax=Math.max(len(A),len(B),len(C));
+  xtalScale=0.30/Lmax; xtalCentre=scl(add(add(A,B),C),0.5);
+  const corner=(x,y,z)=>add(add(scl(A,x),scl(B,y)),scl(C,z));
+  const E=[[0,0,0,1,0,0],[0,0,0,0,1,0],[0,0,0,0,0,1],[1,0,0,1,1,0],[1,0,0,1,0,1],[0,1,0,1,1,0],[0,1,0,0,1,1],[0,0,1,1,0,1],[0,0,1,0,1,1],[1,1,0,1,1,1],[1,0,1,1,1,1],[0,1,1,1,1,1]];
+  const ep=[]; for(const e of E) ep.push(...corner(e[0],e[1],e[2]),...corner(e[3],e[4],e[5]));
+  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(ep,3));
+  xtal.add(new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:0xc9d6e8,transparent:true,opacity:0.75})));
+  const P=PRESETS[S.preset];
+  if(P&&P.intens==='mol'){ xtal.add(chainObject(MOL.P.map(p=>add(p,xtalCentre)),0xc9b8ff,0.7,1.2)); }
+  else {
+    const atoms=[]; for(const x of [0,1])for(const y of [0,1])for(const z of [0,1]) atoms.push([x,y,z]);
+    if(S.rule==='I') atoms.push([.5,.5,.5]);
+    if(S.rule==='C') atoms.push([.5,.5,0],[.5,.5,1]);
+    if(S.rule==='F'||S.rule==='diamond') atoms.push([.5,.5,0],[.5,.5,1],[.5,0,.5],[.5,1,.5],[0,.5,.5],[1,.5,.5]);
+    const ag=new THREE.SphereGeometry(0.016/xtalScale,12,8), am=new THREE.MeshBasicMaterial({color:0xdbe6f5});
+    for(const f of atoms){const m=new THREE.Mesh(ag,am); m.position.set(...corner(...f)); xtal.add(m);}
+  }
+  const mk=(v,col)=>{const geo=new THREE.CylinderGeometry(0.004/xtalScale,0.004/xtalScale,1,8);geo.translate(0,0.5,0);const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:col}));
+    m.scale.set(1,len(v)*1.25,1); m.quaternion.setFromUnitVectors(UP,new THREE.Vector3(...v).normalize()); xtal.add(m);};
+  mk(A,COL.a); mk(B,COL.b); mk(C,COL.c);
+  const pg=new THREE.Group(); pg.name='planes'; xtal.add(pg); buildPlanes(pg);
+}
+function buildPlanes(group){
+  while(group.children.length) group.remove(group.children[0]);
+  const [h,k,l]=S.sel; if(!h&&!k&&!l) return;
+  const {A,B,C}=CELL, corner=f=>add(add(scl(A,f[0]),scl(B,f[1])),scl(C,f[2]));
+  const cs=[]; for(const x of [0,1])for(const y of [0,1])for(const z of [0,1]) cs.push([x,y,z]);
+  const vals=cs.map(c=>h*c[0]+k*c[1]+l*c[2]), mn=Math.min(...vals), mx=Math.max(...vals);
+  if(mx-mn>40) return; // too many planes to draw legibly
+  const E=[[0,1],[0,2],[0,4],[1,3],[1,5],[2,3],[2,6],[3,7],[4,5],[4,6],[5,7],[6,7]];
+  const tris=[];
+  for(let m=Math.ceil(mn);m<=Math.floor(mx);m++){
+    const pts=[];
+    for(const [i,j] of E){const vi=vals[i]-m,vj=vals[j]-m;
+      if(Math.abs(vi)<1e-9)pts.push(cs[i]); if(Math.abs(vj)<1e-9)pts.push(cs[j]);
+      if(vi*vj<0){const t=vi/(vi-vj);pts.push([cs[i][0]+t*(cs[j][0]-cs[i][0]),cs[i][1]+t*(cs[j][1]-cs[i][1]),cs[i][2]+t*(cs[j][2]-cs[i][2])]);}}
+    const uniq=[]; for(const p of pts) if(!uniq.some(q=>Math.abs(q[0]-p[0])+Math.abs(q[1]-p[1])+Math.abs(q[2]-p[2])<1e-6)) uniq.push(p);
+    if(uniq.length<3) continue;
+    const P=uniq.map(corner), cen=scl(P.reduce((s,p)=>add(s,p),[0,0,0]),1/P.length);
+    const n=hklVec(h,k,l), u0=add(P[0],scl(cen,-1)), u=scl(u0,1/len(u0)), w=cross(n,u), wn=scl(w,1/len(w));
+    P.sort((p,q)=>{const a=add(p,scl(cen,-1)),b=add(q,scl(cen,-1));return Math.atan2(dot(a,wn),dot(a,u))-Math.atan2(dot(b,wn),dot(b,u));});
+    for(let i=1;i<P.length-1;i++) tris.push(...P[0],...P[i],...P[i+1]);
+  }
+  if(!tris.length) return;
+  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(tris,3));
+  group.add(new THREE.Mesh(g,new THREE.MeshBasicMaterial({color:COL.ds,transparent:true,opacity:0.2,side:THREE.DoubleSide,depthWrite:false})));
+}
+
+/* ================= labels (anchored in 3D, offset in pixels) ================= */
+const labelsEl=$('labels'),LBL={};
+function mkLabel(key,cls,dx,dy){const d=document.createElement('div');d.className='lbl '+(cls||'');labelsEl.appendChild(d);LBL[key]={el:d,pos:new THREE.Vector3(),on:true,dx:dx||0,dy:dy||0};return LBL[key];}
+mkLabel('O','fg',30,12).el.innerHTML='O (000)';
+mkLabel('C','beam',0,14).el.textContent='C';
+mkLabel('k0','beam',0,14).el.innerHTML='<b>k</b>₀ = <b>ŝ</b>₀/λ';
+mkLabel('k','lit',0,-12).el.innerHTML='<b>k</b>';
+mkLabel('ds','ds',0,14); mkLabel('tt','lit').el.textContent='2θ';
+mkLabel('as','a',8,-8); mkLabel('bs','b',8,-8); mkLabel('cs','c',8,-8);
+mkLabel('xa','a').el.textContent='a'; mkLabel('xb','b').el.textContent='b'; mkLabel('xc','c').el.textContent='c';
+mkLabel('sel','ds',0,-18); mkLabel('ew','beam',0,-10).el.textContent='Ewald sphere, r = 1/λ';
+mkLabel('lim','',0,12).el.textContent='limiting sphere, r = 2/λ'; mkLabel('res','',0,-10);
+LBL.res.el.style.color='#b58cff'; LBL.res.el.innerHTML='resolution sphere, r = 1/d<sub>min</sub>';
+mkLabel('phi','',0,-10).el.textContent='φ axis';
+mkLabel('xt','',0,0); mkLabel('off','lit',0,-12).el.innerHTML='|C→P| ≠ 1/λ';
+mkLabel('bwl','',0,-10); LBL.bwl.el.style.color='#5fe0c8'; LBL.bwl.el.innerHTML='λ<sub>min</sub> … λ<sub>max</sub> shell';
+mkLabel('dvl','',0,-10); LBL.dvl.el.style.color='#b58cff'; LBL.dvl.el.textContent='±δ/2 about O';
+const tmpV=new THREE.Vector3();
+function placeLabels(){
+  const w=view.clientWidth,h=view.clientHeight;
+  for(const k in LBL){const L=LBL[k];
+    if(!L.on||!S.showLbl){L.el.style.display='none';continue;}
+    tmpV.copy(L.pos).project(camera);
+    if(tmpV.z>1||tmpV.z<-1||Math.abs(tmpV.x)>1.3||Math.abs(tmpV.y)>1.3){L.el.style.display='none';continue;}
+    L.el.style.display=''; L.el.style.left=((tmpV.x+1)/2*w+L.dx)+'px'; L.el.style.top=((1-tmpV.y)/2*h+L.dy)+'px';}
+}
+
+/* ================= core update ================= */
+let M0=null,Rm=null,SELD=null;
+const STATS={lit:0,back:0};
+function acceptAng(){return (S.eta+S.div)*DEG;}
+function phiRoots(v){
+  const p0=mulMV(M0,v),A=p0[0],B=p0[2],d2=dot(v,v),Cc=S.lam*d2/2,R=Math.hypot(A,B);
+  if(R<Math.abs(Cc)||R<1e-12) return [];
+  const psi=Math.atan2(B,A),a=Math.acos(-Cc/R);
+  return [wrapDeg((psi+a)/DEG),wrapDeg((psi-a)/DEG)];
+}
+function setOrientation(){
+  M0=mulMM(Rz(S.alp*DEG),Rx(S.bet*DEG)); Rm=mulMM(Ry(S.phi*DEG),M0);
+  LU.uR.value.set(...Rm); LU.uM0.value.set(...M0);
+}
+function updateUniforms(){
+  setOrientation();
+  LU.uLam.value=S.lam; LU.uAng.value=acceptAng(); LU.uBw.value=S.bw/100; LU.uEnv.value=isFinite(S.env)?S.env:1e9;
+  LU.uShowAbs.value=S.showAbs?1:0; LU.uPhi.value=S.phi*DEG; LU.uOsc.value=S.osc*DEG;
+  const dsLim=1/dEff; LU.uFade1.value=S.fade?dsLim:0; LU.uFade0.value=dsLim*0.55;
+  pBase=Math.min(0.055,Math.max(0.0015,0.30*S.lam*Math.min(len(CELL.AS),len(CELL.BS),len(CELL.CS))));
+  LU.uBase.value=pBase; CU.uBase.value=0.009;
+  if(points) points.visible=S.mode==='crystal';
+  if(cloud) cloud.visible=S.mode==='molecule';
+  limiting.visible=S.showLim; resSphere.visible=S.showRes&&S.dmin>S.lam/2; resSphere.scale.setScalar(S.lam/S.dmin);
+}
+
+/* CPU pass: which reflections are recorded (mirrors the shader), detector spots, mosaic arcs */
+function cpuPass(){
+  if(S.mode!=='crystal'){STATS.lit=0;STATS.back=0;mosArcs.visible=false;return;}
+  const lam=S.lam,k0=1/lam,ang=acceptAng(),bw=S.bw/100,osc=S.osc*DEG,phi=S.phi*DEG,c=Math.cos(phi),s=Math.sin(phi);
+  const thMax=Math.asin(Math.min(1,lam*dsMax/2)); const wMax=ang+bw*Math.tan(Math.min(thMax,1.45))+1e-9; const quick=thMax<1.45&&osc===0;
+  const now=performance.now(); const env=isFinite(S.env)?S.env:Infinity;
+  const showMos=(S.smear==='mos'||S.smear==='all')&&S.eta>0; const eta=S.eta*DEG; let nArc=0;
+  let nLit=0,nBack=0; const M=M0;
+  for(let i=0;i<N;i++){
+    LIT[i]=0; if(!OK[i]) continue;
+    const vx=VC[i*3],vy=VC[i*3+1],vz=VC[i*3+2];
+    const p0x=M[0]*vx+M[1]*vy+M[2]*vz,p0y=M[3]*vx+M[4]*vy+M[5]*vz,p0z=M[6]*vx+M[7]*vy+M[8]*vz;
+    const px=c*p0x+s*p0z,py=p0y,pz=-s*p0x+c*p0z, ds=DS[i];
+    const qx=px+k0, dist=Math.abs(Math.sqrt(qx*qx+py*py+pz*pz)-k0);
+    if(quick&&dist>ds*wMax*0.5*1.02+1e-9&&!(showMos&&dist<=env)) continue;
+    const sB=lam*ds/2; if(sB>=1) continue;
+    const thB=Math.asin(sB),thc=Math.asin(Math.max(-1,Math.min(1,-px/ds))),w=ang+bw*Math.tan(thB),dev=thc-thB;
+    let lit=0,sx=px,sy=py,sz=pz,wt=1;
+    if(Math.abs(dev)<=w/2+1e-7){lit=1;wt=w>0?Math.max(0,1-Math.abs(dev)/(w/2)):1;}
+    else if(osc>0){const R=Math.hypot(p0x,p0z),Cc=lam*ds*ds/2;
+      if(R>=Cc){const psi=Math.atan2(p0z,p0x),a=Math.acos(-Cc/R);
+        for(const r of [psi+a,psi-a]) if(wrapRad(r-phi)<=osc){lit=1;wt=1;const cr=Math.cos(r),sr=Math.sin(r);sx=cr*p0x+sr*p0z;sz=-sr*p0x+cr*p0z;break;}}}
+    if(showMos&&nArc<ARC_MAX&&(lit||dist<=env*0.5)) {addArc(nArc++,px,py,pz,eta,lam);}
+    if(!lit) continue;
+    LIT[i]=1; WGT[i]=wt; nLit++;
+    const kx=k0+sx;
+    if(kx>1e-9){SPOT[i*2]=-S.D*sz/kx;SPOT[i*2+1]=S.D*sy/kx;TLIT[i]=now;} else {nBack++;SPOT[i*2]=NaN;SPOT[i*2+1]=NaN;}
+  }
+  STATS.lit=nLit; STATS.back=nBack;
+  mosArcs.visible=showMos&&nArc>0; arcGeoM.setDrawRange(0,nArc*ARC_SEG*4); arcGeoM.attributes.position.needsUpdate=true;
+}
+function addArc(n,px,py,pz,eta,lam){
+  // two arcs of angular width η about axes ⟂ p: one in the plane of p and the beam (changes θ), one across it
+  const pl=Math.hypot(px,py,pz); if(pl<1e-9) return;
+  let a1=[0,pz,-py]; let l1=Math.hypot(a1[1],a1[2]); if(l1<1e-9){a1=[0,0,1];l1=1;} a1=[0,a1[1]/l1,a1[2]/l1];
+  const a2=[ (py*a1[2]-pz*a1[1])/pl, (pz*a1[0]-px*a1[2])/pl, (px*a1[1]-py*a1[0])/pl ];
+  let o=n*ARC_SEG*4*3;
+  for(const ax of [a1,a2]){
+    let prev=null;
+    for(let j=0;j<=ARC_SEG;j++){
+      const t=(-0.5+j/ARC_SEG)*eta, ct=Math.cos(t), st=Math.sin(t);
+      // Rodrigues rotation of p about unit axis ax (ax ⟂ p)
+      const cx=ax[1]*pz-ax[2]*py, cy=ax[2]*px-ax[0]*pz, cz=ax[0]*py-ax[1]*px;
+      const q=[(px*ct+cx*st)*lam,(py*ct+cy*st)*lam,(pz*ct+cz*st)*lam];
+      if(prev){arcBuf.set(prev,o);arcBuf.set(q,o+3);o+=6;}
+      prev=q;
+    }
+  }
+}
+
+function updateSelected(){
+  const lam=S.lam,k0=1/lam,O=new THREE.Vector3(0,0,0),Cv=new THREE.Vector3(-1,0,0);
+  setArrow(arK0,Cv,O);
+  const crystal=S.mode==='crystal';
+  // reciprocal axes (true length)
+  [[arAS,CELL.AS,LBL.as,'a'],[arBS,CELL.BS,LBL.bs,'b'],[arCS,CELL.CS,LBL.cs,'c']].forEach(([ar,v,L,n])=>{
+    const r=scl(mulMV(Rm,v),lam), to=new THREE.Vector3(...r); setArrow(ar,O,to,0.6); ar.userData.on=S.showAx&&crystal;
+    L.pos.copy(to); L.el.innerHTML=`<b>${n}</b>*`; L.on=S.showAx&&crystal;});
+  const [h,k,l]=S.sel; const v=crystal?hklVec(h,k,l):[0,0,0]; const ds=len(v);
+  const p=mulMV(Rm,v), sB=lam*ds/2, ok=allowed(h,k,l,S.rule);
+  const thB=sB<1?Math.asin(sB):NaN, thc=ds>0?Math.asin(Math.max(-1,Math.min(1,-p[0]/ds))):NaN;
+  const w=acceptAng()+S.bw/100*(isFinite(thB)?Math.tan(thB):0);
+  const inCond=crystal&&ok&&isFinite(thB)&&Math.abs(thc-thB)<=w/2+1e-7;
+  SELD={h,k,l,v,ds,d:1/ds,p,thB,thc,w,ok,inCond,roots:ds>0?phiRoots(v):[]};
+  const P=new THREE.Vector3(p[0]*lam,p[1]*lam,p[2]*lam);
+  selMarker.visible=crystal&&ds>0; arDs.userData.on=crystal&&ds>0;
+  selMarker.geometry.attributes.position.array.set([P.x,P.y,P.z]); selMarker.geometry.attributes.position.needsUpdate=true;
+  selMarker.material.uniforms.uSize.value=pBase*3;
+  setArrow(arDs,O,P); arDs.userData.on=crystal&&ds>0;
+  setArrow(arK,Cv,P); arK.userData.on=inCond;
+  offLine.visible=crystal&&!inCond&&ds>0; offLine.geometry.setFromPoints([Cv,P]); offLine.computeLineDistances();
+  tri.visible=inCond; if(inCond){triGeo.attributes.position.array.set([Cv.x,Cv.y,Cv.z,0,0,0,P.x,P.y,P.z]);triGeo.attributes.position.needsUpdate=true;}
+  arc2t.visible=inCond;
+  if(inCond){const u=new THREE.Vector3(1,0,0),q=new THREE.Vector3().subVectors(P,Cv).normalize(),ang=u.angleTo(q),arr=arcGeo.attributes.position.array;
+    const ax=new THREE.Vector3().crossVectors(u,q); if(ax.lengthSq()<1e-12)ax.set(0,1,0); ax.normalize();
+    for(let i=0;i<=40;i++){const t=u.clone().applyAxisAngle(ax,ang*i/40).multiplyScalar(0.26).add(Cv);arr.set([t.x,t.y,t.z],i*3);}
+    arcGeo.attributes.position.needsUpdate=true; LBL.tt.pos.copy(u.clone().applyAxisAngle(ax,ang/2).multiplyScalar(0.36).add(Cv));}
+  LBL.tt.on=inCond; LBL.O.pos.set(0,0,0); LBL.C.pos.set(-1,0,0); LBL.k0.pos.set(-0.5,0,0);
+  LBL.k.on=inCond; LBL.k.pos.copy(Cv).lerp(P,0.55);
+  LBL.ds.on=crystal&&ds>0; LBL.ds.pos.copy(P).multiplyScalar(0.5); LBL.ds.el.innerHTML=`<b>d</b>*<sub>${hklHTML(h,k,l)}</sub>`;
+  LBL.sel.on=crystal&&ds>0; LBL.sel.pos.copy(P); LBL.sel.el.innerHTML=`(${hklHTML(h,k,l)})`;
+  LBL.off.on=crystal&&!inCond&&ds>0; LBL.off.pos.copy(Cv).lerp(P,0.5);
+  LBL.ew.pos.set(-1,1,0); LBL.lim.pos.set(0,-2,0); LBL.lim.on=S.showLim;
+  LBL.res.pos.set(0,S.lam/S.dmin,0); LBL.res.on=resSphere.visible; LBL.phi.pos.set(0,1.7,0);
+  const bwOn=(S.smear==='bw'||S.smear==='all')&&S.bw>0.2; LBL.bwl.on=bwOn; LBL.bwl.pos.set(-1,-1/(1-S.bw/200),0); LBL.bwl.dy=14;
+  const dvOn=(S.smear==='div'||S.smear==='all')&&S.div>0.2; LBL.dvl.on=dvOn; LBL.dvl.pos.set(-1,1.02,0); LBL.dvl.dy=-26;
+  // sample sketch transform
+  const R4=new THREE.Matrix4().set(Rm[0],Rm[1],Rm[2],0,Rm[3],Rm[4],Rm[5],0,Rm[6],Rm[7],Rm[8],0,0,0,0,1);
+  xtal.matrix.copy(new THREE.Matrix4().makeTranslation(-1,0,0).multiply(R4).multiply(new THREE.Matrix4().makeScale(xtalScale,xtalScale,xtalScale)).multiply(new THREE.Matrix4().makeTranslation(-xtalCentre[0],-xtalCentre[1],-xtalCentre[2])));
+  xtal.matrixWorldNeedsUpdate=true; xtal.visible=S.showX;
+  const toScene=v=>{const r=mulMV(Rm,add(v,scl(xtalCentre,-1)));return new THREE.Vector3(-1+r[0]*xtalScale,r[1]*xtalScale,r[2]*xtalScale);};
+  if(crystal){LBL.xa.pos.copy(toScene(scl(CELL.A,1.35)));LBL.xb.pos.copy(toScene(scl(CELL.B,1.35)));LBL.xc.pos.copy(toScene(scl(CELL.C,1.35)));}
+  [LBL.xa,LBL.xb,LBL.xc].forEach(L=>L.on=S.showX&&crystal);
+  LBL.xt.on=S.showX; LBL.xt.pos.set(-1,-0.26,0); LBL.xt.el.textContent=crystal?'crystal (schematic scale)':'molecule (schematic scale)';
+}
+
+let cpuDirty=true,lastCpu=0,detDirty=true;
+function update(full){
+  updateUniforms(); updateSelected();
+  cpuDirty=true; detDirty=true; braggDirty=true;
+  if(full!==false){cpuPass();cpuDirty=false;lastCpu=performance.now();drawDetector();drawReadout();detDirty=false;}
+}
+function findIndex(h,k,l){for(let i=0;i<N;i++)if(HKL[i*3]===h&&HKL[i*3+1]===k&&HKL[i*3+2]===l)return i;return -1;}
+
+/* ================= readout ================= */
+const f=(x,n=3)=>isFinite(x)?x.toFixed(n):'—';
+function drawReadout(){
+  const lam=S.lam;
+  $('info').innerHTML=`|<b>k</b>| = 1/λ = ${f(1/lam,4)} Å⁻¹<br>E = ${f(HC/lam,3)} keV`+(S.mode==='crystal'?`<br>|<b>a</b>*| = ${f(len(CELL.AS),4)} Å⁻¹`:`<br>speckle ≈ 1/L = ${f(1/MOL.size,4)} Å⁻¹`);
+  if(S.mode==='molecule'){
+    $('selTitle').textContent='Single molecule';
+    $('status').innerHTML='<span class="pill mol">Continuous transform: no lattice, no Bragg condition</span>';
+    const eff=MOLSTATS.tot;
+    $('readout').innerHTML=`
+      <dt>Model size L</dt><dd>${f(MOL.size,1)} Å</dd>
+      <dt>Speckle width ≈ 1/L</dt><dd>${f(1/MOL.size,4)} Å⁻¹</dd>
+      <dt>Scattered photons (detector)</dt><dd>${isFinite(S.flux)?Math.round(S.flux).toLocaleString():'∞ (noise-free)'}</dd>
+      <dt>Photons recorded beyond 3 Å</dt><dd>${isFinite(S.flux)?MOLSTATS.hi.toLocaleString():'—'}</dd>
+      <dt>Mean photons/pixel at edge</dt><dd>${isFinite(S.flux)?f(MOLSTATS.edge,4):'—'}</dd>
+      <dt>Detector pixel (display)</dt><dd>${f(S.W/MOLSTATS.G,2)} mm</dd>`;
+    return;
+  }
+  $('selTitle').textContent='Selected reflection';
+  const D=SELD; let st;
+  if(!D.ds) st='<span class="pill bad">(000) is the undiffracted beam</span>';
+  else if(!D.ok) st='<span class="pill bad">Systematically absent: F(hkl) = 0</span>';
+  else if(!isFinite(D.thB)) st='<span class="pill bad">Outside limiting sphere: d &lt; λ/2</span>';
+  else if(D.inCond) st='<span class="pill ok">In diffraction condition</span>';
+  else { const idx=findIndex(D.h,D.k,D.l);
+    if(idx>=0&&LIT[idx]) st='<span class="pill ok">Crosses the sphere within Δφ</span>';
+    else if(D.thc<0) st=`<span class="pill warn">Planes face away from the beam (θ &lt; 0): the Friedel mate (${hklHTML(-D.h,-D.k,-D.l)}) faces it</span>`;
+    else st=`<span class="pill warn">Off condition by ${f((D.thc-D.thB)/DEG,3)}°</span>`; }
+  $('status').innerHTML=st;
+  const kx=1/lam+D.p[0]; let det='—';
+  if(D.inCond){ if(kx>0){const X=-S.D*D.p[2]/kx,Y=S.D*D.p[1]/kx;det=(Math.abs(X)<=S.W/2&&Math.abs(Y)<=S.W/2)?`(${f(X,1)}, ${f(Y,1)}) mm`:`off detector (${f(X,0)}, ${f(Y,0)}) mm`;} else det='back-reflection, 2θ > 90°'; }
+  const roots=D.roots.length?D.roots.map(r=>f(r,2)+'°').join(' or '):(isFinite(D.thB)&&D.ok?'none (blind region)':'—');
+  const idx=findIndex(D.h,D.k,D.l); const Imod=idx>=0&&D.ok?intensityOf(idx)*Math.exp(-S.B*D.ds*D.ds/2):NaN;
+  $('readout').innerHTML=`
+    <dt>d<sub>hkl</sub> = 1/|<b>d</b>*|</dt><dd>${f(D.d,4)} Å</dd>
+    <dt>|<b>d</b>*<sub>hkl</sub>|</dt><dd>${f(D.ds,5)} Å⁻¹</dd>
+    <dt>θ<sub>B</sub> = asin(λ/2d)</dt><dd>${f(D.thB/DEG,3)}°</dd>
+    <dt>2θ<sub>B</sub></dt><dd>${f(2*D.thB/DEG,3)}°</dd>
+    <dt>θ now = asin(−<b>ŝ</b>₀·<b>d̂</b>*)</dt><dd>${f(D.thc/DEG,3)}°</dd>
+    <dt>Acceptance window</dt><dd>${f(D.w/DEG,3)}°</dd>
+    <dt>On sphere at φ</dt><dd>${roots}</dd>
+    <dt>Spot on detector</dt><dd>${det}</dd>
+    <dt>Model intensity I/⟨I⟩₀</dt><dd>${f(Imod,3)}</dd>
+    <dt>Reflections in condition</dt><dd>${STATS.lit.toLocaleString()}${STATS.back?` (${STATS.back} back)`:''}</dd>`;
+}
+
+/* ================= Bragg panel ================= */
+const bc=$('bragg'),bx=bc.getContext('2d'); let braggDirty=true;
+function sizeCanvas(cv){const r=cv.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);const w=Math.max(10,Math.round(r.width*dpr)),h=Math.max(10,Math.round(r.height*dpr));if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}return{w:r.width,h:r.height,dpr};}
+function drawBragg(t){
+  const {w:W,h:H,dpr}=sizeCanvas(bc),g=bx; g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W,H);
+  g.font='11.5px "IBM Plex Mono", ui-monospace, monospace';
+  const txt=(str,x,y,color)=>{g.lineJoin='round';g.lineWidth=4;g.strokeStyle='#0c1420';g.strokeText(str,x,y);g.fillStyle=color;g.fillText(str,x,y);};
+  const D=SELD;
+  if(S.mode==='molecule'){
+    g.fillStyle='#5c6b82'; g.textAlign='center';
+    g.fillText('No lattice planes in a single molecule,',W/2,H/2-8); g.fillText('so there is no Bragg condition.',W/2,H/2+10);
+    return;
+  }
+  if(!D||!D.ds||!isFinite(D.thB)){g.fillStyle='#8a99b0';g.textAlign='left';g.fillText(D&&D.ds?'d < λ/2: no Bragg angle exists':'Select a reflection',14,24);return;}
+  const lam=S.lam,d=D.d; let th=D.thc; const flip=th<0; if(flip)th=-th;
+  const top=42,bot=22;
+  let dpx=Math.max(42,Math.min(100,8*d/lam)); dpx=Math.min(dpx,(H-top-bot)*0.32);
+  const s=dpx/d,lpx=lam*s,y0=top+(H-top-bot)*0.40,xc=W*0.5;
+  const nPl=Math.max(2,Math.min(6,Math.floor((H-bot-4-y0)/dpx)+1));
+  for(let i=0;i<nPl;i++){const y=y0+i*dpx;g.strokeStyle=i<2?'rgba(255,111,94,.55)':'rgba(255,111,94,.28)';g.lineWidth=1;g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();
+    g.fillStyle='rgba(219,230,245,.55)';const sp=Math.max(16,dpx*0.55),off=(i%2)*sp/2;for(let x=off%sp;x<W;x+=sp){g.beginPath();g.arc(x,y,2,0,7);g.fill();}}
+  g.strokeStyle='#ff6f5e';g.fillStyle='#ff6f5e';g.lineWidth=1.2;const xm=W-26;
+  g.beginPath();g.moveTo(xm,y0);g.lineTo(xm,y0+dpx);g.stroke();
+  [[y0,1],[y0+dpx,-1]].forEach(([y,dir])=>{g.beginPath();g.moveTo(xm,y);g.lineTo(xm-4,y+5*dir);g.lineTo(xm+4,y+5*dir);g.fill();});
+  g.textAlign='right'; txt(`d = ${d.toFixed(3)} Å`,xm-8,y0+dpx/2+4,'#ff6f5e');
+  const ci=Math.cos(th),si=Math.sin(th),uin=[ci,si],uout=[ci,-si],A=[xc,y0],B=[xc,y0+dpx];
+  const L=Math.min(W*0.47,(y0-top)/Math.max(si,0.05)),t2=dpx*si+L;
+  const r1=[[A[0]-L*uin[0],A[1]-L*uin[1]],A,[A[0]+L*uout[0],A[1]+L*uout[1]]];
+  const r2=[[B[0]-t2*uin[0],B[1]-t2*uin[1]],B,[B[0]+t2*uout[0],B[1]+t2*uout[1]]];
+  const phase=reduceMotion?0:t*0.0018, amp=Math.min(6,Math.max(2.5,lpx*0.28));
+  function wave(poly,color){
+    g.strokeStyle=color;g.lineWidth=1.6;g.beginPath();let sAcc=0,first=true;
+    for(let k=0;k<poly.length-1;k++){const a=poly[k],b=poly[k+1],dx=b[0]-a[0],dy=b[1]-a[1],Ls=Math.hypot(dx,dy),ux=dx/Ls,uy=dy/Ls,nx=-uy,ny=ux,step=Math.max(0.8,lpx/14);
+      for(let q=0;q<=Ls;q+=step){const yv=amp*Math.sin(TAU*((sAcc+q)/lpx-phase)),x=a[0]+ux*q+nx*yv,y=a[1]+uy*q+ny*yv;if(first){g.moveTo(x,y);first=false;}else g.lineTo(x,y);}
+      sAcc+=Ls;}
+    g.stroke();
+  }
+  g.save();g.beginPath();g.rect(0,0,W,H);g.clip();
+  wave(r1,'rgba(108,196,255,0.95)');wave(r2,'rgba(160,214,255,0.80)');
+  g.setLineDash([3,3]);g.strokeStyle='rgba(226,232,241,.45)';g.lineWidth=1;
+  g.beginPath();g.moveTo(...r1[0]);g.lineTo(...r2[0]);g.stroke();
+  g.beginPath();g.moveTo(...r1[2]);g.lineTo(...r2[2]);g.stroke();
+  const P1=[B[0]-dpx*si*uin[0],B[1]-dpx*si*uin[1]],P2=[B[0]+dpx*si*uout[0],B[1]+dpx*si*uout[1]];
+  g.beginPath();g.moveTo(...A);g.lineTo(...P1);g.moveTo(...A);g.lineTo(...P2);g.stroke();g.setLineDash([]);
+  g.strokeStyle='#ffb54a';g.lineWidth=3.2;g.globalAlpha=0.9;g.beginPath();g.moveTo(...P1);g.lineTo(...B);g.lineTo(...P2);g.stroke();g.globalAlpha=1;
+  g.restore();
+  g.strokeStyle='#ffb54a';g.lineWidth=1.2;const ra=Math.min(42,L*0.4);
+  g.beginPath();g.arc(A[0],A[1],ra,Math.PI,Math.PI+th);g.stroke();
+  g.beginPath();g.arc(A[0],A[1],ra,-th,0);g.stroke();
+  g.strokeStyle='rgba(226,232,241,.55)';g.setLineDash([2,3]);g.beginPath();g.moveTo(...A);g.lineTo(A[0]+ra*2.1*ci,A[1]+ra*2.1*si);g.stroke();g.setLineDash([]);
+  g.beginPath();g.arc(A[0],A[1],ra*1.75,-th,th);g.stroke();
+  g.textAlign='center';
+  txt('θ',A[0]-(ra+10)*Math.cos(th/2),A[1]-(ra+10)*Math.sin(th/2)+4,'#ffb54a');
+  txt('θ',A[0]+(ra+10)*Math.cos(th/2),A[1]-(ra+10)*Math.sin(th/2)+4,'#ffb54a');
+  txt('2θ',A[0]+ra*1.75+14,A[1]+4,'#e2e8f1');
+  txt('extra path 2d sin θ',B[0],B[1]+18,'#ffb54a');
+  const Dp=2*d*Math.sin(th),m=Dp/lam,mR=Math.round(m),inPh=Math.abs(m-mR)<0.004&&mR>=1;
+  g.textAlign='left'; g.fillStyle='#e2e8f1'; g.fillText(`Path difference 2d sin θ = ${Dp.toFixed(3)} Å = ${m.toFixed(3)} λ`,10,16);
+  g.fillStyle='#8a99b0'; g.fillText(`θ = ${(th/DEG).toFixed(3)}°   θB = ${(D.thB/DEG).toFixed(3)}°   λ = ${lam.toFixed(4)} Å`,10,32);
+  const msg=inPh?(mR===1?'In phase: Bragg condition for this reflection':`In phase: order ${mR}, i.e. reflection (${hklTxt(mR*D.h,mR*D.k,mR*D.l)})`):`Phase mismatch ${(((m%1)+1)%1*360).toFixed(0)}°`;
+  txt(msg+(flip?'  (shown for the Friedel mate)':''),10,H-8,inPh?'#58d39a':'#ffb54a');
+}
+
+/* ================= detector ================= */
+const dc=$('det'),dx=dc.getContext('2d'); let detSpots=[];
+const MOLSTATS={G:128,hi:0,edge:0,tot:0}; const BSTOP=4; // mm
+let molImg=null,molImgKey='';
+function computeMolDetector(G){
+  // continuous |F(q)|² on the Ewald sphere, mapped onto the flat detector; Poisson photon counting
+  const lam=S.lam,k0=1/lam,D=S.D,W=S.W,px=W/G, RT=Rm; const mu=new Float32Array(G*G); let sum=0;
+  const X=MOL.X,Y=MOL.Y,Z=MOL.Z,n=MOL.n, B=S.B;
+  for(let j=0;j<G;j++){ const Yd=(G/2-j-0.5)*px;
+    for(let i=0;i<G;i++){ const Xd=(i-G/2+0.5)*px;
+      const r=Math.sqrt(D*D+Xd*Xd+Yd*Yd), nx=D/r, ny=Yd/r, nz=-Xd/r;
+      const ql=[(nx-1)*k0,ny*k0,nz*k0]; const q=mulMTV(RT,ql); const s2=q[0]*q[0]+q[1]*q[1]+q[2]*q[2];
+      let re=0,im=0; for(let a=0;a<n;a++){const ph=q[0]*X[a]+q[1]*Y[a]+q[2]*Z[a]; re+=Math.cos(ph); im+=Math.sin(ph);}
+      const omega=(Math.hypot(Xd,Yd)<BSTOP)?0:(D/r)**3; // pixel solid angle ∝ cos³(2θ); beamstop masked
+      const v=(re*re+im*im)*Math.exp(-B*s2/2)*omega; mu[j*G+i]=v; sum+=v; } }
+  return {mu,sum,G};
+}
+function poisson(m,rnd){ if(m<30){const L=Math.exp(-m);let k=0,p=1;do{k++;p*=rnd();}while(p>L);return k-1;} const u=rnd(),v=rnd(); return Math.max(0,Math.round(m+Math.sqrt(m)*Math.sqrt(-2*Math.log(u+1e-12))*Math.cos(TAU*v))); }
+function drawDetector(){
+  const {w:Wp,h:Hp,dpr}=sizeCanvas(dc),g=dx; g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,Wp,Hp);
+  const pad=18,size=Math.min(Wp,Hp)-2*pad,cx=Wp/2,cy=Hp/2,mm=size/S.W;
+  g.fillStyle='#0b1522'; g.fillRect(cx-size/2,cy-size/2,size,size);
+  g.save(); g.beginPath(); g.rect(cx-size/2,cy-size/2,size,size); g.clip();
+  g.font='10.5px "IBM Plex Mono", ui-monospace, monospace'; g.textAlign='left';
+  detSpots=[];
+  if(S.mode==='molecule'){
+    const G=S.playing?72:128; MOLSTATS.G=G;
+    const key=[G,S.phi,S.alp,S.bet,S.lam,S.D,S.W,S.B].join('|');
+    if(key!==molImgKey){molImg=computeMolDetector(G);molImgKey=key;}
+    const {mu,sum}=molImg; const rnd=mulberry32((S.phi*1000|0)^0x9e37); const off=document.createElement('canvas'); off.width=G; off.height=G;
+    const oc=off.getContext('2d'), im=oc.createImageData(G,G); let vmax=0; const cnt=new Float32Array(G*G);
+    const Nph=S.flux; let hi=0,edgeSum=0,edgeN=0;
+    for(let k=0;k<G*G;k++){const m=isFinite(Nph)?mu[k]/sum*Nph:mu[k]/sum; const c=isFinite(Nph)?poisson(m,rnd):m; cnt[k]=c; if(c>vmax)vmax=c;}
+    for(let j=0;j<G;j++)for(let i=0;i<G;i++){const Xd=(i-G/2+0.5)*S.W/G,Yd=(G/2-j-0.5)*S.W/G,r=Math.hypot(Xd,Yd),tt=Math.atan(r/S.D),d=S.lam/(2*Math.sin(tt/2));
+      if(isFinite(Nph)&&d<3) hi+=cnt[j*G+i]; if(Math.abs(Math.abs(Xd)-S.W/2)<S.W/G*1.5&&Math.abs(Yd)<S.W/4){edgeSum+=mu[j*G+i]/sum*(isFinite(Nph)?Nph:0);edgeN++;}}
+    MOLSTATS.hi=Math.round(hi); MOLSTATS.edge=edgeN?edgeSum/edgeN:0;
+    const gain=S.expo, lv=Math.log10(1+vmax);
+    for(let k=0;k<G*G;k++){
+      let t; if(isFinite(Nph)) t=cnt[k]>0?Math.min(1,(0.25+0.75*Math.log10(1+cnt[k])/Math.max(lv,1e-6))*Math.min(1,gain)):0;
+      else t=Math.min(1,Math.max(0,(Math.log10(cnt[k]*G*G+1e-6)+3+Math.log10(gain))/5));
+      const c=cmap(t); im.data[k*4]=c[0];im.data[k*4+1]=c[1];im.data[k*4+2]=c[2];im.data[k*4+3]=255;}
+    oc.putImageData(im,0,0); g.imageSmoothingEnabled=!isFinite(Nph); g.drawImage(off,cx-size/2,cy-size/2,size,size);
+  }
+  // rings
+  const rMax=S.W/2*Math.SQRT2;
+  for(const dd of [20,10,6,4,3,2.5,2,1.5,1.2,1.0,0.8,0.6]){ if(dd<S.lam/2)continue; const tt=2*Math.asin(S.lam/(2*dd)); if(tt>=Math.PI/2)continue; const r=S.D*Math.tan(tt); if(r>rMax||r*mm<10)continue;
+    g.strokeStyle='rgba(108,196,255,.22)';g.beginPath();g.arc(cx,cy,r*mm,0,7);g.stroke();
+    g.fillStyle='rgba(108,196,255,.65)';g.fillText(dd+' Å',cx+r*mm*0.7071+3,cy-r*mm*0.7071-3);}
+  if(S.mode==='crystal'){
+    const now=performance.now(),trail=S.playing?1600:0;
+    for(let i=0;i<N;i++){
+      if(!OK[i])continue; const live=LIT[i],age=now-TLIT[i]; if(!live&&age>trail)continue;
+      const X=SPOT[i*2],Y=SPOT[i*2+1]; if(!isFinite(X)||Math.abs(X)>S.W/2||Math.abs(Y)>S.W/2)continue;
+      const px=cx+X*mm,py=cy-Y*mm, fadeA=live?1:Math.max(0,1-age/trail);
+      let b=1; if(S.showI){const I=intensityOf(i)*Math.exp(-S.B*DS[i]*DS[i]/2)*(live?(0.35+0.65*WGT[i]):1); b=Math.min(1,Math.sqrt(S.expo*I*0.5));}
+      if(b<0.02)continue;
+      const crowd=Math.min(1,Math.sqrt(400/Math.max(1,STATS.lit))); const a=fadeA*(0.3+0.7*b), r=(0.55+0.45*crowd)*(live?1.1:1)*(0.9+2.2*b);
+      const grd=g.createRadialGradient(px,py,0,px,py,r*2.6); grd.addColorStop(0,`rgba(255,226,170,${a})`); grd.addColorStop(0.35,`rgba(255,181,74,${0.85*a})`); grd.addColorStop(1,'rgba(255,181,74,0)');
+      g.fillStyle=grd; g.beginPath(); g.arc(px,py,r*2.6,0,7); g.fill();
+      if(live) detSpots.push({px,py,i});
+    }
+    const D=SELD;
+    if(D&&D.ds&&isFinite(D.thB)&&D.ok){
+      let p=null,pred=false;
+      if(D.inCond)p=D.p; else if(D.roots.length){const r=D.roots.slice().sort((a,b)=>Math.abs(wrapDeg(a-S.phi))-Math.abs(wrapDeg(b-S.phi)))[0]*DEG;const p0=mulMV(M0,D.v);p=[Math.cos(r)*p0[0]+Math.sin(r)*p0[2],p0[1],-Math.sin(r)*p0[0]+Math.cos(r)*p0[2]];pred=true;}
+      if(p){const kx=1/S.lam+p[0]; if(kx>0){const X=-S.D*p[2]/kx,Y=S.D*p[1]/kx,px=cx+X*mm,py=cy-Y*mm;
+        g.strokeStyle='#ff6f5e';g.lineWidth=1.5;if(pred)g.setLineDash([3,3]);g.beginPath();g.arc(px,py,8,0,7);g.stroke();g.setLineDash([]);
+        g.lineJoin='round';g.lineWidth=3;g.strokeStyle='#0b1522';const lab=`(${hklTxt(D.h,D.k,D.l)})`+(pred?' predicted':'');g.strokeText(lab,px+11,py+4);g.fillStyle='#ff6f5e';g.fillText(lab,px+11,py+4);}}
+    }
+  }
+  g.restore();
+  g.strokeStyle='#2c405d'; g.lineWidth=1; g.strokeRect(cx-size/2+.5,cy-size/2+.5,size-1,size-1);
+  g.fillStyle='#0a1019'; g.strokeStyle='rgba(226,232,241,.6)'; g.beginPath(); g.arc(cx,cy,4,0,7); g.fill(); g.stroke();
+  g.fillStyle='#8a99b0'; g.font='10.5px "IBM Plex Mono", ui-monospace, monospace'; g.textAlign='center';
+  g.fillText(`${S.W} mm × ${S.W} mm at D = ${S.D} mm`,cx,Hp-4);
+  g.textAlign='left'; g.fillText('↑ y (up)',cx-size/2+4,cy-size/2+12);
+  $('detNote').textContent=S.mode==='crystal'
+    ? 'Flat detector ⟂ beam, viewed from the sample looking downstream. Rings: r = D tan 2θ. Spot brightness: display model, not a simulation.'
+    : 'Continuous |F(q)|² on the Ewald sphere, × solid angle, Poisson-sampled to the chosen photon count. Log display; polarisation ignored.';
+}
+function cmap(t){ // dark → indigo → violet → amber → white
+  const st=[[0,[11,21,34]],[0.25,[52,40,120]],[0.5,[150,90,200]],[0.75,[255,170,80]],[1,[255,246,225]]];
+  for(let i=1;i<st.length;i++) if(t<=st[i][0]){const a=st[i-1],b=st[i],u=(t-a[0])/(b[0]-a[0]);return [0,1,2].map(k=>a[1][k]+(b[1][k]-a[1][k])*u);}
+  return st[st.length-1][1];
+}
+function hoverDet(e){const r=dc.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;let best=null,bd=64;for(const s of detSpots){const d2=(s.px-x)**2+(s.py-y)**2;if(d2<bd){bd=d2;best=s;}}return{best,x,y};}
+dc.addEventListener('mousemove',e=>{const {best,x,y}=hoverDet(e),tip=$('tip');
+  if(best){const i=best.i,h=HKL[i*3],k=HKL[i*3+1],l=HKL[i*3+2];tip.hidden=false;tip.style.left=x+'px';tip.style.top=y+'px';
+    tip.innerHTML=`(${hklHTML(h,k,l)}) d = ${(1/DS[i]).toFixed(3)} Å`;dc.style.cursor='pointer';}else{tip.hidden=true;dc.style.cursor='default';}});
+dc.addEventListener('mouseleave',()=>{$('tip').hidden=true;});
+dc.addEventListener('click',e=>{const {best}=hoverDet(e);if(best){const i=best.i;setSel(HKL[i*3],HKL[i*3+1],HKL[i*3+2]);}});
+
+/* ================= picking in 3D (CPU, mirrors shader visibility) ================= */
+let downXY=null;
+glc.addEventListener('pointerdown',e=>{downXY=[e.clientX,e.clientY];});
+glc.addEventListener('pointerup',e=>{
+  if(S.mode!=='crystal'||!downXY||Math.hypot(e.clientX-downXY[0],e.clientY-downXY[1])>4)return;
+  const r=glc.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top,w=r.width,h=r.height;
+  const lam=S.lam,k0=1/lam,env=isFinite(S.env)?S.env:Infinity,M=Rm,v=new THREE.Vector3(); let best=-1,bd=100;
+  const fade1=S.fade?1/dEff:0;
+  for(let i=0;i<N;i++){
+    if(!OK[i]&&!S.showAbs)continue;
+    const vx=VC[i*3],vy=VC[i*3+1],vz=VC[i*3+2];
+    const px=M[0]*vx+M[1]*vy+M[2]*vz,py=M[3]*vx+M[4]*vy+M[5]*vz,pz=M[6]*vx+M[7]*vy+M[8]*vz;
+    if(!LIT[i]){ if(isFinite(env)){const qx=px+k0;if(Math.abs(Math.sqrt(qx*qx+py*py+pz*pz)-k0)>env*0.8)continue;}
+      if(fade1&&DS[i]>fade1*0.97)continue; }
+    v.set(px*lam,py*lam,pz*lam).project(camera); if(v.z>1||v.z<-1)continue;
+    const sx=(v.x+1)/2*w,sy=(1-v.y)/2*h,d2=(sx-mx)**2+(sy-my)**2; if(d2<bd){bd=d2;best=i;}
+  }
+  if(best>=0) setSel(HKL[best*3],HKL[best*3+1],HKL[best*3+2]);
+});
+
+/* ================= controls ================= */
+const sel=$('preset'); for(const k in PRESETS){const o=document.createElement('option');o.value=k;o.textContent=PRESETS[k].name;sel.appendChild(o);}
+function syncCellInputs(){const c=S.cell;$('ca').value=c.a;$('cb').value=c.b;$('cc').value=c.c;$('cal').value=c.al;$('cbe').value=c.be;$('cga').value=c.ga;$('rule').value=S.rule;sel.value=S.preset;}
+function applyPreset(k){const p=PRESETS[k];S.preset=k;if(k==='custom')return;
+  S.cell={a:p.a,b:p.b,c:p.c,al:p.al,be:p.be,ga:p.ga};S.rule=p.rule;S.dmin=p.dmin;S.sel=p.sel.slice();S.B=p.B;if(p.lam)S.lam=p.lam;S.fade=!!p.fade;S.D=p.D;S.W=p.W;
+  $('tFade').checked=S.fade; ['dmin','lam','bfac','dd','dw'].forEach(id=>setRange(id,S[RANGES[id].key]));
+  syncCellInputs();syncSelInputs();buildReflections();bringToDiffraction();detInfo();update();}
+sel.addEventListener('change',()=>applyPreset(sel.value));
+['ca','cb','cc','cal','cbe','cga'].forEach(id=>$(id).addEventListener('change',()=>{
+  const v=parseFloat($(id).value);if(!isFinite(v))return;const key={ca:'a',cb:'b',cc:'c',cal:'al',cbe:'be',cga:'ga'}[id];
+  const old=S.cell[key];S.cell[key]=v;computeCell();if(!CELL.valid){S.cell[key]=old;$(id).value=old;computeCell();return;}
+  S.preset='custom';sel.value='custom';buildReflections();update();}));
+$('rule').addEventListener('change',()=>{S.rule=$('rule').value;if(S.preset!=='custom'){S.preset='custom';sel.value='custom';}buildReflections();update();});
+
+const lg=(a,b,t)=>Math.pow(10,a+(b-a)*t);
+const RANGES={
+  dmin:{key:'dmin',fmt:v=>`${v.toFixed(2)} Å`,rebuild:true},
+  lam:{key:'lam',fmt:v=>`${v.toFixed(4)} Å · ${(HC/v).toFixed(2)} keV`,rebuild:true},
+  bw:{key:'bw',toV:t=>t<=0?0:lg(-3,1,(t-1)/99),toT:v=>v<=0?0:1+99*(Math.log10(v)+3)/4,fmt:v=>v===0?'0 (monochromatic)':v<0.01?`${v.toFixed(4)} %`:v<1?`${v.toFixed(3)} %`:`${v.toFixed(2)} %`,smear:true},
+  div:{key:'div',fmt:v=>`${v.toFixed(2)}° (${(v*DEG*1e3).toFixed(1)} mrad)`,smear:true},
+  eta:{key:'eta',fmt:v=>`${v.toFixed(2)}°`,smear:true},
+  phi:{key:'phi',fmt:v=>`${v.toFixed(2)}°`},
+  alp:{key:'alp',fmt:v=>`${v.toFixed(1)}°`},
+  bet:{key:'bet',fmt:v=>`${v.toFixed(1)}°`},
+  osc:{key:'osc',fmt:v=>`${v.toFixed(2)}°`},
+  spd:{key:'spd',toV:t=>lg(-1,Math.log10(60),t/100),toT:v=>100*(Math.log10(v)+1)/(Math.log10(60)+1),fmt:v=>`${v<1?v.toFixed(2):v.toFixed(1)}°/s`},
+  dd:{key:'D',fmt:v=>`${v.toFixed(0)} mm`},
+  dw:{key:'W',fmt:v=>`${v.toFixed(0)} mm`},
+  bfac:{key:'B',fmt:v=>`${v.toFixed(1)} Å²`,bchange:true},
+  expo:{key:'expo',toV:t=>lg(-2,2,t/100),toT:v=>100*(Math.log10(v)+2)/4,fmt:v=>`×${v<1?v.toFixed(2):v.toFixed(1)}`},
+  env:{key:'env',toV:t=>t>=100?Infinity:lg(-3.3,-0.3,t/99),toT:v=>isFinite(v)?99*(Math.log10(v)+3.3)/3:100,fmt:v=>isFinite(v)?`${v<0.01?v.toFixed(4):v.toFixed(3)} Å⁻¹`:'everything'},
+  flux:{key:'flux',toV:t=>t>=100?Infinity:lg(1,9,t/99),toT:v=>isFinite(v)?99*(Math.log10(v)-1)/8:100,fmt:v=>isFinite(v)?(v>=1e4?`10^${Math.log10(v).toFixed(1)}`:Math.round(v).toLocaleString()):'∞ (noise-free)'}
+};
+function setRange(id,v){const R=RANGES[id];$(id).value=R.toT?R.toT(v):v;$(id+'v').textContent=R.fmt(v);}
+for(const id in RANGES){const R=RANGES[id];setRange(id,S[R.key]);
+  $(id).addEventListener('input',()=>{const t=parseFloat($(id).value),v=R.toV?R.toV(t):t;S[R.key]=v;$(id+'v').textContent=R.fmt(v);
+    if(R.rebuild)buildReflections(); if(R.smear)buildSmear(); if(R.bchange&&cloud){scene.remove(cloud);cloud.geometry.dispose();cloud=null;if(S.mode==='molecule')buildCloud();}
+    detInfo(); update(N<150000||id==='env'?true:false);});
+  $(id).addEventListener('change',()=>update());}
+document.querySelectorAll('[data-lam]').forEach(b=>b.addEventListener('click',()=>{S.lam=parseFloat(b.dataset.lam);setRange('lam',S.lam);buildReflections();detInfo();update();}));
+const TOG={tAbs:'showAbs',tLim:'showLim',tRes:'showRes',tX:'showX',tAx:'showAx',tLbl:'showLbl',tFade:'fade',tInt:'showI'};
+for(const id in TOG){$(id).checked=S[TOG[id]];$(id).addEventListener('change',()=>{S[TOG[id]]=$(id).checked;update();});}
+$('smear').addEventListener('change',()=>{S.smear=$('smear').value;buildSmear();update();});
+function syncSelInputs(){$('sh').value=S.sel[0];$('sk').value=S.sel[1];$('sl').value=S.sel[2];}
+function setSel(h,k,l){S.sel=[h,k,l];syncSelInputs();const pg=xtal.getObjectByName('planes');if(pg)buildPlanes(pg);update();}
+['sh','sk','sl'].forEach(id=>$(id).addEventListener('change',()=>{setSel(parseInt($('sh').value)||0,parseInt($('sk').value)||0,parseInt($('sl').value)||0);}));
+function detInfo(){const dAt=r=>S.lam/(2*Math.sin(Math.atan(r/S.D)/2));$('dedge').textContent=dAt(S.W/2).toFixed(2)+' Å';$('dcorner').textContent=dAt(S.W/2*Math.SQRT2).toFixed(2)+' Å';}
+function bringToDiffraction(){
+  M0=mulMM(Rz(S.alp*DEG),Rx(S.bet*DEG));
+  const v=hklVec(...S.sel);if(!len(v))return false;const roots=phiRoots(v);if(!roots.length)return false;
+  S.phi=roots.sort((a,b)=>Math.abs(wrapDeg(a-S.phi))-Math.abs(wrapDeg(b-S.phi)))[0];setRange('phi',S.phi);return true;
+}
+$('toDiff').addEventListener('click',()=>{if(S.playing)togglePlay();if(!bringToDiffraction()){$('status').innerHTML='<span class="pill bad">Not reachable by φ rotation at this mount (blind region, absent, or beyond 2/λ)</span>';return;}update();});
+function togglePlay(){S.playing=!S.playing;$('play').textContent=S.playing?'❚❚ Pause':'▶ Spin φ';if(!S.playing)update();}
+$('play').addEventListener('click',togglePlay);
+
+function setMode(m){
+  S.mode=m; $('mCrystal').setAttribute('aria-pressed',m==='crystal'); $('mMol').setAttribute('aria-pressed',m==='molecule');
+  $('crystalCtl').hidden=m!=='crystal'; $('molCtl').hidden=m!=='molecule'; $('hklRow').hidden=m!=='crystal';
+  $('braggCard').classList.toggle('dim',m==='molecule'); $('toDiff').disabled=m!=='crystal'; $('zSel').disabled=m!=='crystal';
+  $('braggNote').textContent=m==='crystal'?'Plane spacing and wavelength share one scale in this panel. Atoms schematic.':'Greyed out: Bragg planes exist only for a periodic lattice.';
+  if(m==='molecule') buildCloud();
+  if(m==='molecule') $('nrefl').textContent='dmin sets the fade of the lattice view only; the continuous transform is drawn to 1.8 Å.'; else buildReflections();
+  buildSketch(); legend(); update();
+}
+$('mCrystal').addEventListener('click',()=>setMode('crystal'));
+$('mMol').addEventListener('click',()=>setMode('molecule'));
+function legend(){
+  $('legend').innerHTML=S.mode==='crystal'
+    ? '<span><i style="background:#8d9bb4"></i>reciprocal-lattice point</span><span><i style="background:var(--lit);box-shadow:0 0 6px var(--lit)"></i>in diffraction condition</span><span><i style="border:2px solid var(--dstar);background:transparent"></i>selected</span><span class="lhint">drag: orbit · scroll: zoom · click point: select</span>'
+    : '<span><i style="background:#a98ae0"></i>|F(q)|², log scale</span><span><i style="background:var(--lit);box-shadow:0 0 6px var(--lit)"></i>on the Ewald sphere</span><span class="lhint">drag: orbit · scroll: zoom</span>';
+}
+
+/* ================= camera ================= */
+let fly=null,userMoved=false;
+controls.addEventListener('start',()=>{userMoved=true;fly=null;});
+function flyTo(tgt,dist){const dir=camera.position.clone().sub(controls.target).normalize();fly={t0:performance.now(),dur:reduceMotion?1:900,fromT:controls.target.clone(),toT:tgt.clone(),fromP:camera.position.clone(),toP:tgt.clone().addScaledVector(dir,dist)};}
+function fitDist(){const asp=Math.max(0.3,view.clientWidth/Math.max(1,view.clientHeight)),t=Math.tan(camera.fov*DEG/2);return Math.max(1.55/t,2.15/(t*asp))*1.02;}
+function fitCamera(animate){const dir=HOME.pos.clone().sub(HOME.tgt).normalize(),d=fitDist();
+  if(animate){fly={t0:performance.now(),dur:reduceMotion?1:900,fromT:controls.target.clone(),toT:HOME.tgt.clone(),fromP:camera.position.clone(),toP:HOME.tgt.clone().addScaledVector(dir,d)};}
+  else{camera.position.copy(HOME.tgt).addScaledVector(dir,d);controls.target.copy(HOME.tgt);controls.update();}}
+$('resetView').addEventListener('click',()=>{userMoved=false;fitCamera(true);});
+const closeDist=()=>{const sp=S.mode==='crystal'?S.lam*Math.min(len(CELL.AS),len(CELL.BS),len(CELL.CS)):S.lam/MOL.size;return Math.max(0.01,12*sp/Math.tan(camera.fov*DEG/2));};
+$('zO').addEventListener('click',()=>{userMoved=true;flyTo(new THREE.Vector3(0,0,0),closeDist());});
+$('zSel').addEventListener('click',()=>{userMoved=true;const p=SELD.p;flyTo(new THREE.Vector3(p[0]*S.lam,p[1]*S.lam,p[2]*S.lam),closeDist());});
+
+const NICE=[1,2,5];
+function updateScaleBar(){
+  const dist=camera.position.distanceTo(controls.target),hpx=view.clientHeight;
+  const sceneperpx=2*dist*Math.tan(camera.fov*DEG/2)/hpx, invAperpx=sceneperpx/S.lam;
+  let best=null; for(let e=-5;e<=1;e++)for(const n of NICE){const L=n*Math.pow(10,e),px=L/invAperpx;if(px>=60&&px<=150){best={L,px};}}
+  if(!best){const L=invAperpx*100;best={L,px:100};}
+  $('scaleBar').style.width=best.px.toFixed(0)+'px';
+  const Ls=best.L<0.01?best.L.toExponential(0):String(+best.L.toPrecision(2));
+  $('scaleTxt').textContent=`${Ls} Å⁻¹`;
+  $('scaleSub').textContent=`d = ${(+(1/best.L).toPrecision(3)).toLocaleString()} Å`;
+  return dist;
+}
+
+/* ================= render loop ================= */
+function resize(){
+  const w=view.clientWidth,h=view.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
+  const buf=renderer.getDrawingBufferSize(new THREE.Vector2());LU.uScale.value=buf.y/(2*Math.tan(camera.fov*DEG/2));
+  if(!userMoved)fitCamera(false); braggDirty=true; drawDetector();
+}
+new ResizeObserver(resize).observe(view);
+new ResizeObserver(()=>{braggDirty=true;drawDetector();}).observe(dc);
+let last=performance.now(),lastDet=0;
+function loop(t){
+  const dt=Math.min(0.1,(t-last)/1000);last=t;
+  if(S.playing){S.phi=wrapDeg(S.phi+S.spd*dt);setRange('phi',S.phi);update(false);}
+  if(fly){const u=Math.min(1,(t-fly.t0)/fly.dur),e=u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2;
+    controls.target.lerpVectors(fly.fromT,fly.toT,e);camera.position.lerpVectors(fly.fromP,fly.toP,e);if(u>=1)fly=null;}
+  controls.update();
+  // CPU pass throttled for big lattices
+  const heavy=N>150000||S.mode==='molecule';
+  if(cpuDirty&&(!heavy||t-lastCpu>(S.playing?120:60))){cpuPass();cpuDirty=false;lastCpu=t;drawReadout();detDirty=true;}
+  if((detDirty&&(!heavy||t-lastDet>(S.playing?150:80)))||(S.playing&&S.mode==='crystal'&&t-lastDet>60)){drawDetector();detDirty=false;lastDet=t;if(S.mode==='molecule')drawReadout();}
+  // zoom-aware vector thickness
+  const dist=updateScaleBar(), r=0.0017*dist;
+  for(const a of ARROWS) layoutArrow(a,r);
+  oDot.scale.setScalar(r*2.2); cDot.scale.setScalar(r*1.8);
+  renderer.render(scene,camera); placeLabels();
+  if(!reduceMotion||braggDirty){drawBragg(t);braggDirty=false;}
+  requestAnimationFrame(loop);
+}
+
+/* ================= init ================= */
+syncCellInputs(); syncSelInputs(); $('smear').value=S.smear;
+buildReflections(); detInfo(); buildSmear(); legend();
+bringToDiffraction(); resize(); update();
+requestAnimationFrame(loop);
+window.__ewald={S,update,setMode,stats:()=>({N,lit:STATS.lit})};
+})();
+</script>
+
+</body></html>

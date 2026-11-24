@@ -1,0 +1,898 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Radiation Damage in MX</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/* Layout: long-form lab notebook in five stations (photon → electrons → radicals → residues → lattice), each a figure beside terse text. Single dark theme by choice, matching Ewald Sphere Lab. */
+:root{
+  --bg:#0a1019; --panel:#101926; --panel2:#152132; --line:#22324a; --line2:#2c405d;
+  --fg:#e2e8f1; --muted:#8f9db3; --faint:#5f6e86;
+  --beam:#6cc4ff; --elec:#7fe3ff; --oh:#ff6f5e; --hole:#ffb54a; --hatom:#d8dde6; --ok:#58d39a; --warn:#ffb54a; --bad:#ff6f5e; --metal:#c99bff;
+  --f-display:"Instrument Serif", Georgia, "Times New Roman", serif;
+  --f-body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.55;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 56px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:56px}
+header{display:flex;flex-direction:column;gap:10px}
+.eyebrow{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--beam)}
+h1{font-family:var(--f-display);font-weight:400;font-size:clamp(2.4rem,5.5vw,3.8rem);line-height:1.02;margin:0;text-wrap:balance}
+h1 em{color:var(--beam)}
+.lede{color:var(--muted);max-width:72ch;margin:0}
+h2{font-family:var(--f-display);font-weight:400;font-size:clamp(1.7rem,3.4vw,2.3rem);margin:0;line-height:1.1;text-wrap:balance}
+h2 .n{font-family:var(--f-mono);font-size:.8rem;color:var(--faint);vertical-align:middle;margin-right:10px;letter-spacing:.08em}
+h3{font-size:.74rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:600;margin:0 0 8px}
+p{margin:0}
+section{display:flex;flex-direction:column;gap:18px}
+.sechead{display:flex;flex-direction:column;gap:6px;max-width:80ch}
+.sechead p{color:var(--muted)}
+.grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;align-items:start}
+.grid2.rev{grid-template-columns:minmax(0,1fr) minmax(0,1.35fr)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.fig{background:#0c1420;border:1px solid var(--line);border-radius:10px;overflow:hidden;position:relative;min-width:0}
+.fig canvas{display:block;width:100%}
+.figbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px;border-bottom:1px solid var(--line);background:var(--panel)}
+.figbar .sp{flex:1}
+.figcap{font-size:.78rem;color:var(--faint);padding:8px 12px;border-top:1px solid var(--line)}
+button{font:inherit;font-size:.8rem;background:var(--panel2);color:var(--fg);border:1px solid var(--line2);border-radius:6px;padding:5px 11px;cursor:pointer}
+button:hover{border-color:var(--beam)}
+button[aria-pressed="true"]{background:#16314a;border-color:#2f6b97;color:#d9efff}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--beam);outline-offset:1px}
+.mono{font-family:var(--f-mono);font-size:.86em}
+.muted{color:var(--muted)} .faint{color:var(--faint)}
+ul.tight{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px}
+ul.tight li::marker{color:var(--faint)}
+.unc{display:inline-block;font-family:var(--f-mono);font-size:.66rem;letter-spacing:.06em;color:var(--warn);border:1px solid rgba(255,181,74,.45);border-radius:4px;padding:0 4px;margin-left:4px;vertical-align:1px;white-space:nowrap}
+sup.r{font-family:var(--f-mono);font-size:.66rem;color:var(--beam);margin-left:1px}
+sup.r a{color:inherit;text-decoration:none}
+sup.r a:hover{text-decoration:underline}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:.88rem}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-family:var(--f-mono);font-size:.82rem;text-align:right;font-variant-numeric:tabular-nums}
+.eq{font-family:var(--f-mono);font-size:.84rem;line-height:1.9;overflow-x:auto;white-space:nowrap}
+.eq .c{color:var(--faint)}
+.e{color:var(--elec)} .oh{color:var(--oh)} .h{color:var(--hatom)} .hole{color:var(--hole)} .mt{color:var(--metal)}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.86rem}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600}
+td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* dose ruler */
+.rulerwrap{overflow-x:auto}
+.ruler{position:relative;height:214px;margin:6px 4px 0;min-width:640px}
+.rbar{position:absolute;left:0;right:0;top:120px;height:10px;border-radius:5px;
+  background:linear-gradient(90deg,#1a3b58 0%,#2a5a7c 30%,#6a6a52 62%,#8a4a3a 82%,#a63a2e 100%)}
+.rtick{position:absolute;top:132px;transform:translateX(-50%);font-family:var(--f-mono);font-size:.7rem;color:var(--faint)}
+.rtick::before{content:"";position:absolute;left:50%;top:-12px;height:6px;width:1px;background:var(--line2)}
+.rmark{position:absolute;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;width:120px}
+.rmark.up{bottom:94px}
+.rmark.dn{top:150px}
+.rmark .lab{font-size:.74rem;line-height:1.25;color:var(--fg)}
+.rmark .lab small{display:block;color:var(--muted);font-size:.68rem}
+.rmark .stem{width:1px;height:14px;background:currentColor}
+.rmark.tall .stem{height:52px}
+.rspan{position:absolute;top:114px;height:22px;border-radius:4px;border:1px dashed}
+
+/* timescale */
+.ladder{display:grid;grid-template-columns:110px minmax(0,1fr);gap:0;font-size:.88rem}
+.ladder > div{padding:7px 0;border-bottom:1px solid var(--line)}
+.ladder .t{font-family:var(--f-mono);font-size:.78rem;color:var(--beam);padding-right:10px}
+
+/* specific damage cards */
+.cards4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.sd{display:flex;flex-direction:column;gap:10px}
+.sd svg{width:100%;height:auto;display:block;background:#0c1420;border:1px solid var(--line);border-radius:8px}
+.sd .rank{font-family:var(--f-mono);font-size:.7rem;color:var(--faint)}
+.sd p{font-size:.86rem;color:var(--muted)}
+.sd .eq{font-size:.76rem;line-height:1.7}
+
+/* global controls */
+.ctl{display:flex;flex-direction:column;gap:14px}
+.row{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center}
+.row label{font-size:.88rem}
+.row .val{font-family:var(--f-mono);font-size:.82rem;color:var(--beam);font-variant-numeric:tabular-nums}
+.row input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--beam)}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.74rem;font-weight:500;border:1px solid}
+.pill.ok{color:var(--ok);border-color:rgba(88,211,154,.5);background:rgba(88,211,154,.08)}
+.pill.warn{color:var(--warn);border-color:rgba(255,181,74,.5);background:rgba(255,181,74,.08)}
+.pill.bad{color:var(--bad);border-color:rgba(255,111,94,.5);background:rgba(255,111,94,.08)}
+.globfigs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.74rem;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:3px;border-radius:2px;margin-right:5px;vertical-align:3px}
+
+.refs{columns:2 420px;column-gap:28px;font-size:.8rem;color:var(--muted);margin:0;padding-left:1.6em}
+.refs li{break-inside:avoid;margin-bottom:6px}
+.refs li::marker{font-family:var(--f-mono);color:var(--beam);font-size:.72rem}
+.refs a{color:var(--beam);text-decoration:none}
+.refs a:hover{text-decoration:underline}
+.note{font-size:.8rem;color:var(--faint);max-width:90ch}
+
+@media (max-width:980px){
+  .grid2,.grid2.rev{grid-template-columns:minmax(0,1fr)}
+  .cards4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .globfigs{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:560px){
+  .cards4{grid-template-columns:minmax(0,1fr)}
+  .ladder{grid-template-columns:86px minmax(0,1fr)}
+  .rmark{width:84px}
+  .rmark .lab small{display:none}
+}
+@media (prefers-reduced-motion:reduce){ *{scroll-behavior:auto!important} }
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Macromolecular crystallography · teaching module</div>
+  <h1>Radiation damage, <em>from photon to lattice</em></h1>
+  <p class="lede">Every absorbed X-ray photon deposits ~keV into a crystal that is held together by interactions worth a few kJ/mol. The damage proceeds in two overlapping regimes: <b>specific</b> (site-selective chemistry, visible in difference maps at low dose) and <b>global</b> (loss of diffracting power, visible in the data statistics). Dose, in grays (1 Gy = 1 J kg<sup>−1</sup>), is the metric against which both are tracked.<sup class="r"><a href="#ref-garman2010">1</a></sup></p>
+</header>
+
+<!-- DOSE RULER -->
+<section aria-labelledby="s0">
+  <div class="sechead">
+    <h2 id="s0"><span class="n">00</span>The dose scale</h2>
+    <p>Absorbed dose at 100 K unless noted. Log axis. Specific damage begins orders of magnitude before the global limits.</p>
+  </div>
+  <div class="card">
+    <div class="rulerwrap"><div class="ruler" id="ruler"></div></div>
+    <p class="note">Bands for metal reduction and room-temperature limits are indicative ranges drawn from the cited studies; they depend strongly on the system, photon energy and (at RT) dose rate. <span class="unc">APPROX</span></p>
+  </div>
+</section>
+
+<!-- PRIMARY EVENTS -->
+<section aria-labelledby="s1">
+  <div class="sechead">
+    <h2 id="s1"><span class="n">01</span>Primary interactions</h2>
+    <p>At 12.4 keV in protein crystals only a small fraction of interacting photons scatter elastically; most are absorbed photoelectrically. Energy is deposited by the electrons that result, not by the photon itself.</p>
+  </div>
+  <div class="grid2">
+    <div class="fig">
+      <div class="figbar" role="group" aria-label="Interaction type">
+        <button id="pe-btn" aria-pressed="true">Photoelectric</button>
+        <button id="co-btn" aria-pressed="false">Compton</button>
+        <button id="el-btn" aria-pressed="false">Elastic (Thomson)</button>
+        <span class="sp"></span>
+        <button id="replay">Replay</button>
+      </div>
+      <canvas id="prim" height="380" aria-label="Animation of a primary X-ray interaction"></canvas>
+      <div class="figcap">Schematic, not to scale. A 12 keV photoelectron travels ~µm and causes hundreds of ionisations; the scene shows a few tens of nm.</div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <h3>Interaction fractions, 12.4 keV</h3>
+        <dl class="kv">
+          <dt>Photoelectric absorption</dt><dd>≈ 84 %</dd>
+          <dt>Compton (inelastic)</dt><dd>≈ 8 %</dd>
+          <dt>Elastic (diffraction)</dt><dd>≈ 8 %</dd>
+        </dl>
+        <p class="note" style="margin-top:6px">Fractions of interacting photons for a typical protein crystal; composition- and energy-dependent.<sup class="r"><a href="#ref-garman2010">1</a></sup> <span class="unc">APPROX</span></p>
+      </div>
+      <div id="prim-text"></div>
+    </div>
+  </div>
+</section>
+
+<!-- CASCADE & RADIOLYSIS -->
+<section aria-labelledby="s2">
+  <div class="sechead">
+    <h2 id="s2"><span class="n">02</span>Electron cascade and radiolysis</h2>
+    <p>The crystal is ~30–70 % solvent, so most energy is deposited in water. Ionisation and excitation of water produce the radicals that attack the protein (indirect damage); direct ionisation of the protein produces holes and electrons in situ.</p>
+  </div>
+  <div class="grid2 rev">
+    <div class="card">
+      <h3>Timescales</h3>
+      <div class="ladder">
+        <div class="t">~10⁻¹⁷ s</div><div>Photon absorption; core (K-shell) hole created on C, N, O, S.</div>
+        <div class="t">~10⁻¹⁵ s</div><div>Core hole relaxes, mostly by Auger emission for light elements (fluorescence yield &lt; 1 % for C/N/O).</div>
+        <div class="t">10⁻¹⁵–10⁻¹³ s</div><div>Photoelectron slows; secondary ionisations and excitations along the track. <span class="unc">APPROX</span></div>
+        <div class="t">10⁻¹³–10⁻¹² s</div><div>H₂O<sup>•+</sup> + H₂O → H₃O⁺ + OH<sup>•</sup>; electrons thermalise and solvate (e⁻<sub>aq</sub>).</div>
+        <div class="t">10⁻¹²–10⁻⁷ s</div><div>Spur reactions (RT). Primary yields defined at ~100 ns.</div>
+        <div class="t">10⁻⁷ s → s</div><div>Radical reactions with protein. At 100 K: electron and hole migration only; OH<sup>•</sup> largely trapped.</div>
+        <div class="t">s → h</div><div>Accumulation of H₂ and CO₂, structural relaxation, lattice disorder.<sup class="r"><a href="#ref-meents2010">14</a></sup></div>
+      </div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <h3>Energetics</h3>
+        <ul class="tight">
+          <li>Photoelectron energy ≈ E<sub>γ</sub> − E<sub>B</sub>; K-edges: C 0.28, N 0.41, O 0.54, S 2.47 keV. A 12.4 keV photon on O yields an ≈ 11.9 keV photoelectron.</li>
+          <li>Auger electrons from C/N/O: ≈ 0.25–0.5 keV, ranges of a few nm.</li>
+          <li>Each 12 keV photoelectron produces ~500 further ionisations (≈ 25–30 eV per ion pair).<sup class="r"><a href="#ref-oneill2002">17</a></sup> <span class="unc">APPROX</span></li>
+          <li>Photoelectron range at 12.4 keV ≈ 2–4 µm in protein crystals, so microbeams and microcrystals can lose part of the dose by escape.<sup class="r"><a href="#ref-navehill2005">15</a>,<a href="#ref-sanishvili2011">16</a></sup></li>
+          <li>Low-energy (&lt; 15 eV) secondary electrons break bonds by dissociative electron attachment.<sup class="r"><a href="#ref-boudaiffa2000">18</a></sup></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Water radiolysis</h3>
+        <div class="eq">
+          H₂O ⟿ H₂O<sup>•+</sup> + <span class="e">e⁻</span> &nbsp;<span class="c">ionisation</span><br>
+          H₂O<sup>•+</sup> + H₂O → H₃O⁺ + <span class="oh">OH<sup>•</sup></span> &nbsp;<span class="c">oxidising</span><br>
+          <span class="e">e⁻</span> + n H₂O → <span class="e">e⁻<sub>aq</sub></span> &nbsp;<span class="c">reducing</span><br>
+          H₂O* → <span class="h">H<sup>•</sup></span> + <span class="oh">OH<sup>•</sup></span> &nbsp;<span class="c">excitation</span><br>
+          <span class="e">e⁻<sub>aq</sub></span> + H₃O⁺ → <span class="h">H<sup>•</sup></span> + H₂O
+        </div>
+      </div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Species</th><th>G (molecules / 100 eV)</th><th>Character</th></tr></thead>
+          <tbody>
+            <tr><td class="e">e⁻<sub>aq</sub></td><td class="num">2.7</td><td>strong reductant</td></tr>
+            <tr><td class="oh">OH<sup>•</sup></td><td class="num">2.7</td><td>strong oxidant</td></tr>
+            <tr><td class="h">H<sup>•</sup></td><td class="num">0.6</td><td>reductant</td></tr>
+            <tr><td>H₂O₂</td><td class="num">0.7</td><td>molecular</td></tr>
+            <tr><td>H₂</td><td class="num">0.45</td><td>molecular; gas at 100 K</td></tr>
+          </tbody>
+        </table>
+        <p class="note" style="margin-top:6px">Low-LET yields in liquid water at ~100 ns, room temperature.<sup class="r"><a href="#ref-spinks">19</a></sup> Yields in vitrified, crystalline solvent at 100 K differ and are less well defined. <span class="unc">APPROX AT 100 K</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEMPERATURE -->
+<section aria-labelledby="s3">
+  <div class="sechead">
+    <h2 id="s3"><span class="n">03</span>Radical mobility: 100 K versus room temperature</h2>
+    <p>Cryocooling does not prevent radical formation. It stops diffusion of OH<sup>•</sup> and other heavy radicals, but electrons (and, more slowly, holes) still migrate by tunnelling and hopping to electron-affinic sites. This is why metal centres and disulfides are reduced at 100 K.<sup class="r"><a href="#ref-garman2010">1</a>,<a href="#ref-ravelli2000">8</a></sup></p>
+  </div>
+  <div class="grid2">
+    <div class="fig">
+      <div class="figbar" role="group" aria-label="Temperature">
+        <button id="t100" aria-pressed="true">100 K</button>
+        <button id="t300" aria-pressed="false">Room temperature</button>
+        <span class="sp"></span>
+        <button id="treset">Reset</button>
+      </div>
+      <canvas id="temp" height="400" aria-label="Animation of radical migration in a crystal lattice"></canvas>
+      <div class="figcap">
+        <span class="legend">
+          <span><i style="background:var(--elec)"></i>e⁻</span>
+          <span><i style="background:var(--oh)"></i>OH•</span>
+          <span><i style="background:var(--hatom)"></i>H•</span>
+          <span><i style="background:var(--hole)"></i>hole (h⁺)</span>
+          <span><i style="background:var(--metal)"></i>metal centre</span>
+          <span><i style="background:#e8d36a"></i>S–S</span>
+        </span>
+        Schematic. Rates are illustrative, not simulated.
+      </div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <h3>Live tally</h3>
+        <dl class="kv" id="tally"></dl>
+      </div>
+      <div>
+        <h3>100 K</h3>
+        <ul class="tight">
+          <li>OH<sup>•</sup> immobile in vitreous solvent below ~110 K. <span class="unc">APPROX</span></li>
+          <li>Electrons migrate to metal centres and disulfides; holes to electron-rich sites such as carboxylates.</li>
+          <li>Damage rate effectively independent of dose rate over synchrotron ranges.<sup class="r"><a href="#ref-sliz2003">20</a></sup></li>
+          <li>H₂ accumulates; further cooling to ~15–50 K gives a modest additional gain, magnitude system-dependent.<sup class="r"><a href="#ref-meents2010">14</a></sup> <span class="unc">DEBATED</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Room temperature</h3>
+        <ul class="tight">
+          <li>OH<sup>•</sup>, H<sup>•</sup> and e⁻<sub>aq</sub> diffuse through solvent channels and react with surface residues.</li>
+          <li>Global dose limits fall by roughly 30–100× relative to 100 K.<sup class="r"><a href="#ref-navegarman2005">21</a>,<a href="#ref-southworth2007">22</a></sup> <span class="unc">APPROX</span></li>
+          <li>Dose-rate effects appear: very high dose rates can partly outrun radical diffusion.<sup class="r"><a href="#ref-owen2012">23</a>,<a href="#ref-warkentin2013">24</a></sup></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SPECIFIC DAMAGE -->
+<section aria-labelledby="s4">
+  <div class="sechead">
+    <h2 id="s4"><span class="n">04</span>Specific damage</h2>
+    <p>Site-selective changes seen as negative F<sub>o</sub>(D<sub>n</sub>) − F<sub>o</sub>(D<sub>1</sub>) difference density. Typical order of susceptibility at 100 K: metal reduction ≫ disulfide cleavage &gt; Glu/Asp decarboxylation &gt; Tyr O–H loss &gt; Met C–S cleavage.<sup class="r"><a href="#ref-burmeister2000">6</a>,<a href="#ref-weik2000">7</a>,<a href="#ref-ravelli2000">8</a></sup> Within each class, susceptibility depends on environment (active sites and strained bonds are hit first) and does not correlate with solvent accessibility.<sup class="r"><a href="#ref-fioravanti2007">10</a></sup></p>
+  </div>
+  <div class="cards4">
+    <article class="card sd">
+      <div class="rank">1 · reduction (e⁻)</div>
+      <h3 style="margin:0">Metal centres</h3>
+      <svg viewBox="0 0 240 130" role="img" aria-label="Heme iron reduced from Fe(III) to Fe(II)">
+        <g stroke="#3b5576" stroke-width="1.5" fill="none">
+          <polygon points="70,40 100,30 130,40 140,65 130,90 100,100 70,90 60,65"/>
+        </g>
+        <g font-family="IBM Plex Mono, monospace" font-size="9" fill="#8f9db3">
+          <text x="62" y="35">N</text><text x="132" y="35">N</text><text x="62" y="102">N</text><text x="132" y="102">N</text>
+        </g>
+        <circle cx="100" cy="65" r="13" fill="#2a1f40" stroke="#c99bff" stroke-width="1.5"/>
+        <text x="100" y="69" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#c99bff">Fe³⁺</text>
+        <path d="M172 34 C 150 34 138 44 118 56" stroke="#7fe3ff" stroke-width="1.5" fill="none" marker-end="url(#ae)"/>
+        <text x="176" y="37" font-family="IBM Plex Mono, monospace" font-size="11" fill="#7fe3ff">e⁻</text>
+        <text x="176" y="78" font-family="IBM Plex Mono, monospace" font-size="10" fill="#e2e8f1">→ Fe²⁺</text>
+        <text x="176" y="94" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8f9db3">ligand shifts</text>
+        <defs><marker id="ae" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7fe3ff"/></marker></defs>
+      </svg>
+      <div class="eq">Fe(III) + e⁻ → Fe(II)<br>Cu(II) + e⁻ → Cu(I)<br>Mn(IV/III) → Mn(II)</div>
+      <p>Fastest process. Heme Fe(III) reduction observed by online UV-vis at a small fraction of a data set;<sup class="r"><a href="#ref-beitlich2007">12</a></sup> the PSII Mn₄CaO₅ cluster is substantially reduced at doses used for standard data collection.<sup class="r"><a href="#ref-yano2005">13</a></sup> Validate redox state with online spectroscopy or XAS. Onset typically &lt; 1 MGy. <span class="unc">SYSTEM-DEPENDENT</span></p>
+    </article>
+    <article class="card sd">
+      <div class="rank">2 · reduction (e⁻)</div>
+      <h3 style="margin:0">Disulfide bonds</h3>
+      <svg viewBox="0 0 240 130" role="img" aria-label="Disulfide bond elongating after electron capture">
+        <g font-family="IBM Plex Mono, monospace">
+          <line x1="20" y1="45" x2="60" y2="45" stroke="#3b5576" stroke-width="2"/>
+          <circle cx="72" cy="45" r="11" fill="#2b2a12" stroke="#e8d36a" stroke-width="1.5"/><text x="72" y="49" text-anchor="middle" font-size="10" fill="#e8d36a">S</text>
+          <line x1="83" y1="45" x2="107" y2="45" stroke="#e8d36a" stroke-width="2"/>
+          <circle cx="118" cy="45" r="11" fill="#2b2a12" stroke="#e8d36a" stroke-width="1.5"/><text x="118" y="49" text-anchor="middle" font-size="10" fill="#e8d36a">S</text>
+          <line x1="129" y1="45" x2="169" y2="45" stroke="#3b5576" stroke-width="2"/>
+          <text x="95" y="28" text-anchor="middle" font-size="9" fill="#8f9db3">2.04 Å</text>
+          <text x="190" y="49" font-size="9" fill="#8f9db3">intact</text>
+
+          <line x1="20" y1="100" x2="52" y2="100" stroke="#3b5576" stroke-width="2"/>
+          <circle cx="64" cy="100" r="11" fill="#2b2a12" stroke="#e8d36a" stroke-width="1.5"/><text x="64" y="104" text-anchor="middle" font-size="10" fill="#e8d36a">S</text>
+          <line x1="75" y1="100" x2="115" y2="100" stroke="#e8d36a" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <circle cx="126" cy="100" r="11" fill="#2b2a12" stroke="#e8d36a" stroke-width="1.5"/><text x="126" y="104" text-anchor="middle" font-size="10" fill="#e8d36a">S</text>
+          <line x1="137" y1="100" x2="169" y2="100" stroke="#3b5576" stroke-width="2"/>
+          <text x="95" y="86" text-anchor="middle" font-size="9" fill="#7fe3ff">[RSSR]•⁻ ≈ 2.7 Å</text>
+          <text x="180" y="104" font-size="9" fill="#8f9db3">λmax ≈ 400 nm</text>
+        </g>
+      </svg>
+      <div class="eq">RSSR + e⁻ → [RSSR]•⁻<br>[RSSR]•⁻ → RS• + RS⁻</div>
+      <p>Electron capture forms the disulfide radical anion, with ~0.7 Å bond elongation and a ~400 nm absorption band in crystals.<sup class="r"><a href="#ref-weik2002">9</a></sup> Further dose cleaves the bond; Sγ density splits or disappears.<sup class="r"><a href="#ref-weik2000">7</a>,<a href="#ref-ravelli2000">8</a></sup></p>
+    </article>
+    <article class="card sd">
+      <div class="rank">3 · oxidation (h⁺)</div>
+      <h3 style="margin:0">Glu / Asp decarboxylation</h3>
+      <svg viewBox="0 0 240 130" role="img" aria-label="Carboxylate losing CO2 after oxidation">
+        <g font-family="IBM Plex Mono, monospace">
+          <line x1="20" y1="70" x2="60" y2="70" stroke="#3b5576" stroke-width="2"/>
+          <text x="22" y="62" font-size="9" fill="#8f9db3">Cγ/Cβ</text>
+          <circle cx="70" cy="70" r="9" fill="#14202f" stroke="#8f9db3" stroke-width="1.5"/><text x="70" y="74" text-anchor="middle" font-size="9" fill="#e2e8f1">C</text>
+          <line x1="77" y1="64" x2="95" y2="46" stroke="#ff6f5e" stroke-width="2"/>
+          <line x1="77" y1="76" x2="95" y2="94" stroke="#ff6f5e" stroke-width="2"/>
+          <circle cx="101" cy="40" r="9" fill="#2a1414" stroke="#ff6f5e" stroke-width="1.5"/><text x="101" y="44" text-anchor="middle" font-size="9" fill="#ff6f5e">O</text>
+          <circle cx="101" cy="100" r="9" fill="#2a1414" stroke="#ff6f5e" stroke-width="1.5"/><text x="101" y="104" text-anchor="middle" font-size="9" fill="#ff6f5e">O⁻</text>
+          <text x="128" y="74" font-size="12" fill="#ffb54a">h⁺ →</text>
+          <text x="172" y="60" font-size="10" fill="#e2e8f1">R•</text>
+          <text x="172" y="84" font-size="10" fill="#e2e8f1">+ CO₂</text>
+        </g>
+      </svg>
+      <div class="eq">RCOO⁻ − e⁻ → RCOO•<br>RCOO• → R• + CO₂</div>
+      <p>Hole or OH<sup>•</sup> oxidation of the carboxylate followed by CO₂ loss; carboxyl density fades first.<sup class="r"><a href="#ref-burmeister2000">6</a>,<a href="#ref-weik2000">7</a></sup> Active-site and crystal-contact acids are most sensitive.<sup class="r"><a href="#ref-fioravanti2007">10</a></sup> CO₂ may remain trapped near the site at 100 K. <span class="unc">CASE-DEPENDENT</span></p>
+    </article>
+    <article class="card sd">
+      <div class="rank">4–5 · later onset</div>
+      <h3 style="margin:0">Met C–S and Tyr O–H</h3>
+      <svg viewBox="0 0 240 130" role="img" aria-label="Methionine C–S bond cleavage">
+        <g font-family="IBM Plex Mono, monospace">
+          <line x1="16" y1="65" x2="44" y2="65" stroke="#3b5576" stroke-width="2"/>
+          <circle cx="54" cy="65" r="9" fill="#14202f" stroke="#8f9db3" stroke-width="1.5"/><text x="54" y="69" text-anchor="middle" font-size="8" fill="#e2e8f1">Cγ</text>
+          <line x1="63" y1="65" x2="86" y2="65" stroke="#e8d36a" stroke-width="2" stroke-dasharray="3 3"/>
+          <circle cx="97" cy="65" r="11" fill="#2b2a12" stroke="#e8d36a" stroke-width="1.5"/><text x="97" y="69" text-anchor="middle" font-size="9" fill="#e8d36a">Sδ</text>
+          <line x1="108" y1="65" x2="131" y2="65" stroke="#e8d36a" stroke-width="2" stroke-dasharray="3 3"/>
+          <circle cx="141" cy="65" r="9" fill="#14202f" stroke="#8f9db3" stroke-width="1.5"/><text x="141" y="69" text-anchor="middle" font-size="8" fill="#e2e8f1">Cε</text>
+          <text x="74" y="50" text-anchor="middle" font-size="12" fill="#ff6f5e">✕</text>
+          <text x="120" y="50" text-anchor="middle" font-size="12" fill="#ff6f5e">✕</text>
+          <text x="97" y="100" text-anchor="middle" font-size="9" fill="#8f9db3">either C–S bond may break</text>
+        </g>
+      </svg>
+      <div class="eq">Met: Cγ–Sδ or Sδ–Cε scission<br>Tyr: loss of OH density</div>
+      <p>Met C–S cleavage and Tyr hydroxyl loss are reported at higher doses than disulfide and carboxylate damage.<sup class="r"><a href="#ref-burmeister2000">6</a></sup> Relevant for Se-Met phasing: Se sites decay with dose, which can degrade or (RIP) be exploited for phasing.<sup class="r"><a href="#ref-garman2010">1</a></sup></p>
+    </article>
+  </div>
+  <div class="fig">
+    <div class="figbar"><h3 style="margin:0">Schematic susceptibility curves</h3><span class="sp"></span><span class="legend" id="sdleg"></span></div>
+    <canvas id="sdplot" height="260" aria-label="Schematic fraction intact versus dose for each damage class"></canvas>
+    <div class="figcap">Fraction of sites intact versus dose, log axis. Order follows the cited studies; midpoints and widths are illustrative only and vary by protein, site and photon energy. <span class="unc">SCHEMATIC</span></div>
+  </div>
+</section>
+
+<!-- GLOBAL DAMAGE -->
+<section aria-labelledby="s5">
+  <div class="sechead">
+    <h2 id="s5"><span class="n">05</span>Global damage</h2>
+    <p>Accumulated specific damage and lattice disorder reduce diffracting power, highest resolution first. Model: mean intensity at resolution <i>d</i> decays as ⟨I⟩ = ⟨I⟩₀ exp(−ln2 · D / (H d)), with H = 10 MGy Å⁻¹, so D½ ≈ 10<i>d</i> MGy.<sup class="r"><a href="#ref-holton2009">4</a>,<a href="#ref-holtonfrankel2010">5</a>,<a href="#ref-howells2009">11</a></sup></p>
+  </div>
+  <div class="grid2 rev">
+    <div class="card ctl">
+      <div class="row">
+        <label for="dose">Absorbed dose (100 K)</label><span class="val" id="dose-v"></span>
+        <input type="range" id="dose" min="0" max="60" step="0.5" value="12">
+      </div>
+      <div class="row">
+        <label for="dres">Resolution shell <i>d</i></label><span class="val" id="dres-v"></span>
+        <input type="range" id="dres" min="1.2" max="6" step="0.1" value="2.0">
+      </div>
+      <div><span class="pill ok" id="status"></span></div>
+      <dl class="kv" id="gread"></dl>
+      <div>
+        <h3>Observables</h3>
+        <ul class="tight" style="font-size:.86rem">
+          <li><b>Intensity loss</b>, starting at high resolution; I/σ(I) in the outer shell falls first.</li>
+          <li><b>Wilson B rises</b> roughly linearly with dose; rate varies between crystals.<sup class="r"><a href="#ref-kmetko2006">3</a></sup></li>
+          <li><b>Unit-cell volume expands</b>, typically by a few tenths of a percent to ~1 %; rate is not transferable between crystals, so not a reliable dose metric.<sup class="r"><a href="#ref-murray2002">25</a>,<a href="#ref-ravelli2002">26</a></sup> <span class="unc">APPROX</span></li>
+          <li><b>Mosaicity</b> often increases; not universal.</li>
+          <li><b>Scaling B</b> (per-batch relative B in AIMLESS/XSCALE) becomes increasingly negative with frame number.</li>
+          <li><b>R<sub>d</sub></b> rises with frame separation (Diederichs).<sup class="r"><a href="#ref-diederichs2006">27</a></sup></li>
+          <li>Rising R<sub>merge</sub>, falling CC½ in the outer shell.</li>
+        </ul>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+      <div class="globfigs">
+        <div class="fig">
+          <div class="figbar"><h3 style="margin:0">Simulated still, detector centre</h3></div>
+          <canvas id="det" height="400" aria-label="Simulated diffraction pattern fading with dose"></canvas>
+          <div class="figcap">Random reflections, Wilson B₀ = 20 Å², decayed with the H model. Spot broadening with dose is illustrative. <span class="unc">ILLUSTRATIVE</span></div>
+        </div>
+        <div class="fig">
+          <div class="figbar"><h3 style="margin:0">⟨I⟩/⟨I⟩₀ versus dose</h3></div>
+          <canvas id="curve" height="400" aria-label="Relative intensity versus dose for several resolutions"></canvas>
+          <div class="figcap"><span class="legend" id="cleg"></span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Dose limits at 100 K</h3>
+        <div class="tw">
+          <table>
+            <thead><tr><th>Limit</th><th>Value</th><th>Basis</th></tr></thead>
+            <tbody>
+              <tr><td>Henderson limit</td><td class="num">20 MGy</td><td>Dose to halve diffracting power, extrapolated from electron-diffraction data on 2D crystals.<sup class="r"><a href="#ref-henderson1990">2</a></sup></td></tr>
+              <tr><td>Garman limit</td><td class="num">30 MGy</td><td>Recommended limit: mean intensity reduced to ~70 % of initial; for most biological questions.<sup class="r"><a href="#ref-owen2006">32</a></sup></td></tr>
+              <tr><td>Experimental D½</td><td class="num">43 MGy</td><td>Dose to halve mean intensity, apoferritin and holoferritin crystals, 100 K.<sup class="r"><a href="#ref-owen2006">32</a></sup></td></tr>
+              <tr><td>Resolution-dependent D½</td><td class="num">≈ 10<i>d</i> MGy</td><td>Howells criterion; consistent with Owen 2006 and Kmetko 2006 data.<sup class="r"><a href="#ref-howells2009">11</a>,<a href="#ref-holtonfrankel2010">5</a></sup></td></tr>
+              <tr><td>Room temperature</td><td class="num">~0.2–1 MGy</td><td>Strongly system- and dose-rate-dependent.<sup class="r"><a href="#ref-navegarman2005">21</a>,<a href="#ref-southworth2007">22</a>,<a href="#ref-warkentin2013">24</a></sup> <span class="unc">APPROX</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note" style="margin-top:8px">Specific damage to metal sites, disulfides and active-site carboxylates is often visible well below 20 MGy. Compute dose per crystal with RADDOSE-3D;<sup class="r"><a href="#ref-zeldin2013">28</a></sup> quantify per-atom damage with B<sub>damage</sub>.<sup class="r"><a href="#ref-gerstel2015">29</a></sup></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MITIGATION -->
+<section aria-labelledby="s6">
+  <div class="sechead">
+    <h2 id="s6"><span class="n">06</span>Practical consequences</h2>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <ul class="tight">
+        <li><b>Plan dose, not exposure time.</b> Calculate with RADDOSE-3D for the actual beam profile, crystal shape and composition.<sup class="r"><a href="#ref-zeldin2013">28</a></sup></li>
+        <li><b>Spread dose.</b> Helical/vector scans, multiple positions, multi-crystal merging, serial crystallography.</li>
+        <li><b>Collect redox-sensitive sites first</b>, or composite structures from low-dose wedges of many crystals; verify with online spectroscopy.<sup class="r"><a href="#ref-beitlich2007">12</a>,<a href="#ref-yano2005">13</a></sup></li>
+        <li><b>Microbeams on microcrystals</b> can gain from photoelectron escape, larger at higher photon energy.<sup class="r"><a href="#ref-navehill2005">15</a>,<a href="#ref-sanishvili2011">16</a></sup></li>
+        <li><b>Scavengers</b>: mixed results at 100 K; some benefit reported at RT.<sup class="r"><a href="#ref-southworth2007">22</a></sup> <span class="unc">CASE-DEPENDENT</span></li>
+        <li><b>XFEL</b> femtosecond pulses outrun global damage ("diffraction before destruction"),<sup class="r"><a href="#ref-neutze2000">30</a></sup> but metal sites can still be affected within longer pulses.<sup class="r"><a href="#ref-nass2015">31</a></sup></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Diagnosing specific damage in your data</h3>
+      <ul class="tight">
+        <li>Process the first and last wedges separately; inspect F<sub>o</sub>(late) − F<sub>o</sub>(early) at disulfides, metals, Glu/Asp, Met.</li>
+        <li>Look for negative peaks on Sγ, carboxyl O, metal ligands; positive peaks at alternative S positions.</li>
+        <li>Check metal–ligand distances against the expected oxidation state.</li>
+        <li>Track scaling B and R<sub>d</sub> versus frame; truncate where the outer-shell CC½ or I/σ(I) degrades.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- REFERENCES -->
+<section aria-labelledby="s7">
+  <div class="sechead"><h2 id="s7"><span class="n">07</span>References</h2>
+  <p class="note"><span class="unc">APPROX</span> <span class="unc">SCHEMATIC</span> and similar tags mark values that are indicative, case-dependent, or drawn for illustration rather than taken from a single measurement.</p></div>
+  <ol class="refs">
+    <li id="ref-garman2010">Garman EF (2010) Radiation damage in macromolecular crystallography: what is it and why should we care? <i>Acta Cryst D</i> 66:339–351. <a href="https://doi.org/10.1107/S0907444910008656">doi</a></li>
+    <li id="ref-henderson1990">Henderson R (1990) Cryo-protection of protein crystals against radiation damage in electron and X-ray diffraction. <i>Proc R Soc Lond B</i> 241:6–8. <a href="https://doi.org/10.1098/rspb.1990.0057">doi</a></li>
+    <li id="ref-kmetko2006">Kmetko J, Husseini NS, Naides M, Kalinin Y, Thorne RE (2006) Quantifying X-ray radiation damage in protein crystals at cryogenic temperatures. <i>Acta Cryst D</i> 62:1030–1038. <a href="https://doi.org/10.1107/S0907444906023869">doi</a></li>
+    <li id="ref-holton2009">Holton JM (2009) A beginner's guide to radiation damage. <i>J Synchrotron Rad</i> 16:133–142. <a href="https://doi.org/10.1107/S0909049509004361">doi</a></li>
+    <li id="ref-holtonfrankel2010">Holton JM, Frankel KA (2010) The minimum crystal size needed for a complete diffraction data set. <i>Acta Cryst D</i> 66:393–408. <a href="https://doi.org/10.1107/S0907444910007262">doi</a></li>
+    <li id="ref-burmeister2000">Burmeister WP (2000) Structural changes in a cryo-cooled protein crystal owing to radiation damage. <i>Acta Cryst D</i> 56:328–341. <a href="https://doi.org/10.1107/S0907444999016261">doi</a></li>
+    <li id="ref-weik2000">Weik M, Ravelli RBG, Kryger G, McSweeney S, Raves ML, Harel M, Gros P, Silman I, Kroon J, Sussman JL (2000) Specific chemical and structural damage to proteins produced by synchrotron radiation. <i>PNAS</i> 97:623–628. <a href="https://doi.org/10.1073/pnas.97.2.623">doi</a></li>
+    <li id="ref-ravelli2000">Ravelli RBG, McSweeney SM (2000) The 'fingerprint' that X-rays can leave on structures. <i>Structure</i> 8:315–328. <a href="https://doi.org/10.1016/S0969-2126(00)00109-X">doi</a></li>
+    <li id="ref-weik2002">Weik M, Bergès J, Raves ML, Gros P, McSweeney S, Silman I, Sussman JL, Houée-Levin C, Ravelli RBG (2002) Evidence for the formation of disulfide radicals in protein crystals upon X-ray irradiation. <i>J Synchrotron Rad</i> 9:342–346. <a href="https://doi.org/10.1107/s0909049502014589">doi</a></li>
+    <li id="ref-fioravanti2007">Fioravanti E, Vellieux FMD, Amara P, Madern D, Weik M (2007) Specific radiation damage to acidic residues and its relation to their chemical and structural environment. <i>J Synchrotron Rad</i> 14:84–91. <a href="https://doi.org/10.1107/S0909049506038623">doi</a></li>
+    <li id="ref-howells2009">Howells MR, Beetz T, Chapman HN, et al. (2009) An assessment of the resolution limitation due to radiation-damage in X-ray diffraction microscopy. <i>J Electron Spectrosc Relat Phenom</i> 170:4–12. <a href="https://doi.org/10.1016/j.elspec.2008.10.008">doi</a></li>
+    <li id="ref-beitlich2007">Beitlich T, Kühnel K, Schulze-Briese C, Shoeman RL, Schlichting I (2007) Cryoradiolytic reduction of crystalline heme proteins. <i>J Synchrotron Rad</i> 14:11–23. <a href="https://doi.org/10.1107/S0909049506049806">doi</a></li>
+    <li id="ref-yano2005">Yano J, Kern J, Irrgang KD, et al. (2005) X-ray damage to the Mn₄Ca complex in single crystals of photosystem II. <i>PNAS</i> 102:12047–12052. <a href="https://doi.org/10.1073/pnas.0505207102">doi</a></li>
+    <li id="ref-meents2010">Meents A, Gutmann S, Wagner A, Schulze-Briese C (2010) Origin and temperature dependence of radiation damage in biological samples at cryogenic temperatures. <i>PNAS</i> 107:1094–1099. <a href="https://doi.org/10.1073/pnas.0905481107">doi</a></li>
+    <li id="ref-navehill2005">Nave C, Hill MA (2005) Will reduced radiation damage occur with very small crystals? <i>J Synchrotron Rad</i> 12:299–303. <a href="https://doi.org/10.1107/S0909049505003274">doi</a></li>
+    <li id="ref-sanishvili2011">Sanishvili R, Yoder DW, Pothineni SB, et al. (2011) Radiation damage in protein crystals is reduced with a micron-sized X-ray beam. <i>PNAS</i> 108:6127–6132. <a href="https://doi.org/10.1073/pnas.1017701108">doi</a></li>
+    <li id="ref-oneill2002">O'Neill P, Stevens DL, Garman EF (2002) Physical and chemical considerations of damage induced in protein crystals by synchrotron radiation: a radiation chemical perspective. <i>J Synchrotron Rad</i> 9:329–332. <a href="https://doi.org/10.1107/S0909049502014553">doi</a></li>
+    <li id="ref-boudaiffa2000">Boudaïffa B, Cloutier P, Hunting D, Huels MA, Sanche L (2000) Resonant formation of DNA strand breaks by low-energy (3 to 20 eV) electrons. <i>Science</i> 287:1658–1660. <a href="https://doi.org/10.1126/science.287.5458.1658">doi</a></li>
+    <li id="ref-spinks">Spinks JWT, Woods RJ (1990) <i>An Introduction to Radiation Chemistry</i>, 3rd edn. Wiley, New York.</li>
+    <li id="ref-sliz2003">Sliz P, Harrison SC, Rosenbaum G (2003) How does radiation damage in protein crystals depend on X-ray dose? <i>Structure</i> 11:13–19. <a href="https://doi.org/10.1016/S0969-2126(02)00910-3">doi</a></li>
+    <li id="ref-navegarman2005">Nave C, Garman EF (2005) Towards an understanding of radiation damage in cryocooled macromolecular crystals. <i>J Synchrotron Rad</i> 12:257–260. <a href="https://doi.org/10.1107/S0909049505007132">doi</a></li>
+    <li id="ref-southworth2007">Southworth-Davies RJ, Medina MA, Carmichael I, Garman EF (2007) Observation of decreased radiation damage at higher dose rates in room temperature protein crystallography. <i>Structure</i> 15:1531–1541. <a href="https://doi.org/10.1016/j.str.2007.10.013">doi</a></li>
+    <li id="ref-owen2012">Owen RL, Axford D, Nettleship JE, et al. (2012) Outrunning free radicals in room-temperature macromolecular crystallography. <i>Acta Cryst D</i> 68:810–818. <a href="https://doi.org/10.1107/S0907444912012553">doi</a></li>
+    <li id="ref-warkentin2013">Warkentin M, Hopkins JB, Badeau R, Mulichak AM, Keefe LJ, Thorne RE (2013) Global radiation damage: temperature dependence, time dependence and how to outrun it. <i>J Synchrotron Rad</i> 20:7–13. <a href="https://doi.org/10.1107/S0909049512048303">doi</a></li>
+    <li id="ref-murray2002">Murray J, Garman E (2002) Investigation of possible free-radical scavengers and metrics for radiation damage in protein cryocrystallography. <i>J Synchrotron Rad</i> 9:347–354. <a href="https://doi.org/10.1107/S0909049502014632">doi</a></li>
+    <li id="ref-ravelli2002">Ravelli RBG, Theveneau P, McSweeney S, Caffrey M (2002) Unit-cell volume change as a metric of radiation damage in crystals of macromolecules. <i>J Synchrotron Rad</i> 9:355–360. <a href="https://doi.org/10.1107/S0909049502014541">doi</a></li>
+    <li id="ref-diederichs2006">Diederichs K (2006) Some aspects of quantitative analysis and correction of radiation damage. <i>Acta Cryst D</i> 62:96–101. <a href="https://doi.org/10.1107/S0907444905031537">doi</a></li>
+    <li id="ref-zeldin2013">Zeldin OB, Gerstel M, Garman EF (2013) RADDOSE-3D: time- and space-resolved modelling of dose in macromolecular crystallography. <i>J Appl Cryst</i> 46:1225–1230. <a href="https://doi.org/10.1107/S0021889813011461">doi</a></li>
+    <li id="ref-gerstel2015">Gerstel M, Deane CM, Garman EF (2015) Identifying and quantifying radiation damage at the atomic level. <i>J Synchrotron Rad</i> 22:201–212. <a href="https://doi.org/10.1107/S1600577515002131">doi</a></li>
+    <li id="ref-neutze2000">Neutze R, Wouts R, van der Spoel D, Weckert E, Hajdu J (2000) Potential for biomolecular imaging with femtosecond X-ray pulses. <i>Nature</i> 406:752–757. <a href="https://doi.org/10.1038/35021099">doi</a></li>
+    <li id="ref-nass2015">Nass K, Foucar L, Barends TRM, et al. (2015) Indications of radiation damage in ferredoxin microcrystals using high-intensity X-FEL beams. <i>J Synchrotron Rad</i> 22:225–238. <a href="https://doi.org/10.1107/S1600577515002349">doi</a></li>
+    <li id="ref-owen2006">Owen RL, Rudiño-Piñera E, Garman EF (2006) Experimental determination of the radiation dose limit for cryocooled protein crystals. <i>PNAS</i> 103:4912–4917. <a href="https://doi.org/10.1073/pnas.0600973103">doi</a></li>
+  </ol>
+  <p class="note">DOIs other than those for refs 1, 9, 10 and 12 were entered from memory and have not been individually resolved. <span class="unc">VERIFY</span></p>
+</section>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+const css = getComputedStyle(document.documentElement);
+const C = n => css.getPropertyValue(n).trim();
+const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MONO = '11px "IBM Plex Mono", ui-monospace, monospace';
+
+function fit(cv){
+  const r = cv.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio||1, 2);
+  const h = +cv.getAttribute('height');
+  const w = Math.max(200, r.width);
+  const hh = cv.dataset.square ? w : h;
+  cv.width = Math.round(w*dpr); cv.height = Math.round(hh*dpr);
+  cv.style.height = hh+'px';
+  const ctx = cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx, w, h:hh};
+}
+function rnd(a,b){return a+Math.random()*(b-a)}
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+
+/* ---------- 00 DOSE RULER ---------- */
+(function(){
+  const el = document.getElementById('ruler');
+  const lo = Math.log10(0.01), hi = Math.log10(100);
+  const x = v => ((Math.log10(v)-lo)/(hi-lo)*100);
+  const ticks = [0.01,0.1,1,10,100];
+  const tl = {0.01:'10 kGy',0.1:'100 kGy',1:'1 MGy',10:'10 MGy',100:'100 MGy'};
+  let h = '<div class="rbar"></div>';
+  ticks.forEach(t=>{ h += `<div class="rtick" style="left:${x(t)}%">${tl[t]}</div>`; });
+  const spans = [
+    {a:0.02,b:1, col:C('--metal'), lab:'Metal reduction', sub:'onset, system-dependent', pos:'up'},
+    {a:0.2,b:1, col:C('--oh'), lab:'RT global D½', sub:'~0.2–1 MGy', pos:'dn', off:1}
+  ];
+  spans.forEach(s=>{
+    h += `<div class="rspan" style="left:${x(s.a)}%;width:${x(s.b)-x(s.a)}%;border-color:${s.col};${s.off?'top:118px;height:14px':''}"></div>`;
+  });
+  const marks = [
+    {v:0.1, lab:'Metal reduction', sub:'onset often ≪ 1 MGy', col:C('--metal'), pos:'up'},
+    {v:2.5, lab:'S–S, Glu/Asp', sub:'~1–10 MGy', col:'#e8d36a', pos:'up'},
+    {v:20, lab:'Henderson', sub:'20 MGy', col:C('--warn'), pos:'up'},
+    {v:43, lab:'Owen D½', sub:'43 MGy', col:C('--bad'), pos:'up', tall:1},
+    {v:0.45, lab:'RT global D½', sub:'~0.2–1 MGy', col:C('--oh'), pos:'dn'},
+    {v:30, lab:'Garman limit', sub:'30 MGy', col:C('--warn'), pos:'dn'}
+  ];
+  marks.forEach(m=>{
+    const cls = 'rmark '+m.pos+(m.tall?' tall':'');
+    const lab = `<span class="lab">${m.lab}<small>${m.sub}</small></span>`, stem='<span class="stem"></span>';
+    h += `<div class="${cls}" style="left:${x(m.v)}%;color:${m.col}">${m.pos==='up'?lab+stem:stem+lab}</div>`;
+  });
+  el.innerHTML = h;
+})();
+
+/* ---------- 01 PRIMARY EVENTS ---------- */
+(function(){
+  const cv = document.getElementById('prim');
+  const txt = document.getElementById('prim-text');
+  const btns = {pe:document.getElementById('pe-btn'), co:document.getElementById('co-btn'), el:document.getElementById('el-btn')};
+  const TEXT = {
+    pe:`<h3>Photoelectric absorption</h3><ul class="tight">
+      <li>Photon fully absorbed; a K-shell electron is ejected with E<sub>γ</sub> − E<sub>B</sub>.</li>
+      <li>The core hole relaxes in ~fs, mostly by Auger emission (≈ 0.25–0.5 keV electron for C/N/O), leaving a doubly ionised atom.</li>
+      <li>The photoelectron deposits its energy over ~µm through hundreds of ionisations: the dominant dose channel.</li>
+      <li>Cross-section rises steeply with Z (≈ Z⁴/E³ away from edges), so S, metals and heavy-atom derivatives absorb disproportionately.</li></ul>`,
+    co:`<h3>Compton scattering</h3><ul class="tight">
+      <li>Photon scatters off a loosely bound electron and loses part of its energy.</li>
+      <li>At 12.4 keV the recoil electron receives at most ≈ 0.57 keV (180° backscatter): E<sub>max</sub> = E·2ε/(1+2ε), ε = E/m<sub>e</sub>c².</li>
+      <li>Contributes a small share of dose and a diffuse background; the scattered photon usually escapes small crystals.</li></ul>`,
+    el:`<h3>Elastic (Thomson) scattering</h3><ul class="tight">
+      <li>No energy deposited; the only process that gives Bragg reflections.</li>
+      <li>Ratio of elastic to absorbed photons improves only slowly with energy; diffraction efficiency per unit dose varies weakly over 10–30 keV, with gains at high energy mainly from photoelectron escape in small crystals.<sup class="r"><a href="#ref-navehill2005">15</a></sup> <span class="unc">APPROX</span></li></ul>`
+  };
+  let mode='pe', g, W, H, t0=0, atoms=[], tracks=[], ions=[], raf;
+  function layout(){ g=fit(cv); W=g.w; H=g.h;
+    atoms=[]; const n=Math.round(W*H/1400);
+    for(let i=0;i<n;i++){ const r=Math.random(); atoms.push({x:rnd(8,W-8),y:rnd(8,H-8),e:r<.5?'C':r<.68?'N':r<.95?'O':'S'}); }
+  }
+  function build(){
+    tracks=[]; ions=[];
+    const tx=W*0.36, ty=H*0.52;
+    if(mode==='pe'){
+      // photoelectron random walk with decreasing energy
+      let x=tx,y=ty,ang=rnd(-0.6,0.6),E=1; const pts=[[x,y]];
+      while(E>0.02 && pts.length<260){
+        ang+=gauss()*0.18*(1.6-E); const step=3.2*(0.35+E);
+        x+=Math.cos(ang)*step; y+=Math.sin(ang)*step;
+        if(x<4||x>W-4){ang=Math.PI-ang} if(y<4||y>H-4){ang=-ang}
+        pts.push([x,y]); E-=0.0052;
+        if(Math.random()<0.14){ // secondary ionisation
+          const sp=[[x,y]]; let a2=rnd(0,6.28), xx=x, yy=y, n=Math.floor(rnd(2,7));
+          for(let k=0;k<n;k++){a2+=gauss()*.6; xx+=Math.cos(a2)*3; yy+=Math.sin(a2)*3; sp.push([xx,yy]);}
+          ions.push({i:pts.length,x,y,sec:sp});
+        }
+      }
+      tracks.push({pts,col:C('--elec'),w:1.6,start:0.30,dur:2.4,label:'photoelectron ≈ 11.9 keV'});
+      // Auger
+      const ap=[[tx,ty]]; let a=rnd(2.2,4), ax=tx, ay=ty;
+      for(let k=0;k<9;k++){a+=gauss()*.5; ax+=Math.cos(a)*3.5; ay+=Math.sin(a)*3.5; ap.push([ax,ay]);}
+      tracks.push({pts:ap,col:C('--hole'),w:1.6,start:0.34,dur:0.4,label:'Auger ≈ 0.5 keV'});
+    } else if(mode==='co'){
+      const a=rnd(1.9,2.6)*(Math.random()<.5?1:-1);
+      tracks.push({wave:true,x0:tx,y0:ty,ang:a,col:'#9fb6ff',start:0.32,dur:1.2,label:'scattered photon, E′ < E'});
+      const rp=[[tx,ty]]; let b=a>0?-0.7:0.7, x=tx,y=ty;
+      for(let k=0;k<16;k++){b+=gauss()*.35; x+=Math.cos(b)*3.4; y+=Math.sin(b)*3.4; rp.push([x,y]); if(Math.random()<.25) ions.push({i:rp.length,x,y,sec:[[x,y],[x+rnd(-5,5),y+rnd(-5,5)]]});}
+      tracks.push({pts:rp,col:C('--elec'),w:1.6,start:0.32,dur:0.6,label:'recoil e⁻ ≤ 0.57 keV'});
+    } else {
+      const a=rnd(-0.5,0.5)+(Math.random()<.5?0.5:-0.5);
+      tracks.push({wave:true,x0:tx,y0:ty,ang:a,col:C('--beam'),start:0.32,dur:1.2,label:'scattered photon, E′ = E'});
+    }
+  }
+  function wave(ctx,x0,y0,x1,y1,col,amp,k){
+    const dx=x1-x0, dy=y1-y0, L=Math.hypot(dx,dy); if(L<1)return;
+    const ux=dx/L, uy=dy/L;
+    ctx.beginPath();
+    for(let s=0;s<=L;s+=2){const o=Math.sin(s*k)*amp; const px=x0+ux*s-uy*o, py=y0+uy*s+ux*o; s?ctx.lineTo(px,py):ctx.moveTo(px,py);}
+    ctx.strokeStyle=col; ctx.lineWidth=1.6; ctx.stroke();
+  }
+  function frame(ts){
+    if(!t0)t0=ts; const t=reduce?10:(ts-t0)/1000;
+    const ctx=g.ctx; ctx.clearRect(0,0,W,H);
+    const tx=W*0.36, ty=H*0.52;
+    // atoms
+    for(const a of atoms){ ctx.fillStyle=a.e==='S'?'rgba(232,211,106,.55)':a.e==='O'?'rgba(255,111,94,.28)':a.e==='N'?'rgba(108,196,255,.28)':'rgba(143,157,179,.22)'; ctx.beginPath(); ctx.arc(a.x,a.y,a.e==='S'?2.6:1.8,0,6.28); ctx.fill(); }
+    // incident photon
+    const pin=Math.min(1,t/0.32);
+    wave(ctx,0,ty,pin*tx,ty,C('--beam'),4,0.55);
+    ctx.font=MONO; ctx.fillStyle=C('--beam'); ctx.fillText('hν = 12.4 keV',10,ty-12);
+    if(t>0.32){
+      // target atom flash
+      const f=Math.max(0,1-(t-0.32)*1.3);
+      ctx.fillStyle=`rgba(255,255,255,${0.15+0.6*f})`; ctx.beginPath(); ctx.arc(tx,ty,4+10*f,0,6.28); ctx.fill();
+      ctx.strokeStyle=C('--fg'); ctx.lineWidth=1.2; ctx.beginPath(); ctx.arc(tx,ty,5,0,6.28); ctx.stroke();
+      if(mode==='pe'){ ctx.fillStyle=C('--fg'); ctx.fillText('O²⁺ (core hole → Auger)',tx-60,ty+24); }
+    }
+    for(const tr of tracks){
+      const p=Math.max(0,Math.min(1,(t-tr.start)/tr.dur)); if(p<=0)continue;
+      if(tr.wave){
+        const L=Math.hypot(W,H)*p; const x1=tr.x0+Math.cos(tr.ang)*L, y1=tr.y0+Math.sin(tr.ang)*L;
+        wave(ctx,tr.x0,tr.y0,x1,y1,tr.col,3.4,tr.col===C('--beam')?0.55:0.45);
+        if(p>0.25){ctx.fillStyle=tr.col; const lx=tr.x0+Math.cos(tr.ang)*120, ly=tr.y0+Math.sin(tr.ang)*120; ctx.fillText(tr.label,Math.min(W-170,Math.max(6,lx+8)),ly-8);}
+      } else {
+        const n=Math.max(2,Math.floor(tr.pts.length*p));
+        ctx.beginPath(); ctx.moveTo(tr.pts[0][0],tr.pts[0][1]);
+        for(let i=1;i<n;i++)ctx.lineTo(tr.pts[i][0],tr.pts[i][1]);
+        ctx.strokeStyle=tr.col; ctx.lineWidth=tr.w; ctx.globalAlpha=.9; ctx.stroke(); ctx.globalAlpha=1;
+        const hd=tr.pts[n-1]; ctx.fillStyle=tr.col; ctx.beginPath(); ctx.arc(hd[0],hd[1],2.4,0,6.28); ctx.fill();
+        if(p>0.15){ const lp=tr.pts[Math.min(tr.pts.length-1,Math.floor(tr.pts.length*0.35))]; ctx.fillText(tr.label,Math.min(W-180,lp[0]+8),lp[1]-10); }
+        if(tr.col===C('--elec')){
+          for(const io of ions){ if(io.i>n)continue;
+            ctx.strokeStyle='rgba(127,227,255,.45)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(io.sec[0][0],io.sec[0][1]); for(const q of io.sec)ctx.lineTo(q[0],q[1]); ctx.stroke();
+            ctx.fillStyle=C('--hole'); ctx.beginPath(); ctx.arc(io.x,io.y,1.8,0,6.28); ctx.fill();
+          }
+        }
+      }
+    }
+    if(mode==='pe' && t>2.8){ ctx.fillStyle=C('--muted'); ctx.fillText(`${ions.length} ionisations drawn; real track ≈ 500 over ~µm`,10,H-12); }
+    if(mode==='el' && t>1.2){ ctx.fillStyle=C('--muted'); ctx.fillText('no energy deposited',10,H-12); }
+    if(t<4) raf=requestAnimationFrame(frame);
+  }
+  function go(m){ mode=m||mode; for(const k in btns) btns[k].setAttribute('aria-pressed',k===mode); txt.innerHTML=TEXT[mode]; cancelAnimationFrame(raf); t0=0; build(); raf=requestAnimationFrame(frame); }
+  btns.pe.onclick=()=>go('pe'); btns.co.onclick=()=>go('co'); btns.el.onclick=()=>go('el');
+  document.getElementById('replay').onclick=()=>go();
+  layout(); go('pe');
+  let rt; addEventListener('resize',()=>{clearTimeout(rt); rt=setTimeout(()=>{layout(); go();},150);});
+})();
+
+/* ---------- 03 TEMPERATURE ---------- */
+(function(){
+  const cv=document.getElementById('temp'), tally=document.getElementById('tally');
+  const b100=document.getElementById('t100'), b300=document.getElementById('t300');
+  let g,W,H,RT=false,mols=[],sinks=[],parts=[],stats,raf,last=0,spawnAcc=0;
+  function reset(){
+    g=fit(cv); W=g.w; H=g.h; mols=[]; sinks=[]; parts=[];
+    stats={ss:0,metal:0,ohTrap:0,ohReact:0,cooh:0,disorder:0};
+    const nx=Math.max(2,Math.round(W/170)), ny=2, cw=W/nx, ch=H/ny;
+    for(let i=0;i<nx;i++)for(let j=0;j<ny;j++){
+      const cx=cw*(i+.5)+(j%2?cw*.12:-cw*.12), cy=ch*(j+.5);
+      const m={cx,cy,rx:cw*.33,ry:ch*.32,rot:rnd(-.4,.4),jit:0,dmg:0};
+      mols.push(m);
+      const kinds=['ss','ss','cooh','cooh']; if((i+j)%2===0) kinds.push('metal');
+      kinds.forEach((k,n)=>{ const a=n/kinds.length*6.28+rnd(-.3,.3), r=rnd(.35,.8);
+        sinks.push({m,k,ox:Math.cos(a)*m.rx*r,oy:Math.sin(a)*m.ry*r,hits:0}); });
+    }
+  }
+  function inside(x,y){ for(const m of mols){ const dx=(x-m.cx)/m.rx, dy=(y-m.cy)/m.ry; if(dx*dx+dy*dy<1) return m;} return null; }
+  function spawn(){
+    const x=rnd(0,W), y=rnd(0,H), m=inside(x,y);
+    if(m){ // direct ionisation in protein: e- + hole
+      parts.push({k:'e',x,y,vx:0,vy:0,life:0});
+      parts.push({k:'h',x,y,vx:0,vy:0,life:0,m});
+    } else { // water radiolysis
+      parts.push({k:'e',x,y,vx:0,vy:0,life:0});
+      parts.push({k:'oh',x:x+rnd(-3,3),y:y+rnd(-3,3),vx:0,vy:0,life:0});
+      if(Math.random()<.25) parts.push({k:'H',x:x+rnd(-3,3),y:y+rnd(-3,3),vx:0,vy:0,life:0});
+    }
+  }
+  function sinkPos(s){return [s.m.cx+s.ox, s.m.cy+s.oy];}
+  function nearest(p,kinds,maxd){ let best=null,bd=maxd*maxd; for(const s of sinks){ if(!kinds.includes(s.k))continue; const [sx,sy]=sinkPos(s); const d=(sx-p.x)**2+(sy-p.y)**2; if(d<bd){bd=d;best=s;} } return best; }
+  function step(dt){
+    spawnAcc+=dt*(RT?7:7); while(spawnAcc>1){spawn();spawnAcc--;}
+    for(const p of parts){
+      p.life+=dt;
+      if(p.k==='e'){ // electrons mobile at both T; drift toward electron-affinic sites
+        const s=nearest(p,['metal','ss'],RT?140:110);
+        if(s){const [sx,sy]=sinkPos(s); const dx=sx-p.x, dy=sy-p.y, d=Math.hypot(dx,dy)||1; p.vx=dx/d*60+gauss()*40; p.vy=dy/d*60+gauss()*40;
+          if(d<5){p.dead=1; s.hits++; if(s.k==='metal')stats.metal++; else stats.ss++;}}
+        else {p.vx=gauss()*70; p.vy=gauss()*70;}
+        if(p.life>4)p.dead=1;
+      } else if(p.k==='h'){ // holes hop slowly within protein toward carboxylates
+        const s=nearest(p,['cooh'],80);
+        if(s){const [sx,sy]=sinkPos(s); const dx=sx-p.x, dy=sy-p.y, d=Math.hypot(dx,dy)||1; p.vx=dx/d*14+gauss()*8; p.vy=dy/d*14+gauss()*8; if(d<4){p.dead=1;s.hits++;stats.cooh++;}}
+        if(p.life>8)p.dead=1;
+      } else if(p.k==='oh'){
+        if(RT){ p.vx=gauss()*55; p.vy=gauss()*55; const m=inside(p.x,p.y); if(m){p.dead=1; m.dmg+=1; stats.ohReact++;} if(p.life>3)p.dead=1; }
+        else { p.vx=p.vy=0; if(!p.trapped){p.trapped=1; stats.ohTrap++;} if(p.life>9)p.dead=1; }
+      } else if(p.k==='H'){
+        const sp=RT?60:12; p.vx=gauss()*sp; p.vy=gauss()*sp; const m=inside(p.x,p.y); if(m&&RT){p.dead=1;m.dmg+=.5;} if(p.life>3)p.dead=1;
+      }
+      p.x+=p.vx*dt; p.y+=p.vy*dt;
+      if(p.x<0||p.x>W||p.y<0||p.y>H)p.dead=1;
+    }
+    parts=parts.filter(p=>!p.dead);
+    if(parts.length>700)parts.splice(0,parts.length-700);
+  }
+  function draw(t){
+    const ctx=g.ctx; ctx.clearRect(0,0,W,H);
+    ctx.fillStyle=RT?'rgba(40,70,100,.18)':'rgba(30,55,85,.12)'; ctx.fillRect(0,0,W,H);
+    for(const m of mols){
+      const d=Math.min(1,m.dmg/120); const j=RT?d*3:0;
+      ctx.save(); ctx.translate(m.cx+gauss()*j*.3,m.cy+gauss()*j*.3); ctx.rotate(m.rot);
+      ctx.beginPath(); ctx.ellipse(0,0,m.rx,m.ry,0,0,6.28);
+      ctx.fillStyle=`rgba(${Math.round(36+60*d)},${Math.round(52-10*d)},${Math.round(78-30*d)},.9)`; ctx.fill();
+      ctx.strokeStyle='#3b5576'; ctx.lineWidth=1; ctx.stroke(); ctx.restore();
+    }
+    for(const s of sinks){
+      const [x,y]=sinkPos(s); const lit=Math.min(1,s.hits/6);
+      if(s.k==='metal'){ ctx.fillStyle=lit>.5?'#efe4ff':C('--metal'); ctx.beginPath(); ctx.arc(x,y,5+lit*2,0,6.28); ctx.fill(); }
+      else if(s.k==='ss'){ ctx.strokeStyle=`rgba(232,211,106,${1-lit*.6})`; ctx.lineWidth=2; const gap=lit*5; ctx.beginPath(); ctx.moveTo(x-7,y); ctx.lineTo(x-1-gap,y); ctx.moveTo(x+1+gap,y); ctx.lineTo(x+7,y); ctx.stroke(); }
+      else { ctx.fillStyle=`rgba(255,181,74,${.85-lit*.6})`; ctx.beginPath(); ctx.arc(x-3,y,2.2,0,6.28); ctx.arc(x+3,y,2.2,0,6.28); ctx.fill(); }
+    }
+    for(const p of parts){
+      ctx.fillStyle=p.k==='e'?C('--elec'):p.k==='oh'?C('--oh'):p.k==='h'?C('--hole'):C('--hatom');
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.k==='H'?1.4:2,0,6.28); ctx.fill();
+    }
+    ctx.font=MONO; ctx.fillStyle=C('--muted'); ctx.fillText(RT?'room temperature: radicals diffuse in solvent channels':'100 K: OH• trapped; e⁻ and h⁺ migrate',10,H-10);
+  }
+  function upd(){
+    tally.innerHTML=`<dt>Metal centres reduced</dt><dd>${stats.metal}</dd><dt>e⁻ captured at S–S</dt><dd>${stats.ss}</dd><dt>Holes at carboxylates</dt><dd>${stats.cooh}</dd><dt>OH• trapped in solvent</dt><dd>${RT?'—':stats.ohTrap}</dd><dt>OH• / H• reacted with protein</dt><dd>${RT?stats.ohReact:'≈ 0'}</dd>`;
+  }
+  function loop(ts){ const dt=Math.min(.05,(ts-(last||ts))/1000); last=ts; step(dt); draw(ts); upd(); raf=requestAnimationFrame(loop); }
+  function setT(rt){ RT=rt; b100.setAttribute('aria-pressed',!rt); b300.setAttribute('aria-pressed',rt); reset(); }
+  b100.onclick=()=>setT(false); b300.onclick=()=>setT(true); document.getElementById('treset').onclick=()=>reset();
+  reset();
+  if(reduce){ for(let i=0;i<300;i++)step(.03); draw(0); upd(); }
+  else {
+    const io=new IntersectionObserver(es=>{es.forEach(e=>{ if(e.isIntersecting){last=0; raf=requestAnimationFrame(loop);} else cancelAnimationFrame(raf); });});
+    io.observe(cv);
+    for(let i=0;i<120;i++)step(.03); draw(0); upd();
+  }
+  let rt; addEventListener('resize',()=>{clearTimeout(rt); rt=setTimeout(reset,150);});
+})();
+
+/* ---------- 04 SPECIFIC DAMAGE CURVES ---------- */
+(function(){
+  const cv=document.getElementById('sdplot'), leg=document.getElementById('sdleg');
+  const S=[
+    {n:'Metal reduction',m:0.15,w:0.45,c:C('--metal')},
+    {n:'S–S cleavage',m:2,w:0.45,c:'#e8d36a'},
+    {n:'Glu/Asp CO₂ loss',m:5,w:0.45,c:C('--oh')},
+    {n:'Tyr OH / Met C–S',m:12,w:0.45,c:C('--hole')},
+    {n:'Global ⟨I⟩ (Owen D½)',m:43,w:0.35,c:C('--beam'),dash:true}
+  ];
+  leg.innerHTML=S.map(s=>`<span><i style="background:${s.c}"></i>${s.n}</span>`).join('');
+  function draw(){
+    const {ctx,w,h}=fit(cv); const L=46,R=14,T=14,B=34; const pw=w-L-R, ph=h-T-B;
+    const lo=-2, hi=2; const X=v=>L+(Math.log10(v)-lo)/(hi-lo)*pw, Y=f=>T+(1-f)*ph;
+    ctx.font=MONO; ctx.strokeStyle=C('--line'); ctx.fillStyle=C('--faint'); ctx.lineWidth=1;
+    [0.01,0.1,1,10,100].forEach(v=>{ctx.beginPath();ctx.moveTo(X(v),T);ctx.lineTo(X(v),T+ph);ctx.stroke(); ctx.textAlign='center'; ctx.fillText(v>=1?v+' MGy':(v*1000)+' kGy',X(v),h-12);});
+    [0,.5,1].forEach(f=>{ctx.beginPath();ctx.moveTo(L,Y(f));ctx.lineTo(L+pw,Y(f));ctx.stroke(); ctx.textAlign='right'; ctx.fillText(f.toFixed(1),L-6,Y(f)+4);});
+    ctx.save(); ctx.translate(12,T+ph/2); ctx.rotate(-Math.PI/2); ctx.textAlign='center'; ctx.fillText('fraction intact',0,0); ctx.restore();
+    for(const s of S){
+      ctx.beginPath();
+      for(let i=0;i<=200;i++){ const lv=lo+(hi-lo)*i/200, v=10**lv; const f=1/(1+Math.exp((lv-Math.log10(s.m))/(s.w*0.43)));
+        i?ctx.lineTo(X(v),Y(f)):ctx.moveTo(X(v),Y(f)); }
+      ctx.strokeStyle=s.c; ctx.lineWidth=2; ctx.setLineDash(s.dash?[5,4]:[]); ctx.stroke(); ctx.setLineDash([]);
+    }
+    ctx.textAlign='left';
+  }
+  draw(); let rt; addEventListener('resize',()=>{clearTimeout(rt); rt=setTimeout(draw,150);});
+})();
+
+/* ---------- 05 GLOBAL DAMAGE ---------- */
+(function(){
+  const H=10, B0=20, DMIN=1.4;
+  const dose=document.getElementById('dose'), dres=document.getElementById('dres');
+  const dv=document.getElementById('dose-v'), rv=document.getElementById('dres-v'), st=document.getElementById('status'), rd=document.getElementById('gread');
+  const det=document.getElementById('det'), cur=document.getElementById('curve'); det.dataset.square=1;
+  const decay=(D,d)=>Math.exp(-Math.LN2*D/(H*d));
+  const wil=(d,B)=>Math.exp(-B/(2*d*d));
+  // reflections: 2D reciprocal lattice, a*=1/48 Å⁻¹, random presence (Ewald slice), exponential intensities
+  const astar=1/48, smax=1/DMIN; const refl=[];
+  const N=Math.ceil(smax/astar);
+  for(let h=-N;h<=N;h++)for(let k=-N;k<=N;k++){
+    const sx=h*astar, sy=k*astar*1.08, s=Math.hypot(sx,sy); if(s===0||s>smax)continue;
+    if(Math.random()>0.32)continue;
+    refl.push({sx,sy,d:1/s,I:-Math.log(Math.random()+1e-9)});
+  }
+  // apparent ΔB: least-squares of ln(decay) vs 1/(2d²) over 2–4 Å (Wilson: ln I = -B/(2d²))
+  function appB(D){ let sx=0,sy=0,sxx=0,sxy=0,n=0; for(let d=2;d<=4.001;d+=0.1){const x=1/(2*d*d), y=Math.log(decay(D,d)); sx+=x;sy+=y;sxx+=x*x;sxy+=x*y;n++;} return -(n*sxy-sx*sy)/(n*sxx-sx*sx); }
+  function dlim(D){ // d where wilson×decay×Iavg falls to threshold; threshold set so D=0 gives ~1.6 Å
+    const thr=wil(1.6,B0); for(let d=1.2;d<10;d+=0.01){ if(wil(d,B0)*decay(D,d)>=thr) return d; } return 10; }
+  function drawDet(D){
+    const {ctx,w}=fit(det); const c=w/2, R=w/2-14, sc=R/smax;
+    ctx.fillStyle='#05090f'; ctx.fillRect(0,0,w,w);
+    const grd=ctx.createRadialGradient(c,c,0,c,c,R*1.1); grd.addColorStop(0,'rgba(108,196,255,.10)'); grd.addColorStop(.35,'rgba(108,196,255,.04)'); grd.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=grd; ctx.fillRect(0,0,w,w);
+    const mos=1+D/40; ctx.globalCompositeOperation='lighter';
+    for(const r of refl){
+      const I=r.I*wil(r.d,B0)*decay(D,r.d); const v=Math.pow(I,0.45); if(v<0.03)continue;
+      const x=c+r.sx*sc, y=c+r.sy*sc, rad=(1.1+0.9*Math.min(1,v))*mos;
+      ctx.fillStyle=`rgba(255,${Math.round(200+40*Math.min(1,v))},${Math.round(150+80*Math.min(1,v))},${Math.min(1,v*1.2)})`;
+      ctx.beginPath(); ctx.arc(x,y,rad,0,6.28); ctx.fill();
+    }
+    ctx.globalCompositeOperation='source-over';
+    ctx.font=MONO; ctx.textAlign='left';
+    [4,3,2,1.5].forEach(d=>{ const rr=sc/d; ctx.strokeStyle='rgba(143,157,179,.28)'; ctx.setLineDash([3,4]); ctx.beginPath(); ctx.arc(c,c,rr,0,6.28); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle=C('--faint'); ctx.fillText(d+' Å',c+rr*0.707+3,c-rr*0.707-3); });
+    const dl=dlim(D), rl=sc/dl; ctx.strokeStyle=C('--warn'); ctx.lineWidth=1.4; ctx.beginPath(); ctx.arc(c,c,rl,0,6.28); ctx.stroke(); ctx.lineWidth=1;
+    ctx.fillStyle=C('--warn'); ctx.fillText('model limit '+dl.toFixed(2)+' Å',10,w-12);
+    ctx.fillStyle='#0c1420'; ctx.beginPath(); ctx.arc(c,c,9,0,6.28); ctx.fill();
+  }
+  const DS=[1.5,2,3,5], DC=['#ff6f5e','#ffb54a','#58d39a','#6cc4ff'];
+  document.getElementById('cleg').innerHTML=DS.map((d,i)=>`<span><i style="background:${DC[i]}"></i>${d} Å</span>`).join('')+`<span><i style="background:#e2e8f1"></i>selected d</span>`;
+  function drawCurve(D,dsel){
+    const {ctx,w,h}=fit(cur); const L=40,R=12,T=14,B=34, pw=w-L-R, ph=h-T-B, Dm=60;
+    const X=v=>L+v/Dm*pw, Y=f=>T+(1-f)*ph;
+    ctx.font=MONO; ctx.lineWidth=1;
+    for(let v=0;v<=60;v+=10){ctx.strokeStyle=C('--line'); ctx.beginPath(); ctx.moveTo(X(v),T); ctx.lineTo(X(v),T+ph); ctx.stroke(); ctx.fillStyle=C('--faint'); ctx.textAlign='center'; ctx.fillText(v,X(v),h-18);}
+    ctx.fillText('dose (MGy)',L+pw/2,h-4);
+    for(let f=0;f<=1.001;f+=.25){ctx.strokeStyle=C('--line'); ctx.beginPath(); ctx.moveTo(L,Y(f)); ctx.lineTo(L+pw,Y(f)); ctx.stroke(); ctx.fillStyle=C('--faint'); ctx.textAlign='right'; ctx.fillText(f.toFixed(2),L-5,Y(f)+4);}
+    [[20,'Henderson',C('--warn')],[30,'Garman',C('--warn')],[43,'D½ 43',C('--bad')]].forEach(([v,l,c],i)=>{ctx.strokeStyle=c; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(X(v),T); ctx.lineTo(X(v),T+ph); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle=c; ctx.textAlign='left'; ctx.fillText(l,X(v)+3,T+10+i*13);});
+    // y = 0.5 guide
+    ctx.strokeStyle='rgba(226,232,241,.25)'; ctx.beginPath(); ctx.moveTo(L,Y(.5)); ctx.lineTo(L+pw,Y(.5)); ctx.stroke();
+    DS.forEach((d,i)=>{ctx.strokeStyle=DC[i]; ctx.lineWidth=1.8; ctx.beginPath(); for(let v=0;v<=Dm;v+=.5){const y=Y(decay(v,d)); v?ctx.lineTo(X(v),y):ctx.moveTo(X(v),y);} ctx.stroke();});
+    ctx.strokeStyle=C('--fg'); ctx.lineWidth=2.2; ctx.setLineDash([2,3]); ctx.beginPath(); for(let v=0;v<=Dm;v+=.5){const y=Y(decay(v,dsel)); v?ctx.lineTo(X(v),y):ctx.moveTo(X(v),y);} ctx.stroke(); ctx.setLineDash([]);
+    // cursor
+    ctx.strokeStyle=C('--beam'); ctx.lineWidth=1.4; ctx.beginPath(); ctx.moveTo(X(D),T); ctx.lineTo(X(D),T+ph); ctx.stroke();
+    ctx.fillStyle=C('--fg'); ctx.beginPath(); ctx.arc(X(D),Y(decay(D,dsel)),4,0,6.28); ctx.fill();
+    ctx.lineWidth=1;
+  }
+  function upd(){
+    const D=+dose.value, d=+dres.value;
+    dv.textContent=D.toFixed(1)+' MGy'; rv.textContent=d.toFixed(1)+' Å';
+    const f=decay(D,d);
+    st.className='pill '+(D<20?'ok':D<=30?'warn':'bad');
+    st.textContent=D<20?'Below Henderson limit':D<=30?'Between Henderson and Garman limits':'Beyond 30 MGy recommended limit';
+    const dB=appB(D);
+    rd.innerHTML=`<dt>⟨I⟩/⟨I⟩₀ at ${d.toFixed(1)} Å</dt><dd>${f.toFixed(3)}</dd>
+      <dt>D½ at ${d.toFixed(1)} Å (10d)</dt><dd>${(10*d).toFixed(0)} MGy</dd>
+      <dt>Apparent ΔB, 2–4 Å fit</dt><dd>+${dB.toFixed(1)} Å²</dd>
+      <dt>Model resolution limit</dt><dd>${dlim(D).toFixed(2)} Å</dd>`;
+    drawDet(D); drawCurve(D,d);
+  }
+  dose.oninput=upd; dres.oninput=upd; upd();
+  let rt; addEventListener('resize',()=>{clearTimeout(rt); rt=setTimeout(upd,150);});
+})();
+
+})();
+</script>
+
+</body></html>

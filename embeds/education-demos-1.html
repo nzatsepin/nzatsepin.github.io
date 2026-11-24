@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Serial crystallography figures: SCANZ 2026</title>
+<title>Interactive serial crystallography demos</title>
 <style>
 :root{
   --bg:#ffffff; --surface:#f3f4f6; --ink:#1d2228; --muted:#5d6670; --rule:#d5d9de;
@@ -55,15 +55,15 @@ nav a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visibl
 #fsbox.hidectl .controls{display:none}
 @media (max-width:700px){.controls input[type=range]{width:110px}}
 </style>
-</head>
+<style>html.single body>header{display:none}</style><script>if(/[?&]single/.test(location.search))document.documentElement.classList.add("single")</script></head>
 <body>
 <header>
-  <h1>Figures for the talk</h1>
+  <h1>Interactive serial crystallography demos</h1>
   <nav aria-label="Figures">
-    <a href="#rotation-serial" data-s="A">Rotation vs serial<small>slides 11–12</small></a>
-    <a href="#spot-fading" data-s="B">Spots fade with dose<small>slides 7–9</small></a>
-    <a href="#fly-scan" data-s="C">Fly scan in the drop<small>slides 17–18</small></a>
-    <a href="#mix-probe" data-s="D">Mix, wait, probe<small>slide 32</small></a>
+    <a href="#rotation-serial" data-s="A">Rotation vs serial</a>
+    <a href="#spot-fading" data-s="B">Spots fade with dose</a>
+    <a href="#fly-scan" data-s="C">Fly scan in the drop</a>
+    <a href="#mix-probe" data-s="D">Mix, wait, probe</a>
   </nav>
 </header>
 
@@ -94,10 +94,10 @@ nav a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visibl
     <div class="scene grid-ctl" data-s="C" id="ctlC"></div>
   </div>
 
-  <p class="caption scene" data-s="A"><b>Replaces the slide 11 figures; slide 12 partiality.</b> 2D sketch of the Ewald construction: one reciprocal-lattice plane, spot size exaggerated. Left: a rotated crystal sweeps every reflection fully through the sphere; with room-temperature damage (D½ taken 75× lower) it stops diffracting long before 180°. Right: each still records a few partial reflections from a randomly oriented crystal of random size; averaging over many stills (Monte Carlo merging) recovers the intensities. Kirian et al., Opt. Express 18, 5713 (2010). Curves are from this toy model, not real data.</p>
-  <p class="caption scene" data-s="B"><b>Supports slides 7–9.</b> Simulated still at 13 keV, edge 1.6 Å, both crystals in the same beam (~4.5 MGy/s, as on slide 9). Pattern: tetragonal lattice (a = 79, c = 38 Å, lysozyme-like) in a random orientation cut by the Ewald sphere. Spot fading assumes D½ proportional to d (Howells et al., J. Electron Spectrosc. Relat. Phenom. 170, 4 (2009), 10 MGy × d; used in Holton &amp; Frankel, Acta Cryst. D66, 393 (2010)), scaled here to 7.5 MGy × d so that D½ = 15 MGy at 2 Å as on slide 9; room temperature uses D½ divided by the ratio set below (typical ~75×: de la Mora et al., PNAS 117, 4142 (2020); Thorne, Acta Cryst. D79, 78 (2023); matched lysozyme pair 27×). Time axis plays in log scale. Ignores dose-rate effects and the per-dose B-factor increase.</p>
-  <p class="caption scene" data-s="C"><b>Continues slides 17–18; planner-style use cases.</b> Per-pass fluence F = Φ / (√(2π) σₕ v), independent of frame time; dose = F × E × (μₑₙ/ρ)water, NIST water values interpolated log-log. Water-equivalent dose only: real crystals absorb more (S, Cu, Cl), so use RADDOSE-3D. Crystal sizes are log-normal (σ = 0.45) around the typical size. Predicted hit rate: Poisson, P = 1 − exp(−n⟨A⟩), with A the beam stripe per frame grown by the crystal size; the animation is a direct geometric simulation of the same scan.</p>
-  <p class="caption scene" data-s="D"><b>Replaces the slide 32 schematic.</b> Δt = distance ÷ tape speed. Bound fraction follows a single exponential with the half-time set below, standing in for ligand diffusion into the crystal plus binding; real kinetics depend on crystal size and system. Tape drive: Beale et al., IUCrJ 6, 357 (2019); CFEL TapeDrive 2.0: Henkel et al., IUCrJ (2023). Schematic, not to scale.</p>
+  <p class="caption scene" data-s="A">2D sketch of the Ewald construction: one reciprocal-lattice plane, spot size exaggerated. Left: a rotated crystal sweeps every reflection fully through the sphere; with room-temperature damage (D½ taken 75× lower) it stops diffracting long before 180°. Right: each still records a few partial reflections from a randomly oriented crystal of random size; averaging over many stills (Monte Carlo merging) recovers the intensities. Kirian et al., Opt. Express 18, 5713 (2010). Curves are from this toy model, not real data.</p>
+  <p class="caption scene" data-s="B">Simulated still at 13 keV, edge 1.6 Å, both crystals in the same beam (~4.5 MGy/s). Pattern: tetragonal lattice (a = 79, c = 38 Å, lysozyme-like) in a random orientation cut by the Ewald sphere. Spot fading assumes D½ proportional to d (Howells et al., J. Electron Spectrosc. Relat. Phenom. 170, 4 (2009), 10 MGy × d; used in Holton &amp; Frankel, Acta Cryst. D66, 393 (2010)), scaled here to 7.5 MGy × d so that D½ = 15 MGy at 2 Å; room temperature uses D½ divided by the ratio set below (typical ~75×: de la Mora et al., PNAS 117, 4142 (2020); Thorne, Acta Cryst. D79, 78 (2023); matched lysozyme pair 27×). Time axis plays in log scale. Ignores dose-rate effects and the per-dose B-factor increase.</p>
+  <p class="caption scene" data-s="C">Per-pass fluence F = Φ / (√(2π) σₕ v), independent of frame time; dose = F × E × (μₑₙ/ρ)water, NIST water values interpolated log-log. Water-equivalent dose only: real crystals absorb more (S, Cu, Cl), so use RADDOSE-3D. Crystal sizes are log-normal (σ = 0.45) around the typical size. Predicted hit rate: Poisson, P = 1 − exp(−n⟨A⟩), with A the beam stripe per frame grown by the crystal size; the animation is a direct geometric simulation of the same scan.</p>
+  <p class="caption scene" data-s="D">Δt = distance ÷ tape speed. Bound fraction follows a single exponential with the half-time set below, standing in for ligand diffusion into the crystal plus binding; real kinetics depend on crystal size and system. Tape drive: Beale et al., IUCrJ 6, 357 (2019); CFEL TapeDrive 2.0: Henkel et al., IUCrJ (2023). Schematic, not to scale.</p>
 </div>
 </div>
 
@@ -246,7 +246,7 @@ A.draw=function(){
 /* ======================================================================
    B. Spot fading
    ====================================================================== */
-const B={u:0,ratio:75,hold:0,rate:4.5,Hc:7.5}; // D-half = Hc*d MGy at 100 K; 7.5 MGy/Å gives 15 MGy at 2 Å (slide 9)
+const B={u:0,ratio:75,hold:0,rate:4.5,Hc:7.5}; // D-half = Hc*d MGy at 100 K; 7.5 MGy/Å gives 15 MGy at 2 Å
 B.init=function(){
   const r=mulberry32(5);this.R=270;const lam=12.398/13;this.lam=lam;const th=Math.asin(lam/(2*1.6));this.L=this.R/Math.tan(2*th);
   // 3D still: tetragonal lattice (lysozyme-like, a=79, c=38 Å) in a random orientation, cut by the Ewald sphere
