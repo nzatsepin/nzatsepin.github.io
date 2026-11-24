@@ -210,7 +210,7 @@ section{margin-top:2rem}
     <li>Nave, C. (1998). A description of imperfections in protein crystals. <i>Acta Cryst.</i> D54, 848–853. doi:10.1107/S0907444998001875</li>
     <li>Nave, C. &amp; Hill, M. A. (2005). Will reduced radiation damage occur with very small crystals? <i>J. Synchrotron Rad.</i> 12, 299–303. doi:10.1107/S0909049505003274</li>
     <li>Cowan, J. A. &amp; Nave, C. (2008). The optimum conditions to collect X-ray data from very small samples. <i>J. Synchrotron Rad.</i> 15, 458–462. doi:10.1107/S0909049508014623</li>
-    <li>Kirian, R. A. et al. (2010). Femtosecond protein nanocrystallography—data analysis methods. <i>Opt. Express</i> 18, 5713. doi:10.1364/OE.18.005713</li>
+    <li>Kirian, R. A. et al. (2010). Femtosecond protein nanocrystallography - data analysis methods. <i>Opt. Express</i> 18, 5713. doi:10.1364/OE.18.005713</li>
     <li>Cole, A. (1969). Absorption of 20-eV to 50,000-eV electron beams in air and plastic. <i>Radiat. Res.</i> 38, 7–33. doi:10.2307/3572707 (range formula as used by Holton &amp; Frankel 2010).</li>
     <li>Hubbell, J. H. &amp; Seltzer, S. M. NIST X-ray mass attenuation and mass energy-absorption coefficients (SRD 126), liquid water.</li>
     <li>nanoBragg, J. M. Holton &amp; K. A. Frankel; nanoBragg_standalone.c in cctbx_project/simtbx/nanoBragg.</li>
@@ -718,7 +718,7 @@ function autoSelect() { const c = spots.filter(s => s.active && s.d > 2 && s.d <
 function reselect() { const s = spots.find(x => x.h === selected.h && x.k === selected.k && x.l === selected.l); if (s) { selected = s; drawOverlay(); showSel(); runKernel(); } else autoSelect(); }
 
 // ---------- eq-1 breakdown ----------
-const fx = (v, d = 3) => { if (!isFinite(v)) return '—'; const a = Math.abs(v); return (a !== 0 && (a < 1e-3 || a >= 1e5)) ? v.toExponential(d - 1).replace('e', ' × 10^').replace(/\^\+?(-?\d+)/, (m, e) => sup(e)) : String(Number(v.toPrecision(d))); };
+const fx = (v, d = 3) => { if (!isFinite(v)) return '-'; const a = Math.abs(v); return (a !== 0 && (a < 1e-3 || a >= 1e5)) ? v.toExponential(d - 1).replace('e', ' × 10^').replace(/\^\+?(-?\d+)/, (m, e) => sup(e)) : String(Number(v.toPrecision(d))); };
 const SUP = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' };
 const sup = e => [...e].map(c => SUP[c]).join('');
 function showSel() {
@@ -783,7 +783,7 @@ function paintZoom() { const d = zimg.data; for (let i = 0; i < ZN * ZN; i++) { 
 function compare() {
   let sk = 0; for (const v of zbuf) if (v > 0) sk += v;
   let sp = 0, n = 0; for (const s of spots) { const f = s.f / DET.pix, y = s.s / DET.pix; if (s.active && f >= roi.f0 && f < roi.f1 && y >= roi.s0 && y < roi.s1) { sp += s.I; n++; } }
-  document.getElementById('cmp').textContent = `Within the 128 × 128-pixel box: nanoBragg kernel Σ = ${fx(sk, 4)} photons (no background); eq.-1 preview Σ over ${n} predicted spot${n === 1 ? '' : 's'} = ${fx(sp, 4)} photons; ratio kernel/preview = ${sp > 0 ? (sk / sp).toFixed(2) : '—'}.`;
+  document.getElementById('cmp').textContent = `Within the 128 × 128-pixel box: nanoBragg kernel Σ = ${fx(sk, 4)} photons (no background); eq.-1 preview Σ over ${n} predicted spot${n === 1 ? '' : 's'} = ${fx(sp, 4)} photons; ratio kernel/preview = ${sp > 0 ? (sk / sp).toFixed(2) : '-'}.`;
 }
 
 // ---------- reference gallery (nanoBragg, stored noise-free) ----------

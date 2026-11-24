@@ -887,7 +887,7 @@ function update(full){
 function findIndex(h,k,l){for(let i=0;i<N;i++)if(HKL[i*3]===h&&HKL[i*3+1]===k&&HKL[i*3+2]===l)return i;return -1;}
 
 /* ================= readout ================= */
-const f=(x,n=3)=>isFinite(x)?x.toFixed(n):'—';
+const f=(x,n=3)=>isFinite(x)?x.toFixed(n):'-';
 function drawReadout(){
   const lam=S.lam;
   $('info').innerHTML=`|<b>k</b>| = 1/λ = ${f(1/lam,4)} Å⁻¹<br>E = ${f(HC/lam,3)} keV`+(S.mode==='crystal'?`<br>|<b>a</b>*| = ${f(len(CELL.AS),4)} Å⁻¹`:`<br>speckle ≈ 1/L = ${f(1/MOL.size,4)} Å⁻¹`);
@@ -899,8 +899,8 @@ function drawReadout(){
       <dt>Model size L</dt><dd>${f(MOL.size,1)} Å</dd>
       <dt>Speckle width ≈ 1/L</dt><dd>${f(1/MOL.size,4)} Å⁻¹</dd>
       <dt>Scattered photons (detector)</dt><dd>${isFinite(S.flux)?Math.round(S.flux).toLocaleString():'∞ (noise-free)'}</dd>
-      <dt>Photons recorded beyond 3 Å</dt><dd>${isFinite(S.flux)?MOLSTATS.hi.toLocaleString():'—'}</dd>
-      <dt>Mean photons/pixel at edge</dt><dd>${isFinite(S.flux)?f(MOLSTATS.edge,4):'—'}</dd>
+      <dt>Photons recorded beyond 3 Å</dt><dd>${isFinite(S.flux)?MOLSTATS.hi.toLocaleString():'-'}</dd>
+      <dt>Mean photons/pixel at edge</dt><dd>${isFinite(S.flux)?f(MOLSTATS.edge,4):'-'}</dd>
       <dt>Detector pixel (display)</dt><dd>${f(S.W/MOLSTATS.G,2)} mm</dd>`;
     return;
   }
@@ -915,9 +915,9 @@ function drawReadout(){
     else if(D.thc<0) st=`<span class="pill warn">Planes face away from the beam (θ &lt; 0): the Friedel mate (${hklHTML(-D.h,-D.k,-D.l)}) faces it</span>`;
     else st=`<span class="pill warn">Off condition by ${f((D.thc-D.thB)/DEG,3)}°</span>`; }
   $('status').innerHTML=st;
-  const kx=1/lam+D.p[0]; let det='—';
+  const kx=1/lam+D.p[0]; let det='-';
   if(D.inCond){ if(kx>0){const X=-S.D*D.p[2]/kx,Y=S.D*D.p[1]/kx;det=(Math.abs(X)<=S.W/2&&Math.abs(Y)<=S.W/2)?`(${f(X,1)}, ${f(Y,1)}) mm`:`off detector (${f(X,0)}, ${f(Y,0)}) mm`;} else det='back-reflection, 2θ > 90°'; }
-  const roots=D.roots.length?D.roots.map(r=>f(r,2)+'°').join(' or '):(isFinite(D.thB)&&D.ok?'none (blind region)':'—');
+  const roots=D.roots.length?D.roots.map(r=>f(r,2)+'°').join(' or '):(isFinite(D.thB)&&D.ok?'none (blind region)':'-');
   const idx=findIndex(D.h,D.k,D.l); const Imod=idx>=0&&D.ok?intensityOf(idx)*Math.exp(-S.B*D.ds*D.ds/2):NaN;
   $('readout').innerHTML=`
     <dt>d<sub>hkl</sub> = 1/|<b>d</b>*|</dt><dd>${f(D.d,4)} Å</dd>

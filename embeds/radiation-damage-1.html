@@ -773,7 +773,7 @@ function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();r
     ctx.font=MONO; ctx.fillStyle=C('--muted'); ctx.fillText(RT?'room temperature: radicals diffuse in solvent channels':'100 K: OH• trapped; e⁻ and h⁺ migrate',10,H-10);
   }
   function upd(){
-    tally.innerHTML=`<dt>Metal centres reduced</dt><dd>${stats.metal}</dd><dt>e⁻ captured at S–S</dt><dd>${stats.ss}</dd><dt>Holes at carboxylates</dt><dd>${stats.cooh}</dd><dt>OH• trapped in solvent</dt><dd>${RT?'—':stats.ohTrap}</dd><dt>OH• / H• reacted with protein</dt><dd>${RT?stats.ohReact:'≈ 0'}</dd>`;
+    tally.innerHTML=`<dt>Metal centres reduced</dt><dd>${stats.metal}</dd><dt>e⁻ captured at S–S</dt><dd>${stats.ss}</dd><dt>Holes at carboxylates</dt><dd>${stats.cooh}</dd><dt>OH• trapped in solvent</dt><dd>${RT?'-':stats.ohTrap}</dd><dt>OH• / H• reacted with protein</dt><dd>${RT?stats.ohReact:'≈ 0'}</dd>`;
   }
   function loop(ts){ const dt=Math.min(.05,(ts-(last||ts))/1000); last=ts; step(dt); draw(ts); upd(); raf=requestAnimationFrame(loop); }
   function setT(rt){ RT=rt; b100.setAttribute('aria-pressed',!rt); b300.setAttribute('aria-pressed',rt); reset(); }
