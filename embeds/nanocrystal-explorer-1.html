@@ -85,12 +85,13 @@ section{margin-top:2rem}
 .refs{font-size:.98rem} .refs li{margin:.25rem 0;max-width:110ch}
 .legend{font-size:.95rem;color:var(--muted)}
 .swatch{display:inline-block;width:.8em;height:.8em;vertical-align:-.05em;border:1px solid var(--line)}
+.bgx{display:block;margin:4px 0;font-size:.95rem}.bgx input[type=number]{font:inherit;padding:1px 4px}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header class="top">
-  <h1>Nanocrystal diffraction explorer</h1><p class="sub" style="border-left:4px solid var(--accent);padding:6px 10px;background:var(--accent-soft);border-radius:4px">Simulations built on <a href="https://bl831.als.lbl.gov/~jamesh/nanoBragg/" target="_blank" rel="noopener"><b>nanoBragg</b></a> by James M. Holton and Kenneth A. Frankel (<a href="https://github.com/cctbx/cctbx_project/tree/master/simtbx/nanoBragg" target="_blank" rel="noopener">cctbx simtbx</a>). The zoom panel is a JavaScript port of the nanoBragg pixel loop, checked against the compiled program; reference images were computed with the compiled nanoBragg. Intensities follow Holton &amp; Frankel (2010), Acta Cryst. D66, 393-408.</p>
+  <h1>Nanocrystal diffraction explorer</h1><p class="sub" style="border-left:4px solid var(--accent);padding:6px 10px;background:var(--accent-soft);border-radius:4px">Simulations built on <a href="https://bl831.als.lbl.gov/~jamesh/nanoBragg/" target="_blank" rel="noopener"><b>nanoBragg</b></a> by James M. Holton and Kenneth A. Frankel (<a href="https://github.com/cctbx/cctbx_project/tree/master/simtbx/nanoBragg" target="_blank" rel="noopener">cctbx simtbx</a>). The zoom panel is a JavaScript port of the nanoBragg pixel loop, checked against the compiled program; reference images were computed with the compiled nanoBragg. Intensities follow Holton &amp; Frankel (2010), Acta Cryst. D66, 393-408.</p><p class="sub" style="margin-top:.4rem"><label for="palSel"><b>Colour scheme</b></label> <select id="palSel" style="font:inherit;padding:2px 6px"><option value="bw">Black on white</option><option value="wb">White on black</option><option value="heat">Heat (dark to white)</option></select></p>
   <p class="sub">Cubic insulin (I2₁3, a = 78.1 Å) crystals from 5 µm down to 200 nm, micro/nanofocus synchrotron beam, simulated DECTRIS EIGER2 XE 16M. Companion to the <a id="mainLink" href="../nanobragg.html" target="_top">Bragg spot intensity explorer</a> for crystals of tens of µm. Here the questions change: how many photons a crystal can scatter before radiation damage, how the crystal’s own size and block structure shape each spot, and whether the spots rise above background.</p>
   <div class="eqband" id="eqband">
     <math display="block" aria-label="I spot equals I beam r e squared P L A lambda cubed V xtal F squared over omega V cell squared">
@@ -178,7 +179,7 @@ section{margin-top:2rem}
 
 <section>
   <h2>Reference images computed with nanoBragg</h2>
-  <p>Full 4148 × 4362 detector rendered with the compiled nanoBragg for each crystal size; beam 1 µm (5 µm for the 5 µm crystal), 10¹² photons s⁻¹, 0.01 s, divergence 1 mrad (3 × 3 grid, 5 source points), mosaic spread between blocks 0.05°, mosaic blocks of 0.5 µm (the 200 nm crystal is a single 26-cell block). Images are stored noise-free and scaled here to that exposure; background (5 µm ice + 20 mm air, water-equivalent) and Poisson noise are added in the browser. Radiation-damage fading is not applied to these reference images (≤ 0.13 MGy per frame, < 0.5 % fading at 2 Å). Left: whole detector binned 4 × 4. Right: 256 × 256 native pixels around reflection 10 25 −5. Select an image or a zoom button to enlarge it.</p>
+  <p>Full 4148 × 4362 detector rendered with the compiled nanoBragg for each crystal size; beam 1 µm (5 µm for the 5 µm crystal), 10¹² photons s⁻¹, 0.01 s, divergence 1 mrad (3 × 3 grid, 5 source points), mosaic spread between blocks 0.05°, mosaic blocks of 0.5 µm (the 200 nm crystal is a single 26-cell block). Images are stored noise-free and scaled here to that exposure; background (the materials selected under Background, water path 2 × crystal size by default) and Poisson noise are added in the browser. Radiation-damage fading is not applied to these reference images (≤ 0.13 MGy per frame, < 0.5 % fading at 2 Å). Left: whole detector binned 4 × 4. Right: 256 × 256 native pixels around reflection 10 25 −5. Select an image or a zoom button to enlarge it.</p>
   <div class="bar">
     <span class="seg" role="group" aria-label="Reference frame type">
       <button id="gRot" aria-pressed="false">Rotation 0.1°</button><button id="gStill" aria-pressed="true">Still</button>
@@ -196,7 +197,7 @@ section{margin-top:2rem}
   <p><b>1. Scattering power scales with volume, not edge length.</b> Eq. 1 is linear in V<sub>xtal</sub>. From 50 µm to 200 nm the volume falls by 1.6 × 10⁷; at the same flux density each spot loses the same factor. A 200 nm insulin cube contains about 1.7 × 10⁴ unit cells.</p>
   <p><b>2. The damage limit does not depend on flux.</b> Spot intensity and dose are both proportional to I<sub>beam</sub> t, so the photons a crystal can scatter before its spots fade are fixed by its volume and its dose tolerance (Holton &amp; Frankel 2010, eq. 14 and §3.1). Fading here follows their eq. 13 with the Howells criterion H = 10 MGy Å⁻¹: mean intensity at d-spacing d falls to half after H·d MGy. A brighter beam shortens the time to that point; it does not raise the total. Holton &amp; Frankel estimated that a perfect 1.2 µm lysozyme sphere is the smallest that yields 4 photons per hkl (signal-to-noise 2) at 2 Å, and 0.5 or 0.34 µm with two models of photoelectron escape. Cubic insulin, with about 65 % solvent, scatters less per unit volume than lysozyme; the damage-limited photon counts in the table are computed for this page’s synthetic insulin structure factors and are per observation, before merging symmetry-equivalent observations.</p>
   <p><b>3. Photoelectron escape changes the dose.</b> Once the crystal approaches the photoelectron range, part of the absorbed energy leaves with the photoelectron (Nave &amp; Hill 2005). Holton &amp; Frankel’s eq. 12 approximates the retained fraction as f<sub>NH</sub> = R/(R + R<sub>PE</sub>), with R<sub>PE</sub> from Cole (1969): about 3.9 µm at 12.4 keV for unit-density material. They stress that this is a rough estimate, possibly off by a factor of two or more when R ≪ R<sub>PE</sub>; here R is taken as half the cube edge. Exploiting escape requires minimising the material around the crystal (support, amorphous ice, gas; Nave &amp; Hill 2005), and the predicted benefit grows with photon energy (Nave &amp; Hill 2005; Cowan &amp; Nave 2008). The checkbox above removes the correction (f<sub>NH</sub> = 1).</p>
-  <p><b>4. Background is set by everything else in the beam.</b> Signal scales with crystal volume; background scales with the illuminated mass of ice, solvent, support and air. Holton &amp; Frankel concluded that background photons and spot size on the detector are the main obstacles to reaching the theoretical size limit. The page counts ice and air as water-equivalent mass in the beam footprint, using nanoBragg’s flat water model, so the ring structure of real ice and air scatter is not reproduced. With a 1 µm beam, 5 µm of ice and 20 mm of air (the air dominates the mass), the modelled background is about 0.07 photons per pixel per 0.01 s frame (damage table above). For the 200 nm crystal the brightest expected Bragg pixel in a still is about 0.65 photons and nearly all Bragg pixels are far weaker than the background, which is why the reference images are dominated by background speckle until noise is switched off. Background scales with beam area and path length; signal does not.</p>
+  <p><b>4. Background is set by everything else in the beam.</b> Signal scales with crystal volume; background scales with the illuminated mass of ice, solvent, support and air. Holton &amp; Frankel concluded that background photons and spot size on the detector are the main obstacles to reaching the theoretical size limit. Background uses Holton's nonBragg structure-factor curves for water, ice, air and Paratone-N, so the water ring is reproduced; Kapton, Mylar and SiN windows use an independent-atom approximation without their amorphous halos. With a 1 µm beam, 5 µm of ice and 20 mm of air (the air dominates the mass), the modelled background is about 0.07 photons per pixel per 0.01 s frame (damage table above). For the 200 nm crystal the brightest expected Bragg pixel in a still is about 0.65 photons and nearly all Bragg pixels are far weaker than the background, which is why the reference images are dominated by background speckle until noise is switched off. Background scales with beam area and path length; signal does not.</p>
   <p><b>5. The crystal is its own coherence volume.</b> When the crystal is no larger than a mosaic block, the reciprocal-lattice point takes its size and shape from the crystal: width about 1/(N a), resolution-independent (Nave 1998; Vlahakis et al. 2024, §2.4). A parallelepiped of N cells has the sinc-function transform used by nanoBragg, with subsidiary maxima between Bragg positions; such shape transforms are visible in simulated nanocrystal patterns (Kirian et al. 2010). Turn off noise in the reference images and enlarge the detail view of the 200 nm crystal to see them. Real nanocrystals are not perfect parallelepipeds, so the fringe pattern is model-dependent.</p>
   <p><b>6. Few blocks means no averaging over orientations.</b> A 50 µm crystal contains of the order of 10⁶ mosaic blocks, so a smooth mosaic distribution is a good description. A 1 µm crystal of 0.5 µm blocks has 8. The nanoBragg kernel on this page uses every block individually when there are at most 300, so the spot intensities depend on the particular orientations drawn (change the block-orientation draw to see this), while the fast preview shows the ensemble average. Vlahakis et al. (2024, Fig. 6) report that a single-orientation simulation fitted to a real XFEL nanocrystal image after an 18-parameter grid search remained a poor visual match, whereas the sum of the three best orientations matched much better, consistent with a texture of a few misoriented blocks.</p>
   <p><b>7. Nanocrystals are not more perfect.</b> Vlahakis et al. (2024, §4.2) review scanning electron nanodiffraction (4D-STEM) maps showing bends, defects and misoriented domains inside apparently single nanocrystals, and question the assumption that small crystals have fewer defects. The page implements the three imperfection parameters of Nave (1998): block size, block misorientation and unit-cell variation between blocks. Unit-cell variation broadens reflections radially in proportion to resolution, unlike block size.</p>
@@ -516,12 +517,49 @@ function kernelRows(p, Fd, d, ks, roi, sRow, out) {
     out[(spx - roi.s0) * W + (fpx - roi.f0)] = scale * I * omega * polar;
   }
 }
-function waterBg(p, d, fpx, spx) { // nanoBragg flat water model, photons per native pixel
+
+// ---- background materials in the beam: structure factors per "molecule" vs sin(θ)/λ ----
+// water, ice, air (N2) and Paratone-N: J. M. Holton, nonBragg example curves (bl831.als.lbl.gov/~jamesh/nonBragg), resampled.
+// Kapton, Mylar, SiN: independent-atom approximation (Cromer-Mann form factors, no amorphous halo), so only indicative.
+const BGT = { dx: 0.0025, water: [2.57, 2.5706, 2.5713, 2.5721, 2.5729, 2.5738, 2.5747, 2.5758, 2.5769, 2.5782, 2.5796, 2.5812, 2.583, 2.5852, 2.5878, 2.5909, 2.5948, 2.5997, 2.6059, 2.6136, 2.6233, 2.6354, 2.6504, 2.6687, 2.691, 2.7176, 2.7489, 2.7853, 2.8269, 2.8739, 2.9263, 2.984, 3.0468, 3.1145, 3.187, 3.2645, 3.3471, 3.4354, 3.5301, 3.6322, 3.743, 3.864, 3.9965, 4.1421, 4.3019, 4.4768, 4.667, 4.8725, 5.0923, 5.3248, 5.5677, 5.8182, 6.0727, 6.3273, 6.5776, 6.8194, 7.0481, 7.2597, 7.45, 7.6158, 7.7545, 7.8638, 7.9427, 7.991, 8.0091, 7.9986, 7.9617, 7.9015, 7.8216, 7.7259, 7.6189, 7.5051, 7.3887, 7.2739, 7.1645, 7.0638, 6.9742, 6.8977, 6.8353, 6.7873, 6.7533, 6.732, 6.7217, 6.7201, 6.7245, 6.732, 6.7395, 6.7441, 6.7431, 6.7338, 6.7142, 6.6827, 6.6381, 6.5798, 6.5079, 6.4228, 6.3254, 6.2172, 6.0998, 5.9752, 5.8454, 5.7128, 5.5793, 5.4471, 5.3181, 5.194, 5.0763, 4.9661, 4.8643, 4.7715, 4.6882, 4.6144, 4.55, 4.4947, 4.448, 4.4094, 4.3781, 4.3536, 4.3349, 4.3214, 4.3123, 4.307, 4.3047, 4.305, 4.3071, 4.3107, 4.3153, 4.3205, 4.3261, 4.3318, 4.3373, 4.3424, 4.3471, 4.3511, 4.3544, 4.3569, 4.3586, 4.3593, 4.3591, 4.358, 4.3559, 4.3528, 4.3487, 4.3436, 4.3375, 4.3304, 4.3224, 4.3134, 4.3035, 4.2926, 4.2808, 4.2681, 4.2545, 4.2401, 4.2248, 4.2088, 4.192, 4.1744, 4.1561, 4.1371, 4.1174, 4.0971, 4.0762, 4.0547, 4.0327, 4.0102, 3.9872, 3.9638, 3.94, 3.9158, 3.8912, 3.8664, 3.8413, 3.8159, 3.7904, 3.7647, 3.7388, 3.7129, 3.6869, 3.6608, 3.6347, 3.6087, 3.5827, 3.5568, 3.5309, 3.5052, 3.4797, 3.4543, 3.4292, 3.4043, 3.3796, 3.3552, 3.331, 3.3072, 3.2837, 3.2606, 3.2378, 3.2154, 3.1933, 3.1717, 3.1504], paratone: [2.054, 2.0769, 2.1013, 2.1273, 2.155, 2.1847, 2.2164, 2.2504, 2.2869, 2.3261, 2.3684, 2.4139, 2.463, 2.5162, 2.5738, 2.6362, 2.7041, 2.7779, 2.8584, 2.9463, 3.0423, 3.1474, 3.2626, 3.3889, 3.5276, 3.6797, 3.8466, 4.0295, 4.2297, 4.448, 4.6851, 4.9411, 5.2151, 5.5052, 5.8076, 6.1169, 6.4251, 6.7221, 6.9954, 7.2313, 7.4165, 7.539, 7.5905, 7.5681, 7.474, 7.3159, 7.1052, 6.8554, 6.5802, 6.2923, 6.0025, 5.7188, 5.4473, 5.192, 4.955, 4.7375, 4.5395, 4.3606, 4.1999, 4.0563, 3.9287, 3.8159, 3.7167, 3.6301, 3.555, 3.4907, 3.4362, 3.3909, 3.3541, 3.3253, 3.304, 3.2897, 3.2821, 3.2808, 3.2855, 3.2959, 3.3116, 3.3324, 3.3578, 3.3875, 3.421, 3.4577, 3.4969, 3.538, 3.5799, 3.6218, 3.6625, 3.7009, 3.7359, 3.7664, 3.7912, 3.8096, 3.8207, 3.8244, 3.8203, 3.8088, 3.7902, 3.7653, 3.7349, 3.7001, 3.6618, 3.6211, 3.5791, 3.5365, 3.4941, 3.4527, 3.4127, 3.3746, 3.3387, 3.3051, 3.2742, 3.2458, 3.2201, 3.1969, 3.1764, 3.1584, 3.1427, 3.1294, 3.1182, 3.1091, 3.102, 3.0968, 3.0933, 3.0914, 3.091, 3.0921, 3.0945, 3.0981, 3.1029, 3.1088, 3.1157, 3.1235, 3.1321, 3.1416, 3.1517, 3.1625, 3.174, 3.1859, 3.1984, 3.2114, 3.2247, 3.2384, 3.2524, 3.2667, 3.2813, 3.296, 3.3109, 3.3259, 3.341, 3.3561, 3.3713, 3.3865, 3.4016, 3.4167, 3.4316, 3.4464, 3.4611, 3.4756, 3.4899, 3.504, 3.5178, 3.5313, 3.5446, 3.5575, 3.5701, 3.5823, 3.5941, 3.6055, 3.6165, 3.6271, 3.6372, 3.6468, 3.6559, 3.6646, 3.6727, 3.6802, 3.6873, 3.6938, 3.6997, 3.705, 3.7098, 3.7139, 3.7174, 3.7204, 3.7227, 3.7243, 3.7254, 3.7258, 3.7255, 3.7247, 3.7231, 3.7209, 3.7181, 3.7146, 3.7105, 3.7057, 3.7003, 3.6942, 3.6875, 3.6801, 3.6722], air: [14.0954, 14.0917, 14.088, 14.0769, 14.0657, 14.0472, 14.0285, 14.003, 13.977, 13.9443, 13.9111, 13.8715, 13.8312, 13.7849, 13.7378, 13.6849, 13.6311, 13.5719, 13.5117, 13.4466, 13.3803, 13.3094, 13.2373, 13.161, 13.0835, 13.0021, 12.9194, 12.8333, 12.7459, 12.6554, 12.5636, 12.4691, 12.3734, 12.2753, 12.176, 12.0747, 11.9722, 11.8681, 11.7629, 11.6563, 11.5488, 11.4402, 11.3308, 11.2206, 11.1097, 10.9982, 10.8862, 10.7739, 10.6611, 10.5483, 10.4353, 10.3223, 10.2093, 10.0966, 9.9841, 9.8718, 9.76, 9.6487, 9.5379, 9.4277, 9.3183, 9.2095, 9.1017, 8.9946, 8.8887, 8.7835, 8.6797, 8.5767, 8.4752, 8.3745, 8.2755, 8.1773, 8.081, 7.9855, 7.892, 7.7993, 7.7087, 7.6189, 7.5314, 7.4445, 7.3601, 7.2763, 7.1951, 7.1144, 7.0364, 6.9589, 6.8841, 6.8097, 6.7382, 6.667, 6.5987, 6.5306, 6.4655, 6.4006, 6.3386, 6.2768, 6.2179, 6.1591, 6.1033, 6.0474, 5.9945, 5.9417, 5.8916, 5.8416, 5.7943, 5.7471, 5.7024, 5.6579, 5.6158, 5.5739, 5.5342, 5.4947, 5.4574, 5.4203, 5.3852, 5.3504, 5.3174, 5.2848, 5.2538, 5.2232, 5.1941, 5.1654, 5.1382, 5.1113, 5.0857, 5.0606, 5.0366, 5.013, 4.9906, 4.9685, 4.9474, 4.9268, 4.907, 4.8876, 4.869, 4.8508, 4.8334, 4.8163, 4.7999, 4.7839, 4.7684, 4.7533, 4.7387, 4.7245, 4.7107, 4.6972, 4.6842, 4.6715, 4.6591, 4.647, 4.6353, 4.6238, 4.6126, 4.6016, 4.5909, 4.5804, 4.5702, 4.5601, 4.5503, 4.5406, 4.5311, 4.5218, 4.5126, 4.5036, 4.4947, 4.486, 4.4774, 4.4689, 4.4605, 4.4522, 4.444, 4.4359, 4.4278, 4.4198, 4.4119, 4.4041, 4.3963, 4.3886, 4.3809, 4.3733, 4.3657, 4.3582, 4.3507, 4.3432, 4.3357, 4.3283, 4.3209, 4.3135, 4.3061, 4.2988, 4.2914, 4.2841, 4.2768, 4.2694, 4.2621, 4.2548, 4.2475, 4.2402, 4.2328, 4.2255, 4.2182], ice: { dx: 0.002, y: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 144.851, 0, 0, 0, 0, 0, 114.68, 0, 0, 0, 0, 133.84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 111.068, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 181.998, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 202.156, 0, 0, 0, 0, 0, 0, 0, 71.447, 0, 0, 0, 143.507, 0, 0, 71.599, 0, 0, 0, 0, 3.34, 0, 0, 0, 0, 0, 0, 0, 0, 56.289, 0, 0, 0, 0, 0, 0, 2.449, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 119.707, 0, 0, 0, 0, 0, 0, 64.903, 0, 0, 0, 60.645, 0, 0, 0, 0.073, 0, 0, 0, 0, 0, 0, 122.205, 0, 54.767, 0, 0, 0, 0, 2.009, 0, 0, 0, 0, 0, 66.759, 0, 0, 0, 0.416, 0, 0, 0, 109.177, 0, 0, 0, 0, 0, 0, 56.934, 0, 36.28, 0, 0, 0, 0, 0, 0, 0, 0, 81.086, 0, 39.437, 0, 0, 0, 0, 0.554, 0.882, 0, 0, 0, 0, 46.396, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28.169, 0, 40.76, 0, 63.287, 0, 28.025, 0, 0, 0.906, 0, 0, 0, 0, 0, 79.316, 24.561, 28.977, 0, 0, 0, 0, 0, 0, 35.64, 0, 0, 0] } };
+const CM = { H: [[0.489918, 0.262003, 0.196767, 0.049879], [20.6593, 7.74039, 49.5519, 2.20159], 0.001305], C: [[2.31, 1.02, 1.5886, 0.865], [20.8439, 10.2075, 0.5687, 51.6512], 0.2156],
+  N: [[12.2126, 3.1322, 2.0125, 1.1663], [0.0057, 9.8933, 28.9975, 0.5826], -11.529], O: [[3.0485, 2.2868, 1.5463, 0.867], [13.2771, 5.7011, 0.3239, 32.9089], 0.2508],
+  Si: [[6.2915, 3.0353, 1.9891, 1.541], [2.4386, 32.3337, 0.6785, 81.6937], 1.1407] };
+function fCM(el, s) { const c = CM[el]; let f = c[2]; for (let i = 0; i < 4; i++) f += c[0][i] * Math.exp(-c[1][i] * s * s); return f; }
+function iam2(comp, s) { let t = 0; for (const el in comp) { const f = fCM(el, s); t += comp[el] * f * f; } return t; }
+function tab(y, dx, s) { const x = s / dx, i = Math.floor(x); if (i >= y.length - 1) return y[y.length - 1]; const u = x - i; return y[i] + (y[i + 1] - y[i]) * u; }
+const BGM = { // F²(s) per formula unit, molar mass g/mol, density g/cm³
+  water: { F2: s => { const F = tab(BGT.water, BGT.dx, s); return F * F; }, MW: 18.015, rho: 1.0 },
+  ice: { F2: s => { const F = tab(BGT.ice.y, BGT.ice.dx, s); return F * F; }, MW: 18.015, rho: 0.92 },
+  air: { F2: s => { const F = tab(BGT.air, BGT.dx, s); return F * F; }, MW: 28.0, rho: 1.2e-3 },
+  paratone: { F2: s => { const F = tab(BGT.paratone, BGT.dx, s); return F * F; }, MW: 12, rho: 0.88 },
+  kapton: { F2: s => iam2({ C: 22, H: 10, N: 2, O: 5 }, s), MW: 382.32, rho: 1.42 },
+  mylar: { F2: s => iam2({ C: 10, H: 8, O: 4 }, s), MW: 192.17, rho: 1.39 },
+  sin: { F2: s => iam2({ Si: 3, N: 4 }, s), MW: 140.28, rho: 3.1 }
+};
+const BGX = { autoWater: true, ice: false, iceUm: 5, para: false, paraUm: 10, air: false, airMm: 20, kapton: false, mylar: false, sin: false };
+function bgPaths(p) { // path length along the beam, cm
+  const P_ = { water: (p.ice) * 1e-4 };
+  P_.air = p.air * 0.1;
+  if (BGX.ice) P_.ice = BGX.iceUm * 1e-4; if (BGX.para) P_.paratone = BGX.paraUm * 1e-4;
+  if (BGX.kapton) P_.kapton = 2 * 7.5e-4; if (BGX.mylar) P_.mylar = 2 * 13e-4; if (BGX.sin) P_.sin = 2 * 200e-7;
+  return P_;
+}
+let bgLutKey = '', bgLut = null;
+function bgSum(p, s) { // Σ N_m F_m²(s): illuminated formula units × F², beam footprint = beam²
+  const key = JSON.stringify([p.beam, bgPaths(p)]);
+  if (key !== bgLutKey) { bgLutKey = key; bgLut = new Float64Array(1201); const A = (p.beam * 1e-4) ** 2, paths = bgPaths(p);
+    for (let i = 0; i <= 1200; i++) { const ss = i * 0.0005; let t = 0; for (const m in paths) { const M = BGM[m]; if (!paths[m]) continue; t += A * paths[m] * M.rho / M.MW * 6.02214076e23 * M.F2(ss); } bgLut[i] = t; } }
+  const x = Math.min(1199.999, s / 0.0005), i = Math.floor(x), u = x - i; return bgLut[i] + (bgLut[i + 1] - bgLut[i]) * u;
+}
+function bgAny(p) { const P_ = bgPaths(p); for (const m in P_) if (P_[m] > 0) return true; return false; }
+
+function waterBg(p, d, fpx, spx) { // amorphous background (nonBragg curves), photons per native pixel
   const g = geom(p), X = g.D, Y = -((spx + 0.5) * DET.pix - g.sb), Z = (fpx + 0.5) * DET.pix - g.fb, R = Math.sqrt(X * X + Y * Y + Z * Z);
   const omega = (DET.pix * 1e-3) ** 2 / (R * 1e-3) ** 2 * (X / R);
   const pol = kahn(p.polar, [1, 0, 0], [X / R, Y / R, Z / R]);
-  const w = p.water * 1e-6, nW = (p.bgVol != null ? p.bgVol : w * w * w) * 1e6 * NA / 18.0;
-  return 2.57 * 2.57 * RE2 * d.fluence * nW * omega * pol;
+  const s = Math.sqrt(Math.max(0, (1 - X / R) / 2)) / p.lambda;
+  return RE2 * d.fluence * bgSum(p, s) * omega * pol;
 }
 if (typeof module !== 'undefined') module.exports = { fadeFactor, buildF, derive, orient, predict, spotCov, kernelSetup, kernelRows, waterBg, DET, CELL, VCELL, geom, project, moduleCover, poisson, rng, kahn };
 
@@ -535,7 +573,7 @@ const Fd = buildF(asu);
 const BIN = 4, BW = 1037, BH = 1090;
 
 // ---------- parameters ----------
-const BASE = { lambda: 1.0, bw: 0, div: 1, polar: 0.99, flux: 1e12, beam: 1, texp: 0.01, xtal: 0.5, mosaic: 0.05, block: 0.5, domain: 0.5, bextra: 0, A: 1, dist: 200, mode: 'still', phi: 0.05, osc: 0.1, water: 0, ice: 5, air: 20, cellVar: 0, dose0: 0, seed: 1, oversample: 1 };
+const BASE = { lambda: 1.0, bw: 0, div: 1, polar: 0.99, flux: 1e12, beam: 1, texp: 0.01, xtal: 0.5, mosaic: 0.05, block: 0.5, domain: 0.5, bextra: 0, A: 1, dist: 200, mode: 'still', phi: 0.05, osc: 0.1, water: 0, ice: 1, air: 20, cellVar: 0, dose0: 0, seed: 1, oversample: 1 };
 const PRESETS = [
   { id: 'n5000', name: '5 µm', set: { xtal: 5, block: 0.5, beam: 5 } },
   { id: 'n1000', name: '1 µm', set: { xtal: 1, block: 0.5, beam: 1 } },
@@ -559,8 +597,8 @@ const CTL = [
   { g: 'Data collection', key: 'texp', label: 'Exposure per frame', unit: 's', lo: 1e-4, hi: 1, log: 1, fmt: v => v.toPrecision(2), terms: ['omega', 'Ibeam', 'dose'], tag: 'ω (rotation); dose per frame' },
   { g: 'Data collection', key: 'dose0', label: 'Dose already absorbed', unit: 'MGy', lo: 0, hi: 60, fmt: v => v.toFixed(1), terms: ['dose'], tag: 'spots fade as exp(−ln2·D/(H d)), H = 10 MGy/Å' },
   { g: 'Data collection', key: 'dist', label: 'Detector distance', unit: 'mm', lo: 80, hi: 800, log: 1, fmt: v => v.toFixed(0), terms: [], tag: 'geometry only' },
-  { g: 'Background', key: 'ice', label: 'Ice / solvent path around crystal', unit: 'µm', lo: 0, hi: 100, fmt: v => v.toFixed(1), terms: [], tag: 'background ∝ beam area × path' },
-  { g: 'Background', key: 'air', label: 'Air path in beam', unit: 'mm', lo: 0, hi: 200, fmt: v => v.toFixed(0), terms: [], tag: 'counted as water-equivalent mass (ρ_air = 1.2 mg cm⁻³)' }
+  { g: 'Background', key: 'ice', label: 'Water (solvent) path along beam', unit: 'µm', lo: 0, hi: 100, fmt: v => v.toFixed(1), terms: [], tag: 'nonBragg water curve (water ring); footprint = beam²' },
+  { g: 'Background', key: 'air', label: 'Air path in beam', unit: 'mm', lo: 0, hi: 200, fmt: v => v.toFixed(0), terms: [], tag: 'nonBragg air (N₂) curve, ρ = 1.2 mg cm⁻³' }
 ];
 let P = Object.assign({}, BASE);
 const toT = (c, v) => { if (c.zero && v <= 0) return 0; if (c.log) { const t = Math.log(v / c.lo) / Math.log(c.hi / c.lo); return Math.round((c.zero ? 20 : 0) + t * (1000 - (c.zero ? 20 : 0))); } return Math.round((v - c.lo) / (c.hi - c.lo) * 1000); };
@@ -612,10 +650,31 @@ for (const c of CTL) {
   groups[c.g].appendChild(d); c.el = d.querySelector('input'); c.out = d.querySelector('output'); c.box = d;
   c.el.addEventListener('input', () => { P[c.key] = fromT(c, +c.el.value); c.out.textContent = c.fmt(P[c.key]); schedule(); });
 }
+
+// background materials panel
+(function () {
+  const fs = document.createElement('fieldset'); fs.innerHTML = `<legend>Other material in the beam</legend>
+  <label class="bgx"><input type="checkbox" data-k="autoWater" checked> Water path = 2 × crystal size</label>
+  
+  <label class="bgx"><input type="checkbox" data-k="ice"> Ice (hexagonal, powder rings) <input type="number" data-n="iceUm" value="5" min="0" step="0.5" style="width:5em"> µm</label>
+  <label class="bgx"><input type="checkbox" data-k="para"> Paratone-N <input type="number" data-n="paraUm" value="10" min="0" step="1" style="width:5em"> µm</label>
+  <label class="bgx"><input type="checkbox" data-k="kapton"> Kapton, 2 × 7.5 µm</label>
+  <label class="bgx"><input type="checkbox" data-k="mylar"> Mylar, 2 × 13 µm</label>
+  <label class="bgx"><input type="checkbox" data-k="sin"> SiN, 2 × 200 nm</label>
+  <span class="tag">Water, ice, air, Paratone-N: J. M. Holton's <a href="https://bl831.als.lbl.gov/~jamesh/nonBragg/" target="_blank" rel="noopener">nonBragg</a> curves. Kapton, Mylar, SiN: independent-atom approximation (no amorphous halo), indicative only. Footprint = beam².</span>`;
+  ctlEl.appendChild(fs);
+  const xc = CTL.find(c => c.key === 'xtal'), wc = CTL.find(c => c.key === 'ice');
+  function applyAuto() { if (BGX.autoWater) { P.ice = 2 * P.xtal; if (wc) { wc.el.value = toT(wc, P.ice); wc.out.textContent = wc.fmt(P.ice); } } }
+  fs.querySelectorAll('input[data-k]').forEach(i => i.addEventListener('change', () => { BGX[i.dataset.k] = i.checked; applyAuto(); schedule(); if (typeof paintGallery === 'function') paintGallery(); }));
+  fs.querySelectorAll('input[data-n]').forEach(i => i.addEventListener('input', () => { const v = parseFloat(i.value); if (isFinite(v) && v >= 0) { BGX[i.dataset.n] = v; schedule(); if (typeof paintGallery === 'function') paintGallery(); } }));
+  if (xc) xc.el.addEventListener('input', () => { applyAuto(); });
+  if (wc) wc.el.addEventListener('input', () => { if (BGX.autoWater) { BGX.autoWater = false; fs.querySelector('input[data-k=autoWater]').checked = false; } });
+  applyAuto();
+})();
 function syncControls() { for (const c of CTL) { c.el.value = toT(c, P[c.key]); c.out.textContent = c.fmt(P[c.key]); c.box.style.opacity = (c.rotOnly && P.mode !== 'rot') ? .45 : 1; } setMode(P.mode, true); }
 const presetEl = document.getElementById('presets');
 for (const pr of PRESETS) { const b = document.createElement('button'); b.className = 'act'; b.textContent = pr.name; b.onclick = () => loadPreset(pr.id, P.mode); presetEl.appendChild(b); }
-function loadPreset(id, mode) { const pr = PRESETS.find(x => x.id === id); P = Object.assign({}, BASE, pr.set, { mode, phi: mode === 'still' ? 0.05 : 0 }); selected = null; syncControls(); schedule(); }
+function loadPreset(id, mode) { const pr = PRESETS.find(x => x.id === id); P = Object.assign({}, BASE, pr.set, { mode, phi: mode === 'still' ? 0.05 : 0 }); if (BGX.autoWater) P.ice = 2 * P.xtal; selected = null; syncControls(); schedule(); }
 const mRot = document.getElementById('mRot'), mStill = document.getElementById('mStill');
 function setMode(m, silent) { P.mode = m; mRot.setAttribute('aria-pressed', m === 'rot'); mStill.setAttribute('aria-pressed', m === 'still'); for (const c of CTL) if (c.rotOnly) c.box.style.opacity = m === 'rot' ? 1 : .45; if (!silent) { selected = null; schedule(); } }
 mRot.onclick = () => setMode('rot'); mStill.onclick = () => setMode('still');
@@ -652,14 +711,13 @@ function compute() {
   spots = predict(P, Fd, D, O);
   const g = geom(P), E = new Float64Array(BW * BH);
   // water background at bin centres (photons per native pixel) x active count
-  const bgVol = (P.beam * 1e-6) ** 2 * (P.ice * 1e-6 + P.air * 1e-3 * 1.2e-3); P.bgVol = bgVol;
-  if (bgVol > 0) {
-    const nW = bgVol * 1e6 * 6.02214076e23 / 18, k = 2.57 * 2.57 * 7.94079248018965e-30 * D.fluence * nW * (DET.pix * 1e-3) ** 2;
+  if (bgAny(P)) {
+    const k = 7.94079248018965e-30 * D.fluence * (DET.pix * 1e-3) ** 2;
     for (let by = 0; by < BH; by++) { const Y = -((by * BIN + 2) * DET.pix - g.sb); for (let bx = 0; bx < BW; bx++) {
       const c = cov[by * BW + bx]; if (!c) continue; const Z = (bx * BIN + 2) * DET.pix - g.fb, X = g.D, R2 = X * X + Y * Y + Z * Z, R = Math.sqrt(R2);
       const c2 = X / R, s2 = 1 - c2 * c2, psi = -Math.atan2(Y / R, Z / R);
       const pol = 0.5 * (1 + c2 * c2 - P.polar * Math.cos(2 * psi) * s2);
-      E[by * BW + bx] = c * k / (R2 * 1e-6) * c2 * pol; } }
+      E[by * BW + bx] = c * k * bgSum(P, Math.sqrt(Math.max(0, (1 - c2) / 2)) / P.lambda) / (R2 * 1e-6) * c2 * pol; } }
   }
   // splat spots (photons) into bins
   const bmm = BIN * DET.pix;
@@ -684,11 +742,11 @@ function compute() {
   if (!selected) autoSelect(); else reselect();
 }
 const detC = document.getElementById('det'), dctx = detC.getContext('2d'), idata = dctx.createImageData(BW, BH);
-const GAP = [180, 192, 205];
+const GAP = [180, 192, 205]; let PALM='bw'; const HEATST=[[0,[11,21,34]],[0.25,[52,40,120]],[0.5,[150,90,200]],[0.75,[255,170,80]],[1,[255,246,225]]];function setPx(d,j,v,sat){const t=Math.min(1,Math.sqrt(Math.max(0,v)/sat));if(PALM==='bw'){const g=255*(1-t);d[j]=d[j+1]=d[j+2]=g;return;}if(PALM==='wb'){const g=255*t;d[j]=d[j+1]=d[j+2]=g;return;}for(let i=1;i<HEATST.length;i++)if(t<=HEATST[i][0]){const a=HEATST[i-1],b=HEATST[i],u=(t-a[0])/(b[0]-a[0]);d[j]=a[1][0]+(b[1][0]-a[1][0])*u;d[j+1]=a[1][1]+(b[1][1]-a[1][1])*u;d[j+2]=a[1][2]+(b[1][2]-a[1][2])*u;return;}}function gapCol(){return PALM==='bw'?GAP:[44,54,68];} 
 function grey(v, sat) { return 255 * (1 - Math.min(1, Math.sqrt(Math.max(0, v) / sat))); }
 function paint() {
   const d = idata.data;
-  for (let i = 0; i < img.length; i++) { const v = img[i], j = 4 * i; if (v < 0) { d[j] = GAP[0]; d[j + 1] = GAP[1]; d[j + 2] = GAP[2]; } else { const g = grey(v, SAT); d[j] = d[j + 1] = d[j + 2] = g; } d[j + 3] = 255; }
+  for (let i = 0; i < img.length; i++) { const v = img[i], j = 4 * i; if (v < 0) { const G = gapCol(); d[j] = G[0]; d[j + 1] = G[1]; d[j + 2] = G[2]; } else { setPx(d, j, v, SAT); } d[j + 3] = 255; }
   dctx.putImageData(idata, 0, 0);
 }
 const ovl = document.getElementById('ovl'), octx = ovl.getContext('2d');
@@ -779,7 +837,7 @@ function startKernel(job) {
   step();
 }
 const zrow = new Float64Array(DET.nf);
-function paintZoom() { const d = zimg.data; for (let i = 0; i < ZN * ZN; i++) { const v = zshow[i], j = 4 * i; if (v < 0) { d[j] = GAP[0]; d[j + 1] = GAP[1]; d[j + 2] = GAP[2]; } else d[j] = d[j + 1] = d[j + 2] = grey(v, ZSAT); d[j + 3] = 255; } zctx.putImageData(zimg, 0, 0); }
+function paintZoom() { const d = zimg.data; for (let i = 0; i < ZN * ZN; i++) { const v = zshow[i], j = 4 * i; if (v < 0) { const G = gapCol(); d[j] = G[0]; d[j + 1] = G[1]; d[j + 2] = G[2]; } else setPx(d, j, v, ZSAT); d[j + 3] = 255; } zctx.putImageData(zimg, 0, 0); }
 function compare() {
   let sk = 0; for (const v of zbuf) if (v > 0) sk += v;
   let sp = 0, n = 0; for (const s of spots) { const f = s.f / DET.pix, y = s.s / DET.pix; if (s.active && f >= roi.f0 && f < roi.f1 && y >= roi.s0 && y < roi.s1) { sp += s.I; n++; } }
@@ -800,13 +858,13 @@ document.getElementById('gNoise').onchange = () => paintGallery();
 const galEl = document.getElementById('gallery'), decoded = {}, bgCache = {};
 async function gunzipU16(s) { const ds = new DecompressionStream('gzip'); const buf = await new Response(new Blob([b64(s)]).stream().pipeThrough(ds)).arrayBuffer(); return new Uint16Array(buf); }
 async function decodeLog(o) { const q = await gunzipU16(o.gz), v = new Float32Array(q.length), r = o.L1 - o.L0; for (let i = 0; i < q.length; i++) v[i] = q[i] ? Math.pow(10, o.L0 + (q[i] - 1) / 65534 * r) : 0; return { w: o.w, h: o.h, v }; }
-function presetParams(id, mode) { const pr = PRESETS.find(x => x.id === id), p = Object.assign({}, BASE, pr.set, { mode, phi: mode === 'still' ? 0.05 : 0 }); Object.assign(p, autoSamples(p)); p.bgVol = (p.beam * 1e-6) ** 2 * (p.ice * 1e-6 + p.air * 1e-3 * 1.2e-3); return p; }
+function presetParams(id, mode) { const pr = PRESETS.find(x => x.id === id), p = Object.assign({}, BASE, pr.set, { mode, phi: mode === 'still' ? 0.05 : 0 }); Object.assign(p, autoSamples(p)); if (BGX.autoWater) p.ice = 2 * p.xtal; return p; }
 function bgArrays(id) {
-  if (bgCache[id]) return bgCache[id];
+  const bgk = id + JSON.stringify(BGX); if (bgCache[bgk]) return bgCache[bgk];
   const p = presetParams(id, 'still'), d = derive(p), bin = new Float32Array(BW * BH), z = new Float32Array(256 * 256);
   for (let by = 0; by < BH; by += 8) for (let bx = 0; bx < BW; bx += 8) { const v = waterBg(p, d, bx * BIN + 2, by * BIN + 2); for (let y = by; y < Math.min(BH, by + 8); y++) for (let x = bx; x < Math.min(BW, bx + 8); x++) bin[y * BW + x] = v; }
   for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) z[y * 256 + x] = waterBg(p, d, 1803 + x, 1100 + y);
-  return (bgCache[id] = { bin, z });
+  return (bgCache[bgk] = { bin, z });
 }
 for (const g of GAL) {
   const c = document.createElement('article'); c.className = 'card';
@@ -831,7 +889,7 @@ async function paintGallery() {
         let c;
         if (j === 0) c = cov[i]; else { const x = i % 256, y = (i / 256) | 0; c = moduleCover(1803 + x, 1100 + y) ? 1 : 0; }
         if (!c) { vals[i] = -1; } else { const e = (im.v[i] + (noise ? (j ? bg.z[i] : bg.bin[i]) : 0)) * c; vals[i] = (noise ? poisson(e, r) : e) / c; }
-        const v = vals[i], q = 4 * i; if (v < 0) { d[q] = GAP[0]; d[q + 1] = GAP[1]; d[q + 2] = GAP[2]; } else d[q] = d[q + 1] = d[q + 2] = grey(v, j ? GSAT * 8 : GSAT); d[q + 3] = 255;
+        const v = vals[i], q = 4 * i; if (v < 0) { const G = gapCol(); d[q] = G[0]; d[q + 1] = G[1]; d[q + 2] = G[2]; } else setPx(d, q, v, j ? GSAT * 8 : GSAT); d[q + 3] = 255;
       }
       cx.putImageData(id, 0, 0); g.cv[j]._v = vals; g.cv[j]._w = im.w; g.cv[j]._h = im.h;
     });
@@ -859,7 +917,7 @@ function updateDamage() {
   h += row('Flux density', 'flux / beam area', fx(dm.Ib * 1e-12), 'photons µm⁻² s⁻¹');
   h += row('Dose rate', 'q_e E_ph I_beam μ_en/ρ f_NH', fx(dm.rate, 3), 'MGy s⁻¹');
   h += row('Dose per frame', `exposure ${fx(P.texp)} s`, fx(dm.frame, 3), 'MGy');
-  h += row('Background per pixel per frame', 'ice + air (water-equivalent), flat water F = 2.57, near detector centre', fx(waterBg(P, D, 2075, 2182), 3), 'photons');
+  h += row('Background per pixel per frame', 'materials in the beam (nonBragg curves), near detector centre', fx(waterBg(P, D, 2075, 2182), 3), 'photons');
   h += row(`Half-intensity dose at d = ${DRES.toFixed(2)} Å`, 'H·d, H = 10 MGy Å⁻¹ (Howells criterion)', fx(Hd, 3), 'MGy');
   h += row('Frames until half intensity at d', `from ${fx(P.dose0)} MGy already absorbed`, fx(remaining / dm.frame, 3), 'frames');
   h += row('Mean intensity factor in this frame at d', 'eq. 13 averaged over the frame', fx(fadeHere, 4), '');
@@ -922,5 +980,5 @@ vc.addEventListener('pointerup', endPtr); vc.addEventListener('pointercancel', e
 
 syncControls(); compute(); paintGallery();
 </script>
-</body>
+<script>(function(){const s=document.getElementById('palSel');if(!s)return;s.addEventListener('change',()=>{PALM=s.value;for(const id of ['sat','zsat','gsat','vsat']){const e=document.getElementById(id);if(e)e.dispatchEvent(new Event('input',{bubbles:true}));}});})();</script></body>
 </html>

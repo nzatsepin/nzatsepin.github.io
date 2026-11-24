@@ -1,4 +1,5 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+</style></head><body>
 <title>Ewald Sphere Lab</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,7 +30,7 @@ h1 em{color:var(--beam)}
 h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:600;margin:0 0 8px}
 .app{display:grid;grid-template-columns:280px minmax(0,1fr) 470px;grid-template-areas:"ctl view side";gap:14px;align-items:start}
 .ctl{grid-area:ctl;display:flex;flex-direction:column;gap:12px}
-.view{grid-area:view;position:relative;height:max(560px, min(calc(100vh - 120px), 700px));border:1px solid var(--line);border-radius:10px;overflow:hidden;
+.view{grid-area:view;position:relative;height:max(540px, min(calc(100vh - 120px), 640px));border:1px solid var(--line);border-radius:10px;overflow:hidden;
   background:radial-gradient(120% 90% at 40% 45%, #111c2c 0%, var(--bg) 70%)}
 .side{grid-area:side;display:flex;flex-direction:column;gap:12px;min-width:0}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:0}
@@ -109,6 +110,8 @@ canvas{display:block}
   .lhint,.info{display:none}
   .legend{max-width:calc(100% - 20px);bottom:56px}
 }
+
+@media (min-width:1500px){.app{grid-template-columns:560px minmax(0,1fr) 520px}.ctl{display:block;column-count:2;column-gap:12px}.ctl>.card{break-inside:avoid;display:block;margin:0 0 12px}}
 </style>
 
 <header>
@@ -155,6 +158,7 @@ canvas{display:block}
       <div class="row"><label for="dmin">Resolution limit d<sub>min</sub></label><span class="val" id="dminv"></span>
         <input id="dmin" type="range" min="0.5" max="12" step="0.05"></div>
       <p class="hint" id="nrefl"></p>
+      <p class="warnbox" id="capWarn" hidden></p>
     </section>
 
     <section class="card">
@@ -433,6 +437,8 @@ let dsMax=0,dEff=0,truncated=false,motifSum2=1;
 function buildReflections(){
   computeCell();
   dEff=Math.max(S.dmin,S.lam/2); dsMax=1/dEff;
+  const CAP0=1500000, nFull=4/3*Math.PI*dsMax**3*CELL.V; let capped=false;
+  if(nFull>CAP0){dsMax=Math.cbrt(CAP0/(4/3*Math.PI*CELL.V)); dEff=1/dsMax; capped=true;} // keep the shown set a complete sphere, not a slab
   const hm=Math.ceil(len(CELL.A)*dsMax),km=Math.ceil(len(CELL.B)*dsMax),lm=Math.ceil(len(CELL.C)*dsMax);
   const CAP=1600000; truncated=false;
   const est=Math.min(CAP,Math.ceil(4/3*Math.PI*dsMax**3*CELL.V*1.05)+64);
@@ -455,6 +461,7 @@ function buildReflections(){
   if(P&&P.motif){motifSum2=0;for(const [Z] of P.motif.atoms) motifSum2+=Z*Z*P.motif.cen.length;}
   let nOk=0; for(let i=0;i<N;i++) nOk+=OK[i];
   $('nrefl').textContent=`${nOk.toLocaleString()} allowed reflections with d ≥ ${dEff.toFixed(2)} Å`+(S.dmin<S.lam/2?' (limited by λ/2)':'')+(truncated?'. List truncated: raise dmin':'')+'.';
+  $('capWarn').hidden=!capped; if(capped) $('capWarn').innerHTML=`<b>Too many reciprocal-lattice points to show.</b> d<sub>min</sub> = ${S.dmin.toFixed(2)} Å would give about ${(nFull/1e6).toFixed(1)} million; only points with d ≥ ${dEff.toFixed(2)} Å are shown and used for the detector.`;
   buildPointsGeometry(); buildSketch();
 }
 
@@ -1097,9 +1104,9 @@ function drawDetector(){
       if(!OK[i])continue; const live=LIT[i],age=now-TLIT[i]; if(!live&&age>trail)continue;
       const X=SPOT[i*2],Y=SPOT[i*2+1]; if(!isFinite(X)||Math.abs(X)>S.W/2||Math.abs(Y)>S.W/2)continue;
       const px=cx+X*mm,py=cy-Y*mm, fadeA=live?1:Math.max(0,1-age/trail);
-      let b=1; const dsL=1/S.dmin, fz=S.fade?1-Math.max(0,Math.min(1,(DS[i]-0.8*dsL)/(0.2*dsL))):1; if(S.showI){const I=intensityOf(i)*Math.exp(-S.B*DS[i]*DS[i]/2)*(live?(0.35+0.65*WGT[i]):1); b=Math.min(1,Math.sqrt(S.expo*I*0.5));}
+      let b=1; const dsL=1/S.dmin, fz=S.fade?1-Math.max(0,Math.min(1,(DS[i]-0.8*dsL)/(0.2*dsL))):1; if(S.showI){const I=intensityOf(i)*Math.exp(-S.B*DS[i]*DS[i]/2)*(live?(0.35+0.65*WGT[i]):1); b=Math.min(1,Math.sqrt(S.expo*I*1.2));}
       b*=fz; if(b<0.02)continue;
-      const crowd=Math.min(1,Math.sqrt(400/Math.max(1,STATS.lit))); const a=fadeA*(0.3+0.7*b), r=(0.55+0.45*crowd)*(live?1.1:1)*(0.9+2.2*b);
+      const crowd=Math.min(1,Math.sqrt(400/Math.max(1,STATS.lit))); const a=fadeA*(0.45+0.55*b), r=(0.55+0.45*crowd)*(live?1.1:1)*(0.9+2.2*b);
       const grd=g.createRadialGradient(px,py,0,px,py,r*1.6); grd.addColorStop(0,`rgba(255,240,205,${a})`); grd.addColorStop(0.45,`rgba(255,190,90,${0.9*a})`); grd.addColorStop(1,'rgba(255,181,74,0)');
       g.fillStyle=grd; g.beginPath(); g.arc(px,py,r*1.6,0,7); g.fill();
       if(live) detSpots.push({px,py,i});
