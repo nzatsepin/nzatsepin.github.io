@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diffraction basics for biochemists | Zatsepin Lab</title><link rel="stylesheet" href="site.css?v=1795520925">
+<style>
+.prim h2{scroll-margin-top:130px}
+.prim h3{font-size:18px;color:#12203d;margin:18px 0 6px}
+.prim ul{margin:0 0 .9rem 1.2rem}.prim li{margin:.25rem 0}
+.eq{font-family:"Cambria Math","STIX Two Math","Times New Roman",serif;font-size:18px;background:#f6f3ef;border-left:4px solid #f0a04b;border-radius:4px;padding:10px 14px;margin:8px 0 12px;overflow-x:auto;white-space:nowrap}
+.eq small{font-family:"Inter","Segoe UI",Helvetica,Arial,sans-serif;font-size:14px;color:#1c2430;margin-left:12px;white-space:normal}
+.key{background:#e4e9f2;border-radius:8px;padding:10px 14px;margin:6px 0 14px;font-size:15px}
+.key b{color:#12203d}
+.widget{border:1px solid #d5dbe3;border-top:4px solid #3d78b8;border-radius:10px;padding:14px 16px;margin:12px 0 18px;background:#fff}
+.widget h4{margin:0 0 8px;color:#12203d;font-size:16px}
+.widget canvas{width:100%;display:block;border:1px solid #e3e8ee;border-radius:6px;background:#fbfcfe}
+.ctl{display:flex;flex-wrap:wrap;gap:10px 22px;margin:10px 0 4px;font-size:14.5px;align-items:center}
+.ctl label{display:flex;align-items:center;gap:8px;color:#12203d;font-weight:600}
+.ctl input[type=range]{width:160px}
+.ctl input[type=number]{width:90px;font:inherit;padding:3px 6px;border:1px solid #b9c3d1;border-radius:5px}
+.ctl output{font-weight:400;color:#1c2430;min-width:4.5em}
+.ctl button{font:inherit;font-size:14px;font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid #cfd6e0;background:#fff;color:#12203d;cursor:pointer}
+.readout{font-size:15px;margin-top:8px;color:#1c2430}
+.readout b{color:#12203d}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:700px){.cols2{grid-template-columns:1fr}.ctl input[type=range]{width:120px}}
+.prim td,.prim th{font-size:14.5px}
+.refs li{font-size:14.5px}
+.side .box{font-size:14.5px}
+.side .box ol.steps a{font-weight:600}
+</style></head><body>
+<header class="site"><div class="wrap bar"><a class="logo" href="index.html">Zatsepin Lab</a><nav class="main"><button class="navtoggle" type="button">Menu</button><ul class="menu"><li><a href="index.html">Home</a></li><li><a href="research.html">Research</a></li><li><a href="publications.html">Publications</a></li><li><a href="members.html">Members</a></li><li class="dd"><a class="" href="news.html">News</a><ul><li><a href="news-ansto-user-meeting-2026.html">ANSTO User Meeting 2026</a></li><li><a href="news-crystal36-axaa-2026.html">Crystal36-AXAA 2026</a></li></ul></li><li class="dd"><a class="" href="resources.html">Resources</a><ul><li><a href="datview/index.html">DatView</a></li><li><a href="spind.html">SPIND</a></li><li><a href="hit-finding.html">Hit finding</a></li><li><a href="workshops.html">Workshops</a></li><li><a href="beamtime-proposal-deadlines.html">Beamtime proposal deadlines</a></li><li><a href="anz-xfel.html">ANZ XFEL</a></li></ul></li><li class="dd"><a class="on" href="education.html">Education</a><ul><li><a href="diffraction-basics.html">Diffraction basics for biochemists</a></li><li><a href="education-diffraction.html">Visualise diffraction</a></li><li><a href="ewald-sphere.html">Ewald sphere construction</a></li><li><a href="rotation-vs-serial.html">Rotation vs serial crystallography</a></li><li><a href="spot-fading.html">Diffraction spots fading with dose</a></li><li><a href="mixing-timing.html">Mixing device timing simulations</a></li><li><a href="radiation-damage.html">Radiation damage in macromolecular crystallography</a></li><li><a href="molecular-replacement.html">Molecular replacement and the log-likelihood gain</a></li><li><a href="nanobragg.html">Diffraction simulations: nanoBragg</a></li><li><a href="nanocrystal-explorer.html">Nanocrystal diffraction explorer</a></li><li><a href="ssx-in-plates-scan-planning.html">SSX in plates scan planning</a></li><li><a href="ssx-scan-simulations.html">SSX in plates simulations</a></li></ul></li><li class="dd"><a class="" href="about.html">About</a><ul><li><a href="cv.html">CV</a></li><li><a href="music.html">Music</a></li></ul></li><li class="dd"><a class="cta" href="projects.html">Join us</a><ul><li><a href="projects.html">Available projects</a></li><li><a href="how-to-apply.html">How to apply</a></li></ul></li></ul></nav></div></header>
+
+<div class="ptop"><div class="wrap"><h1>Diffraction basics for biochemists</h1><p>The physics behind our jargon: from waves and lattices to serial data and time-resolved difference maps <span class="ttag">Educational · Interactive</span></p></div></div>
+
+<div class="jump"><div class="wrap">
+<a href="#waves">Waves</a><a href="#scatter">What scatters</a><a href="#crystal">The crystal</a><a href="#recip">Reciprocal space</a><a href="#sf">Structure factors</a><a href="#phase">Phase problem</a><a href="#beam">Beams and detectors</a><a href="#dose">Dose</a><a href="#serial">Serial</a><a href="#stats">Data statistics</a><a href="#maps">Models and maps</a><a href="#tr">Time-resolved</a><a href="#read">Reading</a>
+</div></div>
+
+<div class="wrap layout prim">
+<main>
+
+<section id="intro">
+<h2>What we measure and what we want</h2>
+<p>We want the electron density of a macromolecule, ρ(<b>r</b>). We measure the intensities of X-rays scattered by many identical copies of that molecule arranged in a crystal. The density and the scattered wave are related by a Fourier transform. The detector records only intensities, so half the information (the phases) is lost and must be recovered by other means.</p>
+<div class="key"><b>In one line:</b> crystal → diffraction spots (amplitudes only) → add phases → Fourier transform → electron density map → atomic model.</div>
+</section>
+
+<section id="waves">
+<h2>Waves, phase and interference</h2>
+<p>X-rays are electromagnetic waves with wavelength λ around 1 Å (0.1 nm), comparable to interatomic distances. When waves scattered from different points overlap, their amplitudes add, taking their relative phase into account. In phase, they reinforce; half a wavelength out of phase, they cancel. The detector measures intensity, the squared magnitude of the summed amplitude.</p>
+<p>Bragg's description treats the crystal as stacks of parallel planes with spacing <i>d</i>. Waves reflected from adjacent planes travel an extra path 2<i>d</i> sin θ. When that equals a whole number of wavelengths, all planes add constructively:</p>
+<div class="eq">2<i>d</i> sin θ = <i>n</i>λ <small>θ is half the scattering angle 2θ measured on the detector.</small></div>
+<p>With many planes, constructive interference becomes extremely sharp: a crystal with <i>N</i> repeats concentrates the scattered intensity into peaks whose height scales as <i>N</i><sup>2</sup> and whose width scales as 1/<i>N</i>. This is why crystals give spots, and why small crystals give broader, weaker spots.</p>
+
+<div class="widget">
+<h4>Bragg's law and the sharpening effect of many repeats</h4>
+<canvas id="braggCv" width="900" height="300"></canvas>
+<div class="ctl">
+<label>λ (Å) <input type="range" id="bL" min="0.5" max="2" step="0.01" value="1"><output id="bLo"></output></label>
+<label>d (Å) <input type="range" id="bD" min="1" max="10" step="0.1" value="3"><output id="bDo"></output></label>
+<label>θ (°) <input type="range" id="bT" min="1" max="60" step="0.1" value="9.6"><output id="bTo"></output></label>
+<label>Planes N <input type="range" id="bN" min="2" max="40" step="1" value="5"><output id="bNo"></output></label>
+</div>
+<div class="readout" id="bR"></div>
+</div>
+</section>
+
+<section id="scatter">
+<h2>What scatters: electrons</h2>
+<ul>
+<li>X-rays scatter from electrons, so the experiment images <b>electron density</b>, not nuclei. Heavier atoms (S, metals) scatter more strongly; hydrogen has one electron and is barely visible except at very high resolution.</li>
+<li>Each element has an <b>atomic form factor</b> <i>f</i>, equal to its electron count at zero angle and falling off at higher angle because the electron cloud has finite size.</li>
+<li>Thermal motion and disorder smear atoms further. This is described by the <b>B-factor</b> (atomic displacement parameter), <i>B</i> = 8π<sup>2</sup>⟨<i>u</i><sup>2</sup>⟩, where ⟨<i>u</i><sup>2</sup>⟩ is the mean-square displacement. Higher B means weaker high-angle scattering.</li>
+<li>Near an element's absorption edge, <i>f</i> gains extra real and imaginary components (<i>f</i>′, <i>f</i>″). This <b>anomalous scattering</b> is the basis of SAD and MAD phasing.</li>
+</ul>
+</section>
+
+<section id="crystal">
+<h2>The crystal: lattice, unit cell, symmetry</h2>
+<ul>
+<li><b>Lattice:</b> the array of points by which the contents repeat in 3D.</li>
+<li><b>Unit cell:</b> the repeating box, defined by edge lengths <i>a</i>, <i>b</i>, <i>c</i> and angles α, β, γ. Protein cells are typically tens to hundreds of Å on a side.</li>
+<li><b>Asymmetric unit (ASU):</b> the smallest part that generates the whole cell by applying the symmetry operators. It may contain one or several copies of the molecule.</li>
+<li><b>Space group:</b> the set of symmetry operations (rotations, screw axes, translations) relating copies within the cell. Proteins are chiral, so their crystals lack mirrors and inversion centres. Only the 65 Sohncke space groups are possible.</li>
+<li><b>Solvent content:</b> protein crystals are typically 30 to 70% solvent. This is why they are fragile, why ligands can soak in, and why molecules can still move inside them, which makes time-resolved experiments possible.</li>
+<li><b>Miller indices (<i>hkl</i>):</b> integers that label a family of lattice planes, and the corresponding diffraction spot (reflection).</li>
+<li><b>Systematic absences:</b> reflections forced to zero by screw axes or centring, used to help assign the space group.</li>
+</ul>
+</section>
+
+<section id="recip">
+<h2>Reciprocal space and resolution</h2>
+<p>Each reflection <i>hkl</i> corresponds to a point in <b>reciprocal space</b>, at distance 1/<i>d</i><sub><i>hkl</i></sub> from the origin. A large unit cell in real space gives closely spaced reflections in reciprocal space, and vice versa. The diffraction pattern is a picture of reciprocal space.</p>
+<ul>
+<li><b>Resolution</b> is quoted as the smallest <i>d</i> (in Å) to which reflections are measured. Smaller is better: "2.0 Å data" contain more detail than "3.0 Å data". High resolution means high scattering angle, at the edge of the detector.</li>
+<li>Rough guide for proteins: about 3.5 Å and worse, secondary structure and backbone trace; about 2.5 Å, side chains clear; about 1.5 Å and better, individual atoms resolved, some hydrogens visible near 1 Å. These are rules of thumb; map quality also depends on data quality and B-factors.</li>
+<li>The <b>Ewald sphere</b> (radius 1/λ) determines which reciprocal lattice points satisfy the diffraction condition for a given crystal orientation. A still image records only the points cut by the sphere. See the <a href="ewald-sphere.html">Ewald sphere construction</a>.</li>
+<li>Each reciprocal lattice point is not a mathematical point: it is smeared by the crystal's finite size (the <b>shape transform</b>), mosaicity, and the beam's divergence and bandwidth. See the <a href="nanocrystal-explorer.html">nanocrystal diffraction explorer</a>.</li>
+</ul>
+</section>
+
+<section id="sf">
+<h2>Structure factors and the Fourier transform</h2>
+<p>The wave scattered into reflection <i>hkl</i> is the <b>structure factor</b>, a complex number with an amplitude |<i>F</i>| and a phase φ. It is the sum of contributions from every atom <i>j</i> in the unit cell at fractional position (<i>x<sub>j</sub></i>, <i>y<sub>j</sub></i>, <i>z<sub>j</sub></i>):</p>
+<div class="eq"><i>F</i>(<i>hkl</i>) = Σ<sub><i>j</i></sub> <i>f<sub>j</sub></i> exp[2π<i>i</i>(<i>hx<sub>j</sub></i> + <i>ky<sub>j</sub></i> + <i>lz<sub>j</sub></i>)] = |<i>F</i>| e<sup><i>i</i>φ</sup></div>
+<p>The electron density is recovered by the inverse Fourier transform, summing over all measured reflections:</p>
+<div class="eq">ρ(<i>x</i>,<i>y</i>,<i>z</i>) = (1/<i>V</i>) Σ<sub><i>hkl</i></sub> |<i>F</i>(<i>hkl</i>)| exp[<i>i</i>φ(<i>hkl</i>) − 2π<i>i</i>(<i>hx</i> + <i>ky</i> + <i>lz</i>)]</div>
+<ul>
+<li>Every reflection contributes to every point in the map, and every atom contributes to every reflection. Missing or bad reflections degrade the whole map, not one region.</li>
+<li>Stopping the sum at a resolution limit blurs the map and adds ripples (series termination).</li>
+<li><b>Friedel's law:</b> without anomalous scattering, |<i>F</i>(<i>hkl</i>)| = |<i>F</i>(−<i>h</i>−<i>k</i>−<i>l</i>)|. Anomalous differences between these Friedel pairs carry phase information.</li>
+<li>The measured intensity is <i>I</i>(<i>hkl</i>) ∝ |<i>F</i>(<i>hkl</i>)|<sup>2</sup>, after corrections (polarisation, Lorentz, absorption, and partiality for stills).</li>
+</ul>
+
+<div class="widget">
+<h4>1D Fourier synthesis: resolution and the importance of phases</h4>
+<p class="small" style="margin:0 0 8px">A 1D "unit cell" (40 Å) containing five atoms. Structure factors are calculated to 1 Å, then summed back to a density using only reflections to the chosen resolution, with the chosen phases.</p>
+<canvas id="fCv" width="900" height="300"></canvas>
+<div class="ctl">
+<label>Resolution (Å) <input type="range" id="fRes" min="1" max="10" step="0.1" value="2"><output id="fReso"></output></label>
+<label>Phases
+<select id="fMode" style="font:inherit;padding:3px 6px;border:1px solid #b9c3d1;border-radius:5px">
+<option value="true">Correct</option>
+<option value="err">Correct + random error</option>
+<option value="zero">All zero</option>
+<option value="swap">Amplitudes of A, phases of B</option>
+</select></label>
+<label id="fErrL">Phase error σ (°) <input type="range" id="fErr" min="0" max="90" step="1" value="30"><output id="fErro"></output></label>
+<button id="fNew" type="button">New random errors</button>
+</div>
+<div class="readout" id="fR"></div>
+</div>
+</section>
+
+<section id="phase">
+<h2>The phase problem</h2>
+<p>The detector records |<i>F</i>|<sup>2</sup>; the phases are lost. As the "amplitudes of A, phases of B" option above shows, the phases determine where density appears, so they cannot be ignored. Ways to obtain them:</p>
+<ul>
+<li><b>Molecular replacement (MR):</b> place a known similar structure (or a predicted model, such as from AlphaFold) in the unknown cell and use its calculated phases as a starting point. Most protein structures are now solved this way. See <a href="molecular-replacement.html">molecular replacement and the LLG</a>.</li>
+<li><b>Experimental phasing:</b> SAD and MAD use anomalous scatterers (Se-Met, S, metals, halides); SIR and MIR use isomorphous heavy-atom derivatives.</li>
+<li><b>Direct methods:</b> standard for small molecules; for proteins only at atomic resolution.</li>
+</ul>
+<div class="key"><b>Model bias:</b> phases calculated from a model pull the map towards that model. A ligand placed in the model can appear in a map it was used to phase. Omit maps and Rfree are the main safeguards.</div>
+</section>
+
+<section id="beam">
+<h2>Beams and detectors</h2>
+<div class="eq"><i>E</i> [keV] ≈ 12.398 / λ [Å] <small>13 keV ≈ 0.954 Å; 12.4 keV ≈ 1.000 Å</small></div>
+<table>
+<tr><th>Term</th><th>Meaning</th></tr>
+<tr><td>Flux</td><td>Photons per second in the beam. Sets how fast a dataset accumulates and how fast dose is deposited.</td></tr>
+<tr><td>Beam size, divergence</td><td>Matching beam size to crystal size maximises signal over background (air, solvent, sample holder).</td></tr>
+<tr><td>Bandwidth (Δλ/λ)</td><td>Spread of wavelengths. Monochromatic synchrotron beams are about 10<sup>−4</sup>; XFEL SASE pulses about 10<sup>−3</sup>; pink beams wider. Wider bandwidth records more of each reflection per still.</td></tr>
+<tr><td>Synchrotron</td><td>Electron storage ring; quasi-continuous beam of short pulses (tens of ps). Exposures from µs to s.</td></tr>
+<tr><td>XFEL</td><td>X-ray free-electron laser; pulses of tens of fs with about 10<sup>12</sup> photons each. Diffraction is recorded before the crystal is destroyed.</td></tr>
+<tr><td>Pixel array detector</td><td>Photon-counting detectors (such as the DECTRIS EIGER2) with no readout noise and kHz frame rates, which made fast serial collection at synchrotrons practical.</td></tr>
+</table>
+
+<div class="widget">
+<h4>Resolution at the detector</h4>
+<div class="ctl">
+<label>Energy (keV) <input type="number" id="dE" value="13" step="0.1" min="4" max="30"></label>
+<label>Distance (mm) <input type="number" id="dD" value="200" step="1" min="50" max="1500"></label>
+<label>Detector width (mm) <input type="number" id="dW" value="311.1" step="0.1"></label>
+<label>Detector height (mm) <input type="number" id="dH" value="327.2" step="0.1"></label>
+</div>
+<div class="readout" id="dR"></div>
+<p class="small" style="margin:6px 0 0">Assumes the beam hits the detector centre and the detector is perpendicular to the beam. Defaults: EIGER2 XE 16M active area (4148 × 4362 pixels of 75 µm). <i>d</i> = λ / (2 sin θ), with 2θ = arctan(<i>r</i>/<i>D</i>).</p>
+</div>
+</section>
+
+<section id="dose">
+<h2>Dose and radiation damage</h2>
+<ul>
+<li><b>Dose</b> is absorbed energy per unit mass, in gray (Gy = J/kg). Typical values are kGy to MGy.</li>
+<li>At 100 K, the commonly used limits are about 20 MGy (Henderson) and about 30 MGy (Garman) for halving the diffracted intensity. Room-temperature crystals tolerate far less dose, because radicals diffuse.</li>
+<li><b>Specific damage</b> (disulfide breakage, decarboxylation, metal reduction) can occur well before the diffraction fades, and can be mistaken for biology.</li>
+<li>XFELs outrun most damage by finishing the measurement within the pulse; serial synchrotron methods spread the dose over many crystals.</li>
+</ul>
+<p>See <a href="radiation-damage.html">radiation damage in macromolecular crystallography</a> and <a href="spot-fading.html">diffraction spots fading with dose</a>.</p>
+</section>
+
+<section id="serial">
+<h2>Serial crystallography</h2>
+<p>Rotation crystallography collects a complete dataset from one crystal (or a few), rotating it through the beam. Serial crystallography collects one or a few still images from each of thousands of crystals in random orientations, then merges them. This allows room-temperature data, micro- and nanocrystals, low dose per crystal, and time-resolved experiments where each crystal is used once.</p>
+<table>
+<tr><th>Term</th><th>Meaning</th></tr>
+<tr><td>Hit / hit rate</td><td>A frame containing diffraction from a crystal; fraction of frames that are hits.</td></tr>
+<tr><td>Indexing</td><td>Determining the crystal orientation and unit cell from spot positions on a single frame. Indexing rate: fraction of hits indexed.</td></tr>
+<tr><td>Integration</td><td>Measuring the intensity of each predicted reflection and its background.</td></tr>
+<tr><td>Partiality</td><td>A still captures only part of each reflection. The fraction recorded is unknown and varies from frame to frame.</td></tr>
+<tr><td>Monte Carlo merging</td><td>Averaging many partial measurements of each reflection so that partiality and crystal-to-crystal variation average out. Requires high multiplicity.</td></tr>
+<tr><td>Scaling, post-refinement</td><td>Putting frames on a common scale, and modelling partiality to improve on simple averaging.</td></tr>
+<tr><td>Indexing ambiguity</td><td>In some space groups, a still cannot distinguish between equivalent but non-identical indexing choices; these must be resolved before merging.</td></tr>
+</table>
+<p>See <a href="rotation-vs-serial.html">rotation vs serial crystallography</a>, <a href="ssx-scan-simulations.html">SSX in plates simulations</a> and the <a href="hit-finding.html">hit finding</a> resource.</p>
+</section>
+
+<section id="stats">
+<h2>Data statistics ("Table 1")</h2>
+<table>
+<tr><th>Statistic</th><th>What it tells you</th></tr>
+<tr><td>Resolution range</td><td>Low- and high-resolution limits; statistics are usually also given for the outermost shell.</td></tr>
+<tr><td>Completeness (%)</td><td>Fraction of unique reflections measured to the stated resolution.</td></tr>
+<tr><td>Multiplicity</td><td>Average number of measurements per unique reflection. Hundreds to thousands in serial data.</td></tr>
+<tr><td>⟨<i>I</i>/σ(<i>I</i>)⟩</td><td>Mean signal-to-noise of merged intensities.</td></tr>
+<tr><td>CC<sub>1/2</sub></td><td>Correlation between intensities merged from two random halves of the data. Used to choose the resolution cutoff.</td></tr>
+<tr><td>R<sub>merge</sub></td><td>Spread of repeated measurements in rotation data. Grows with multiplicity, so it is a poor quality indicator alone.</td></tr>
+<tr><td>R<sub>split</sub></td><td>Serial equivalent: disagreement between intensities merged from two halves of the frames.</td></tr>
+<tr><td>Wilson B</td><td>Overall falloff of intensity with resolution; an estimate of the average B-factor.</td></tr>
+</table>
+</section>
+
+<section id="maps">
+<h2>Models, maps and refinement</h2>
+<ul>
+<li><b>Refinement</b> adjusts the atomic model (positions, B-factors, occupancies) so that calculated amplitudes |<i>F</i><sub>c</sub>| match observed |<i>F</i><sub>o</sub>|, subject to stereochemical restraints.</li>
+<li><b>R-factor (R<sub>work</sub>):</b> disagreement between |<i>F</i><sub>o</sub>| and |<i>F</i><sub>c</sub>|. <b>R<sub>free</sub></b> is the same statistic for a set of reflections (about 5%) never used in refinement; it detects overfitting.</li>
+<li><b>Occupancy:</b> fraction of unit cells in which an atom or conformation is present. Alternate conformations, partially bound ligands, and intermediates in time-resolved data are modelled with occupancies below 1.</li>
+<li><b>2<i>m</i>F<sub>o</sub>−<i>D</i>F<sub>c</sub> map:</b> best estimate of the density, used to build the model.</li>
+<li><b><i>m</i>F<sub>o</sub>−<i>D</i>F<sub>c</sub> difference map:</b> positive peaks show density missing from the model; negative peaks show model with no supporting density.</li>
+<li><b>Omit map:</b> calculated with part of the model (often a ligand) removed, to reduce model bias.</li>
+<li>Map contour levels are quoted in σ (rmsd of the map), for example 1.0σ for 2<i>m</i>F<sub>o</sub>−<i>D</i>F<sub>c</sub> and ±3.0σ for difference maps.</li>
+</ul>
+</section>
+
+<section id="tr">
+<h2>Time-resolved crystallography</h2>
+<ul>
+<li><b>Pump-probe:</b> a trigger (usually a laser pulse acting on a light-sensitive protein or caged compound) starts the reaction; an X-ray probe follows after a controlled <b>time delay</b>.</li>
+<li><b>Mix-and-inject / mix-and-probe:</b> crystals are mixed with substrate or ligand and probed after a delay set by flow rates or travel distance. Diffusion into the crystal limits the fastest time point, so smaller crystals give better time resolution. See <a href="mixing-timing.html">mixing device timing simulations</a>.</li>
+<li><b>Dark / reference dataset:</b> the same crystals without triggering, collected under identical conditions.</li>
+<li><b>Isomorphous difference map:</b> F<sub>o</sub>(<i>t</i>) − F<sub>o</sub>(dark), with phases from the dark model. It shows what changed at time <i>t</i> and is more sensitive than comparing two separately refined models. It requires the crystals to remain isomorphous (same cell and packing).</li>
+<li><b>Activated fraction α:</b> only part of the molecules react. <b>Extrapolated structure factors</b>, F<sub>extr</sub> = F<sub>dark</sub> + (F<sub>light</sub> − F<sub>dark</sub>)/α, estimate the pure intermediate for model building.</li>
+<li>A time series of difference maps can be analysed for kinetic intermediates and rates ("molecular movies").</li>
+</ul>
+</section>
+
+<section id="read">
+<h2>Reading</h2>
+<h3>Start here</h3>
+<ul class="refs">
+<li>Wlodawer A, Minor W, Dauter Z, Jaskolski M (2008) Protein crystallography for non-crystallographers, or how to get the best (but not more) from published macromolecular structures. <i>FEBS J</i> 275:1–21.</li>
+<li>Rupp B (2010) <i>Biomolecular Crystallography: Principles, Practice, and Application to Structural Biology</i>. Garland Science.</li>
+<li>Drenth J (2007) <i>Principles of Protein X-Ray Crystallography</i>, 3rd ed. Springer.</li>
+<li>Taylor G (2003) The phase problem. <i>Acta Cryst D</i> 59:1881–1890.</li>
+<li>Cowtan K. <a href="http://www.ysbl.york.ac.uk/~cowtan/fourier/fourier.html" target="_blank" rel="noopener">Kevin Cowtan's Book of Fourier</a>. University of York.</li>
+</ul>
+<h3>Serial, XFEL and time-resolved</h3>
+<ul class="refs">
+<li>Neutze R, Wouts R, van der Spoel D, Weckert E, Hajdu J (2000) Potential for biomolecular imaging with femtosecond X-ray pulses. <i>Nature</i> 406:752–757.</li>
+<li>Chapman HN et al. (2011) Femtosecond X-ray protein nanocrystallography. <i>Nature</i> 470:73–77.</li>
+<li>Kirian RA et al. (2010) Femtosecond protein nanocrystallography: data analysis methods. <i>Opt Express</i> 18:5713–5723.</li>
+<li>Spence JCH, Weierstall U, Chapman HN (2012) X-ray lasers for structural and dynamic biology. <i>Rep Prog Phys</i> 75:102601.</li>
+<li>White TA et al. (2012) CrystFEL: a software suite for snapshot serial crystallography. <i>J Appl Cryst</i> 45:335–341.</li>
+</ul>
+<h3>Data quality, refinement, damage</h3>
+<ul class="refs">
+<li>Karplus PA, Diederichs K (2012) Linking crystallographic model and data quality. <i>Science</i> 336:1030–1033.</li>
+<li>Brünger AT (1992) Free R value: a novel statistical quantity for assessing the accuracy of crystal structures. <i>Nature</i> 355:472–475.</li>
+<li>Holton JM (2009) A beginner's guide to radiation damage. <i>J Synchrotron Rad</i> 16:133–142.</li>
+<li>Owen RL, Rudiño-Piñera E, Garman EF (2006) Experimental determination of the radiation dose limit for cryocooled protein crystals. <i>PNAS</i> 103:4912–4917.</li>
+</ul>
+</section>
+
+</main>
+<aside class="side"><div class="box">
+<h3>Suggested path</h3>
+<ol class="steps">
+<li>This page, top to bottom</li>
+<li><a href="education-diffraction.html">Visualise diffraction</a>: molecule to crystal</li>
+<li><a href="ewald-sphere.html">Ewald sphere construction</a></li>
+<li><a href="nanocrystal-explorer.html">Nanocrystal diffraction explorer</a></li>
+<li><a href="rotation-vs-serial.html">Rotation vs serial</a></li>
+<li><a href="radiation-damage.html">Radiation damage</a> and <a href="spot-fading.html">spot fading</a></li>
+<li><a href="molecular-replacement.html">Molecular replacement</a></li>
+<li><a href="mixing-timing.html">Mixing timing</a> for time-resolved work</li>
+<li><a href="ssx-scan-simulations.html">SSX in plates simulations</a> before your first beamtime</li>
+</ol>
+<div class="mail">Units: 1 Å = 0.1 nm. Resolution and <i>d</i> in Å; reciprocal distances in Å<sup>−1</sup>; dose in Gy.</div>
+</div></aside>
+</div>
+
+<footer class="home"><div class="wrap"><div class="cols">
+<div><h4>Contact</h4><p>nzatsepin {...} swin.edu.au</p><p>Department of Physics and Astronomy</p><p>School of Science, Computing and Engineering Technologies</p><p>Swinburne University of Technology</p><p>Hawthorn Campus</p><p>John St, Hawthorn VIC 3122</p><p><a href="https://experts.swinburne.edu.au/11120-nadia-zatsepin" target="_blank" rel="noopener">https://experts.swinburne.edu.au/11120-nadia-zatsepin</a></p></div>
+<div><h4>Mailing address</h4><p>Swinburne University of Technology</p><p>C/-Department of Physics and Astronomy</p><p>PO Box 218, Hawthorn</p><p>VIC 3122 Australia</p><p class="links"><a href="https://scholar.google.com/citations?user=zYC2VMkAAAAJ&amp;hl=en&amp;oi=ao" target="_blank" rel="noopener">Google Scholar</a> &nbsp;·&nbsp; <a href="https://github.com/nzatsepin" target="_blank" rel="noopener">GitHub</a></p></div>
+<div><h4>Affiliations</h4><p>Affiliate faculty, Arizona State University Biodesign Center for Applied Structural Discovery</p><p>National Science Foundation's Science and Technology Center for Biology with X-ray free-electron lasers - NSF BioXFEL STC</p></div>
+</div></div></footer>
+
+<script>
+document.querySelectorAll('.navtoggle').forEach(b=>b.addEventListener('click',()=>document.querySelector('.menu').classList.toggle('open')));
+const $=id=>document.getElementById(id);
+const NAVY='#12203d',ORANGE='#f0a04b',BLUE='#3d78b8',PINK='#b5578a',GREY='#9aa6b8';
+function prep(cv){const r=window.devicePixelRatio||1,w=cv.clientWidth,h=w*cv.height/cv.width;if(cv._w!==w){cv._w=w;cv.width=w*r;cv.height=h*r;cv._h=h;}const c=cv.getContext('2d');c.setTransform(r,0,0,r,0,0);c.clearRect(0,0,w,cv._h);return [c,w,cv._h];}
+function arrow(c,x1,y1,x2,y2,col){c.strokeStyle=col;c.fillStyle=col;c.lineWidth=2;c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();const a=Math.atan2(y2-y1,x2-x1);c.beginPath();c.moveTo(x2,y2);c.lineTo(x2-9*Math.cos(a-.4),y2-9*Math.sin(a-.4));c.lineTo(x2-9*Math.cos(a+.4),y2-9*Math.sin(a+.4));c.fill();}
+
+/* Bragg */
+const bCv=$('braggCv');
+function bragg(){
+ const L=+$('bL').value,D=+$('bD').value,T=+$('bT').value,N=+$('bN').value;
+ $('bLo').textContent=L.toFixed(2);$('bDo').textContent=D.toFixed(1);$('bTo').textContent=T.toFixed(1);$('bNo').textContent=N;
+ const [c,w,h]=prep(bCv);const gw=w*0.42;
+ // geometry panel
+ const sp=Math.min(38,14+D*3),y0=70,np=4,cx=gw/2,th=T*Math.PI/180;
+ c.strokeStyle=GREY;c.lineWidth=1.5;
+ for(let k=0;k<np;k++){c.beginPath();c.moveTo(15,y0+k*sp);c.lineTo(gw-15,y0+k*sp);c.stroke();}
+ c.fillStyle=NAVY;c.font='13px Inter,Segoe UI,sans-serif';c.fillText('d',gw-30,y0+sp*0.6);
+ const len=130;
+ for(let k=0;k<2;k++){const y=y0+k*sp,x=cx+(k?sp/Math.tan(Math.max(th,0.02))*0:0);
+  const col=k?ORANGE:BLUE;
+  arrow(c,x-len*Math.cos(th),y-len*Math.sin(th),x,y,col);
+  arrow(c,x,y,x+len*Math.cos(th),y-len*Math.sin(th),col);}
+ // path difference
+ const pd=2*D*Math.sin(th)/L;
+ c.fillStyle=NAVY;c.fillText('extra path = 2d sin θ = '+(2*D*Math.sin(th)).toFixed(2)+' Å = '+pd.toFixed(2)+' λ',15,h-40);
+ c.fillText('θ = '+T.toFixed(1)+'°',cx+8,y0-8);
+ // intensity panel
+ const x0=gw+40,x1=w-15,yb=h-35,yt=20;
+ c.strokeStyle='#b9c3d1';c.lineWidth=1;c.beginPath();c.moveTo(x0,yt);c.lineTo(x0,yb);c.lineTo(x1,yb);c.stroke();
+ c.fillStyle=NAVY;c.fillText('θ (°)',x1-36,h-10);c.save();c.translate(x0-24,(yt+yb)/2+50);c.rotate(-Math.PI/2);c.fillText('I / N²',0,0);c.restore();
+ for(let t=0;t<=60;t+=10){const x=x0+(x1-x0)*t/60;c.fillText(t,x-6,yb+16);}
+ c.strokeStyle=NAVY;c.lineWidth=1.6;c.beginPath();
+ const I=t=>{const ph=2*Math.PI*2*D*Math.sin(t*Math.PI/180)/L;const s=Math.sin(ph/2);if(Math.abs(s)<1e-9)return 1;return Math.pow(Math.sin(N*ph/2)/s,2)/(N*N);};
+ for(let i=0;i<=1200;i++){const t=60*i/1200,x=x0+(x1-x0)*t/60,y=yb-(yb-yt)*I(t);i?c.lineTo(x,y):c.moveTo(x,y);}c.stroke();
+ const xm=x0+(x1-x0)*T/60;c.strokeStyle=ORANGE;c.lineWidth=2;c.beginPath();c.moveTo(xm,yt);c.lineTo(xm,yb);c.stroke();
+ const n=Math.round(pd),near=Math.abs(pd-n)<0.03&&n>0;
+ let peaks=[];for(let m=1;m<10;m++){const s=m*L/(2*D);if(s<Math.sin(60*Math.PI/180))peaks.push((Math.asin(s)*180/Math.PI).toFixed(1));}
+ $('bR').innerHTML='Intensity at this θ: <b>'+(I(T)*100).toFixed(1)+'%</b> of the peak. '+(near?'Bragg condition met (n = '+n+'). ':'')+'Bragg peaks for this d and λ at θ = '+(peaks.join('°, ')||'none')+(peaks.length?'°.':'.')+' Increase N to see the peaks sharpen.';
+}
+['bL','bD','bT','bN'].forEach(i=>$(i).addEventListener('input',bragg));
+
+/* 1D Fourier */
+const A_cell=40,HMAX=40;
+const atA=[[0.12,7,12],[0.20,6,12],[0.47,8,14],[0.55,6,14],[0.78,16,10]];
+const atB=[[0.30,7,12],[0.36,6,12],[0.62,8,14],[0.88,6,14],[0.05,16,10]];
+function sfs(at){const F=[];for(let h=0;h<=HMAX;h++){let re=0,im=0;const s2=Math.pow(h/A_cell,2);for(const [x,Z,B] of at){const f=Z*Math.exp(-B*s2/4);re+=f*Math.cos(2*Math.PI*h*x);im+=f*Math.sin(2*Math.PI*h*x);}F.push([Math.hypot(re,im),Math.atan2(im,re)]);}return F;}
+const FA=sfs(atA),FB=sfs(atB);
+let seed=1;function rnd(){seed=(seed*16807)%2147483647;return seed/2147483647;}
+function gauss(){let u=0,v=0;while(!u)u=rnd();v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+let errs=[];function newErr(){errs=[0];for(let h=1;h<=HMAX;h++)errs.push(gauss());}
+seed=7;newErr();
+function synth(amp,ph,hc){const out=[];for(let i=0;i<=600;i++){const x=i/600;let r=amp[0];for(let h=1;h<=hc;h++)r+=2*amp[h]*Math.cos(2*Math.PI*h*x-ph[h]);out.push(r/A_cell);}return out;}
+const fCv=$('fCv');
+function fourier(){
+ const res=+$('fRes').value,mode=$('fMode').value,sig=+$('fErr').value;
+ $('fReso').textContent=res.toFixed(1);$('fErro').textContent=sig;
+ $('fErrL').style.display=mode==='err'?'flex':'none';$('fNew').style.display=mode==='err'?'':'none';
+ const hc=Math.min(HMAX,Math.floor(A_cell/res));
+ const ampA=FA.map(v=>v[0]),phA=FA.map(v=>v[1]),phB=FB.map(v=>v[1]);
+ let ph;
+ if(mode==='true')ph=phA;else if(mode==='zero')ph=phA.map(()=>0);else if(mode==='swap')ph=phB;else ph=phA.map((p,h)=>p+errs[h]*sig*Math.PI/180);
+ ph=ph.slice();ph[0]=0;
+ const tA=synth(ampA,phA,HMAX),tB=synth(FB.map(v=>v[0]),phB,HMAX),s=synth(ampA,ph,hc);
+ const [c,w,h]=prep(fCv);const x0=40,x1=w-24,yb=h-30,yt=34;
+ const all=tA.concat(s,mode==='swap'?tB:[]);const mx=Math.max(...all),mn=Math.min(0,...all);
+ const Y=v=>yb-(yb-yt)*(v-mn)/(mx-mn),X=i=>x0+(x1-x0)*i/600;
+ c.strokeStyle='#b9c3d1';c.lineWidth=1;c.beginPath();c.moveTo(x0,yt);c.lineTo(x0,yb);c.lineTo(x1,yb);c.stroke();
+ c.beginPath();c.moveTo(x0,Y(0));c.lineTo(x1,Y(0));c.setLineDash([3,3]);c.stroke();c.setLineDash([]);
+ c.fillStyle=NAVY;c.font='13px Inter,Segoe UI,sans-serif';
+ for(let a=0;a<=40;a+=10){c.fillText(a+' Å',X(a/40*600)-10,yb+16);}
+ const line=(arr,col,wd)=>{c.strokeStyle=col;c.lineWidth=wd;c.beginPath();arr.forEach((v,i)=>i?c.lineTo(X(i),Y(v)):c.moveTo(X(i),Y(v)));c.stroke();};
+ if(mode==='swap')line(tB,PINK,1.4);
+ line(tA,GREY,1.4);line(s,NAVY,2.2);
+ const leg=[[GREY,'true density A (1 Å)'],[NAVY,'synthesised map']];if(mode==='swap')leg.push([PINK,'true density B']);
+ let lx=x0+10;leg.forEach(([col,t])=>{c.fillStyle=col;c.fillRect(lx,10,14,4);c.fillStyle=NAVY;c.fillText(t,lx+18,17);lx+=c.measureText(t).width+40;});
+ // correlation
+ const cc=(a,b)=>{const n=a.length,ma=a.reduce((p,q)=>p+q)/n,mb=b.reduce((p,q)=>p+q)/n;let sab=0,sa=0,sb=0;for(let i=0;i<n;i++){sab+=(a[i]-ma)*(b[i]-mb);sa+=(a[i]-ma)**2;sb+=(b[i]-mb)**2;}return sab/Math.sqrt(sa*sb);};
+ let txt='Reflections used: h = 1 to '+hc+'. Map correlation with true A: <b>'+cc(s,tA).toFixed(2)+'</b>';
+ if(mode==='swap')txt+='; with true B: <b>'+cc(s,tB).toFixed(2)+'</b>. The map follows the phases, not the amplitudes';
+ $('fR').innerHTML=txt+'.';
+}
+['fRes','fMode','fErr'].forEach(i=>$(i).addEventListener('input',fourier));
+$('fNew').addEventListener('click',()=>{newErr();fourier();});
+
+/* detector */
+function det(){
+ const E=+$('dE').value,D=+$('dD').value,W=+$('dW').value,H=+$('dH').value;
+ if(!(E>0&&D>0&&W>0&&H>0)){$('dR').textContent='';return;}
+ const L=12.3984/E;const d=r=>L/(2*Math.sin(Math.atan(r/D)/2));
+ const rE=Math.min(W,H)/2,rC=Math.hypot(W/2,H/2);
+ $('dR').innerHTML='λ = <b>'+L.toFixed(4)+' Å</b> &nbsp;·&nbsp; resolution at nearest edge: <b>'+d(rE).toFixed(2)+' Å</b> &nbsp;·&nbsp; at corner: <b>'+d(rC).toFixed(2)+' Å</b> (incomplete beyond the edge value)';
+}
+['dE','dD','dW','dH'].forEach(i=>$(i).addEventListener('input',det));
+
+function all(){bragg();fourier();det();}
+window.addEventListener('resize',()=>{bCv._w=0;fCv._w=0;all();});
+all();
+</script>
+</body></html>
