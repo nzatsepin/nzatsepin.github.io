@@ -8,7 +8,7 @@
 /* Layout: long-form lab notebook in five stations (photon → electrons → radicals → residues → lattice), each a figure beside terse text. Single dark theme by choice, matching Ewald Sphere Lab. */
 :root{
   --bg:#0a1019; --panel:#101926; --panel2:#152132; --line:#22324a; --line2:#2c405d;
-  --fg:#e2e8f1; --muted:#8f9db3; --faint:#5f6e86;
+  --fg:#eef2f7; --muted:#cdd6e3; --faint:#b3bfd0;
   --beam:#6cc4ff; --elec:#7fe3ff; --oh:#ff6f5e; --hole:#ffb54a; --hatom:#d8dde6; --ok:#58d39a; --warn:#ffb54a; --bad:#ff6f5e; --metal:#c99bff;
   --f-display:"Instrument Serif", Georgia, "Times New Roman", serif;
   --f-body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -17,17 +17,17 @@
 }
 *{box-sizing:border-box}
 html,body{background:var(--bg);color:var(--fg)}
-body{font-family:var(--f-body);font-size:15px;line-height:1.55;
+body{font-family:var(--f-body);font-size:16.5px;line-height:1.55;
   padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 56px}
-.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:56px}
+.wrap{max-width:1380px;margin:0 auto;display:flex;flex-direction:column;gap:56px}
 header{display:flex;flex-direction:column;gap:10px}
-.eyebrow{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--beam)}
+.eyebrow{font-family:var(--f-mono);font-size:.88rem;letter-spacing:.14em;text-transform:uppercase;color:var(--beam)}
 h1{font-family:var(--f-display);font-weight:400;font-size:clamp(2.4rem,5.5vw,3.8rem);line-height:1.02;margin:0;text-wrap:balance}
 h1 em{color:var(--beam)}
 .lede{color:var(--muted);max-width:72ch;margin:0}
 h2{font-family:var(--f-display);font-weight:400;font-size:clamp(1.7rem,3.4vw,2.3rem);margin:0;line-height:1.1;text-wrap:balance}
-h2 .n{font-family:var(--f-mono);font-size:.8rem;color:var(--faint);vertical-align:middle;margin-right:10px;letter-spacing:.08em}
-h3{font-size:.74rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:600;margin:0 0 8px}
+h2 .n{font-family:var(--f-mono);font-size:.95rem;color:var(--beam);vertical-align:middle;margin-right:10px;letter-spacing:.08em}
+h3{font-size:.9rem;text-transform:uppercase;letter-spacing:.1em;color:var(--fg);font-weight:600;margin:0 0 8px}
 p{margin:0}
 section{display:flex;flex-direction:column;gap:18px}
 .sechead{display:flex;flex-direction:column;gap:6px;max-width:80ch}
@@ -39,8 +39,8 @@ section{display:flex;flex-direction:column;gap:18px}
 .fig canvas{display:block;width:100%}
 .figbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px;border-bottom:1px solid var(--line);background:var(--panel)}
 .figbar .sp{flex:1}
-.figcap{font-size:.78rem;color:var(--faint);padding:8px 12px;border-top:1px solid var(--line)}
-button{font:inherit;font-size:.8rem;background:var(--panel2);color:var(--fg);border:1px solid var(--line2);border-radius:6px;padding:5px 11px;cursor:pointer}
+.figcap{font-size:.95rem;color:var(--muted);padding:8px 12px;border-top:1px solid var(--line)}
+button{font:inherit;font-size:.95rem;background:var(--panel2);color:var(--fg);border:1px solid var(--line2);border-radius:6px;padding:5px 11px;cursor:pointer}
 button:hover{border-color:var(--beam)}
 button[aria-pressed="true"]{background:#16314a;border-color:#2f6b97;color:#d9efff}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--beam);outline-offset:1px}
@@ -48,81 +48,83 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .muted{color:var(--muted)} .faint{color:var(--faint)}
 ul.tight{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px}
 ul.tight li::marker{color:var(--faint)}
-.unc{display:inline-block;font-family:var(--f-mono);font-size:.66rem;letter-spacing:.06em;color:var(--warn);border:1px solid rgba(255,181,74,.45);border-radius:4px;padding:0 4px;margin-left:4px;vertical-align:1px;white-space:nowrap}
-sup.r{font-family:var(--f-mono);font-size:.66rem;color:var(--beam);margin-left:1px}
+.unc{display:inline-block;font-family:var(--f-mono);font-size:.75rem;letter-spacing:.06em;color:var(--warn);border:1px solid rgba(255,181,74,.45);border-radius:4px;padding:0 4px;margin-left:4px;vertical-align:1px;white-space:nowrap}
+sup.r{font-family:var(--f-mono);font-size:.8rem;color:var(--beam);margin-left:1px}
 sup.r a{color:inherit;text-decoration:none}
 sup.r a:hover{text-decoration:underline}
-.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:.88rem}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;font-size:1rem}
 .kv dt{color:var(--muted)}
-.kv dd{margin:0;font-family:var(--f-mono);font-size:.82rem;text-align:right;font-variant-numeric:tabular-nums}
-.eq{font-family:var(--f-mono);font-size:.84rem;line-height:1.9;overflow-x:auto;white-space:nowrap}
+.kv dd{margin:0;font-family:var(--f-mono);font-size:.95rem;text-align:right;font-variant-numeric:tabular-nums}
+.eq{font-family:var(--f-mono);font-size:.95rem;line-height:1.9;overflow-x:auto;white-space:nowrap}
 .eq .c{color:var(--faint)}
 .e{color:var(--elec)} .oh{color:var(--oh)} .h{color:var(--hatom)} .hole{color:var(--hole)} .mt{color:var(--metal)}
 .tw{overflow-x:auto}
-table{border-collapse:collapse;width:100%;font-size:.86rem}
+table{border-collapse:collapse;width:100%;font-size:.98rem}
 th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600}
+th{font-size:.82rem;text-transform:uppercase;letter-spacing:.08em;color:var(--fg);font-weight:600}
 td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
 
 /* dose ruler */
 .rulerwrap{overflow-x:auto}
-.ruler{position:relative;height:214px;margin:6px 4px 0;min-width:640px}
-.rbar{position:absolute;left:0;right:0;top:120px;height:10px;border-radius:5px;
+.ruler{position:relative;height:262px;margin:6px 48px 0;min-width:640px}
+.rbar{position:absolute;left:0;right:0;top:146px;height:10px;border-radius:5px;
   background:linear-gradient(90deg,#1a3b58 0%,#2a5a7c 30%,#6a6a52 62%,#8a4a3a 82%,#a63a2e 100%)}
-.rtick{position:absolute;top:132px;transform:translateX(-50%);font-family:var(--f-mono);font-size:.7rem;color:var(--faint)}
-.rtick::before{content:"";position:absolute;left:50%;top:-12px;height:6px;width:1px;background:var(--line2)}
-.rmark{position:absolute;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;width:120px}
-.rmark.up{bottom:94px}
-.rmark.dn{top:150px}
-.rmark .lab{font-size:.74rem;line-height:1.25;color:var(--fg)}
-.rmark .lab small{display:block;color:var(--muted);font-size:.68rem}
+.rtick{position:absolute;top:160px;transform:translateX(-50%);white-space:nowrap;font-family:var(--f-mono);font-size:.9rem;color:var(--fg)}
+.rtick::before{content:"";position:absolute;left:50%;top:-8px;height:6px;width:1px;background:var(--muted)}
+.rmark{position:absolute;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;width:150px}
+.rmark.up{bottom:116px}
+.rmark.dn{top:184px}
+.rmark .lab{font-size:.92rem;line-height:1.25;color:var(--fg)}
+.rmark .lab small{display:block;color:var(--muted);font-size:.82rem}
 .rmark .stem{width:1px;height:14px;background:currentColor}
 .rmark.tall .stem{height:52px}
-.rspan{position:absolute;top:114px;height:22px;border-radius:4px;border:1px dashed}
+.rspan{position:absolute;top:140px;height:22px;border-radius:4px;border:1px dashed}
 
 /* timescale */
-.ladder{display:grid;grid-template-columns:110px minmax(0,1fr);gap:0;font-size:.88rem}
+.ladder{display:grid;grid-template-columns:136px minmax(0,1fr);gap:0;font-size:1rem}
 .ladder > div{padding:7px 0;border-bottom:1px solid var(--line)}
-.ladder .t{font-family:var(--f-mono);font-size:.78rem;color:var(--beam);padding-right:10px}
+.ladder .t{font-family:var(--f-mono);font-size:.92rem;color:var(--beam);padding-right:10px}
 
 /* specific damage cards */
-.cards4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.cards4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
 .sd{display:flex;flex-direction:column;gap:10px}
 .sd svg{width:100%;height:auto;display:block;background:#0c1420;border:1px solid var(--line);border-radius:8px}
-.sd .rank{font-family:var(--f-mono);font-size:.7rem;color:var(--faint)}
-.sd p{font-size:.86rem;color:var(--muted)}
-.sd .eq{font-size:.76rem;line-height:1.7}
+.sd .rank{font-family:var(--f-mono);font-size:.88rem;color:var(--beam)}
+.sd p{font-size:1.02rem;color:var(--muted)}
+.sd .eq{font-size:.92rem;line-height:1.7;white-space:normal}
 
 /* global controls */
 .ctl{display:flex;flex-direction:column;gap:14px}
 .row{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center}
-.row label{font-size:.88rem}
-.row .val{font-family:var(--f-mono);font-size:.82rem;color:var(--beam);font-variant-numeric:tabular-nums}
+.row label{font-size:1rem}
+.row .val{font-family:var(--f-mono);font-size:.95rem;color:var(--beam);font-variant-numeric:tabular-nums}
 .row input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--beam)}
-.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.74rem;font-weight:500;border:1px solid}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.9rem;font-weight:500;border:1px solid}
 .pill.ok{color:var(--ok);border-color:rgba(88,211,154,.5);background:rgba(88,211,154,.08)}
 .pill.warn{color:var(--warn);border-color:rgba(255,181,74,.5);background:rgba(255,181,74,.08)}
 .pill.bad{color:var(--bad);border-color:rgba(255,111,94,.5);background:rgba(255,111,94,.08)}
 .globfigs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
-.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.74rem;color:var(--muted)}
-.legend i{display:inline-block;width:12px;height:3px;border-radius:2px;margin-right:5px;vertical-align:3px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:.92rem;color:var(--fg)}
+.legend i{display:inline-block;width:16px;height:4px;border-radius:2px;margin-right:5px;vertical-align:3px}
 
-.refs{columns:2 420px;column-gap:28px;font-size:.8rem;color:var(--muted);margin:0;padding-left:1.6em}
+.refs{columns:2 460px;column-gap:28px;font-size:.95rem;color:var(--muted);margin:0;padding-left:1.6em}
 .refs li{break-inside:avoid;margin-bottom:6px}
-.refs li::marker{font-family:var(--f-mono);color:var(--beam);font-size:.72rem}
+.refs li::marker{font-family:var(--f-mono);color:var(--beam);font-size:.85rem}
 .refs a{color:var(--beam);text-decoration:none}
 .refs a:hover{text-decoration:underline}
-.note{font-size:.8rem;color:var(--faint);max-width:90ch}
+.note{font-size:.95rem;color:var(--muted);max-width:95ch}
 
+@media (max-width:1100px){
+  .cards4{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 @media (max-width:980px){
   .grid2,.grid2.rev{grid-template-columns:minmax(0,1fr)}
-  .cards4{grid-template-columns:repeat(2,minmax(0,1fr))}
   .globfigs{grid-template-columns:minmax(0,1fr)}
 }
 @media (max-width:560px){
   .cards4{grid-template-columns:minmax(0,1fr)}
-  .ladder{grid-template-columns:86px minmax(0,1fr)}
-  .rmark{width:84px}
+  .ladder{grid-template-columns:104px minmax(0,1fr)}
+  .rmark{width:96px}
   .rmark .lab small{display:none}
 }
 @media (prefers-reduced-motion:reduce){ *{scroll-behavior:auto!important} }
@@ -174,7 +176,7 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
           <dt>Compton (inelastic)</dt><dd>≈ 8 %</dd>
           <dt>Elastic (diffraction)</dt><dd>≈ 8 %</dd>
         </dl>
-        <p class="note" style="margin-top:6px">Fractions of interacting photons for a typical protein crystal; composition- and energy-dependent.<sup class="r"><a href="#ref-garman2010">1</a></sup> <span class="unc">APPROX</span></p>
+        <p class="note" style="margin-top:6px">Fractions of interacting photons for a 100 µm protein crystal at 1 Å, where only ~2 % of incident photons interact at all. Photoelectric absorption accounts for &gt; 90 % of the deposited energy.<sup class="r"><a href="#ref-garman2010">1</a></sup></p>
       </div>
       <div id="prim-text"></div>
     </div>
@@ -185,7 +187,7 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
 <section aria-labelledby="s2">
   <div class="sechead">
     <h2 id="s2"><span class="n">02</span>Electron cascade and radiolysis</h2>
-    <p>The crystal is ~30–70 % solvent, so most energy is deposited in water. Ionisation and excitation of water produce the radicals that attack the protein (indirect damage); direct ionisation of the protein produces holes and electrons in situ.</p>
+    <p>The crystal is ~30–70 % solvent, so most energy is deposited in water. Ionisation and excitation of water produce the radicals that attack the protein (indirect damage); direct ionisation of the protein produces holes and electrons in situ. At 100 K most damage is attributed to direct ionisation of residues and their associated water, since OH<sup>•</sup> cannot diffuse.<sup class="r"><a href="#ref-oneill2002">17</a></sup></p>
   </div>
   <div class="grid2 rev">
     <div class="card">
@@ -206,9 +208,9 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
         <ul class="tight">
           <li>Photoelectron energy ≈ E<sub>γ</sub> − E<sub>B</sub>; K-edges: C 0.28, N 0.41, O 0.54, S 2.47 keV. A 12.4 keV photon on O yields an ≈ 11.9 keV photoelectron.</li>
           <li>Auger electrons from C/N/O: ≈ 0.25–0.5 keV, ranges of a few nm.</li>
-          <li>Each 12 keV photoelectron produces ~500 further ionisations (≈ 25–30 eV per ion pair).<sup class="r"><a href="#ref-oneill2002">17</a></sup> <span class="unc">APPROX</span></li>
-          <li>Photoelectron range at 12.4 keV ≈ 2–4 µm in protein crystals, so microbeams and microcrystals can lose part of the dose by escape.<sup class="r"><a href="#ref-navehill2005">15</a>,<a href="#ref-sanishvili2011">16</a></sup></li>
-          <li>Low-energy (&lt; 15 eV) secondary electrons break bonds by dissociative electron attachment.<sup class="r"><a href="#ref-boudaiffa2000">18</a></sup></li>
+          <li>Each photoelectron can cause up to ~500 further ionisations (≈ 11.9 keV / 500 ≈ 24 eV each).<sup class="r"><a href="#ref-garman2010">1</a></sup></li>
+          <li>Photoelectron range is a few µm: around a 1 µm beam, damage fell to zero at ~4 µm from the beam centre, and the dose-normalised damage rate fell 3× from a 15.6 µm to a 0.84 µm beam.<sup class="r"><a href="#ref-sanishvili2011">16</a></sup> Microbeams and microcrystals can therefore lose part of the dose by escape.<sup class="r"><a href="#ref-navehill2005">15</a></sup></li>
+          <li>Low-energy (3–20 eV) secondary electrons, below the ionisation threshold, still break bonds via resonant electron attachment (shown for DNA strand breaks).<sup class="r"><a href="#ref-boudaiffa2000">18</a></sup></li>
         </ul>
       </div>
       <div>
@@ -273,18 +275,19 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
       <div>
         <h3>100 K</h3>
         <ul class="tight">
-          <li>OH<sup>•</sup> immobile in vitreous solvent below ~110 K. <span class="unc">APPROX</span></li>
+          <li>OH<sup>•</sup> trapped in amorphous solvent at 100 K.<sup class="r"><a href="#ref-owen2012">22</a></sup></li>
           <li>Electrons migrate to metal centres and disulfides; holes to electron-rich sites such as carboxylates.</li>
-          <li>Damage rate effectively independent of dose rate over synchrotron ranges.<sup class="r"><a href="#ref-sliz2003">20</a></sup></li>
-          <li>H₂ accumulates; further cooling to ~15–50 K gives a modest additional gain, magnitude system-dependent.<sup class="r"><a href="#ref-meents2010">14</a></sup> <span class="unc">DEBATED</span></li>
+          <li>Dose-rate dependence is weak: none detected by Sliz et al.;<sup class="r"><a href="#ref-sliz2003">20</a></sup> ~10 % shorter lifetime for a 10× higher dose rate in ferritin.<sup class="r"><a href="#ref-owen2006">31</a></sup></li>
+          <li>H₂ gas formed in the sample is proposed as the main cause of high-resolution loss. At 50 K versus 100 K: disulfide damage reduced 4×, and 2.6× (elastase) and 3.9× (cubic insulin) higher dose tolerated by R<sub>free</sub>.<sup class="r"><a href="#ref-meents2010">14</a></sup></li>
         </ul>
       </div>
       <div>
         <h3>Room temperature</h3>
         <ul class="tight">
           <li>OH<sup>•</sup>, H<sup>•</sup> and e⁻<sub>aq</sub> diffuse through solvent channels and react with surface residues.</li>
-          <li>Global dose limits fall by roughly 30–100× relative to 100 K.<sup class="r"><a href="#ref-navegarman2005">21</a>,<a href="#ref-southworth2007">22</a></sup> <span class="unc">APPROX</span></li>
-          <li>Dose-rate effects appear: very high dose rates can partly outrun radical diffusion.<sup class="r"><a href="#ref-owen2012">23</a>,<a href="#ref-warkentin2013">24</a></sup></li>
+          <li>Radiation sensitivity rises sharply above a transition near 200 K, consistent with solvent-coupled diffusion.<sup class="r"><a href="#ref-warkentin2013">23</a></sup></li>
+          <li>Crystal lifetime ~26–113× shorter than at 100 K (lysozyme, 6–10 Gy s⁻¹).<sup class="r"><a href="#ref-southworth2007">21</a></sup></li>
+          <li>Dose-rate effects appear: lifetime increased with dose rate (60 % higher rate, 4× longer lifetime);<sup class="r"><a href="#ref-southworth2007">21</a></sup> short exposures can outrun part of the damage (up to half at 260 K with ~1 s collection).<sup class="r"><a href="#ref-owen2012">22</a>,<a href="#ref-warkentin2013">23</a></sup></li>
         </ul>
       </div>
     </div>
@@ -295,50 +298,45 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
 <section aria-labelledby="s4">
   <div class="sechead">
     <h2 id="s4"><span class="n">04</span>Specific damage</h2>
-    <p>Site-selective changes seen as negative F<sub>o</sub>(D<sub>n</sub>) − F<sub>o</sub>(D<sub>1</sub>) difference density. Typical order of susceptibility at 100 K: metal reduction ≫ disulfide cleavage &gt; Glu/Asp decarboxylation &gt; Tyr O–H loss &gt; Met C–S cleavage.<sup class="r"><a href="#ref-burmeister2000">6</a>,<a href="#ref-weik2000">7</a>,<a href="#ref-ravelli2000">8</a></sup> Within each class, susceptibility depends on environment (active sites and strained bonds are hit first) and does not correlate with solvent accessibility.<sup class="r"><a href="#ref-fioravanti2007">10</a></sup></p>
+    <p>Site-selective changes seen as negative F<sub>o</sub>(D<sub>n</sub>) − F<sub>o</sub>(D<sub>1</sub>) difference density. Typical order at 100 K: metal reduction first; then disulfides elongate and break, Glu/Asp decarboxylate, Tyr loses its hydroxyl, and Met C–S bonds are cleaved.<sup class="r"><a href="#ref-garman2010">1</a>,<a href="#ref-burmeister2000">6</a>,<a href="#ref-weik2000">7</a>,<a href="#ref-ravelli2000">8</a></sup> Within each class, susceptibility varies between sites;<sup class="r"><a href="#ref-burmeister2000">6</a></sup> for acidic residues, active-site and crystal-contact sites are most sensitive and there is no correlation with solvent accessibility.<sup class="r"><a href="#ref-fioravanti2007">10</a></sup></p>
   </div>
   <div class="cards4">
     <article class="card sd">
       <div class="rank">1 · reduction (e⁻)</div>
       <h3 style="margin:0">Metal centres</h3>
-      <svg viewBox="0 0 240 130" role="img" aria-label="Heme iron reduced from Fe(III) to Fe(II)">
-        <g stroke="#3b5576" stroke-width="1.5" fill="none">
-          <polygon points="70,40 100,30 130,40 140,65 130,90 100,100 70,90 60,65"/>
-        </g>
-        <g font-family="IBM Plex Mono, monospace" font-size="9" fill="#8f9db3">
-          <text x="62" y="35">N</text><text x="132" y="35">N</text><text x="62" y="102">N</text><text x="132" y="102">N</text>
-        </g>
-        <circle cx="100" cy="65" r="13" fill="#2a1f40" stroke="#c99bff" stroke-width="1.5"/>
-        <text x="100" y="69" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#c99bff">Fe³⁺</text>
-        <path d="M172 34 C 150 34 138 44 118 56" stroke="#7fe3ff" stroke-width="1.5" fill="none" marker-end="url(#ae)"/>
-        <text x="176" y="37" font-family="IBM Plex Mono, monospace" font-size="11" fill="#7fe3ff">e⁻</text>
-        <text x="176" y="78" font-family="IBM Plex Mono, monospace" font-size="10" fill="#e2e8f1">→ Fe²⁺</text>
-        <text x="176" y="94" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8f9db3">ligand shifts</text>
+      <svg viewBox="0 0 260 140" role="img" aria-label="Heme iron reduced from Fe(III) to Fe(II)">
         <defs><marker id="ae" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7fe3ff"/></marker></defs>
+        <polygon points="45,45 75,35 105,45 115,70 105,95 75,105 45,95 35,70" stroke="#5b7aa0" stroke-width="1.6" fill="none"/>
+        <g font-family="IBM Plex Mono, monospace" font-size="12" fill="#cdd6e3"><text x="30" y="40">N</text><text x="110" y="40">N</text><text x="30" y="112">N</text><text x="110" y="112">N</text></g>
+        <circle cx="75" cy="70" r="17" fill="#2a1f40" stroke="#c99bff" stroke-width="1.6"/>
+        <text x="75" y="75" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="#d9bfff">Fe³⁺</text>
+        <path d="M188 34 C 160 34 140 46 96 62" stroke="#7fe3ff" stroke-width="1.8" fill="none" marker-end="url(#ae)"/>
+        <text x="194" y="39" font-family="IBM Plex Mono, monospace" font-size="16" fill="#7fe3ff">e⁻</text>
+        <text x="146" y="96" font-family="IBM Plex Mono, monospace" font-size="15" fill="#eef2f7">→ Fe²⁺</text>
+        <text x="146" y="118" font-family="IBM Plex Mono, monospace" font-size="12" fill="#cdd6e3">ligand shifts</text>
       </svg>
       <div class="eq">Fe(III) + e⁻ → Fe(II)<br>Cu(II) + e⁻ → Cu(I)<br>Mn(IV/III) → Mn(II)</div>
-      <p>Fastest process. Heme Fe(III) reduction observed by online UV-vis at a small fraction of a data set;<sup class="r"><a href="#ref-beitlich2007">12</a></sup> the PSII Mn₄CaO₅ cluster is substantially reduced at doses used for standard data collection.<sup class="r"><a href="#ref-yano2005">13</a></sup> Validate redox state with online spectroscopy or XAS. Onset typically &lt; 1 MGy. <span class="unc">SYSTEM-DEPENDENT</span></p>
+      <p>Fastest process. Online UV-vis shows very rapid reduction of ferric heme in myoglobin, P450cam and chloroperoxidase;<sup class="r"><a href="#ref-beitlich2007">12</a></sup> the PSII Mn₄CaO₅ cluster is substantially reduced at doses used for standard data collection.<sup class="r"><a href="#ref-yano2005">13</a></sup> Validate redox state with online spectroscopy or XAS. Onset typically &lt; 1 MGy. <span class="unc">SYSTEM-DEPENDENT</span></p>
     </article>
     <article class="card sd">
       <div class="rank">2 · reduction (e⁻)</div>
       <h3 style="margin:0">Disulfide bonds</h3>
-      <svg viewBox="0 0 240 130" role="img" aria-label="Disulfide bond elongating after electron capture">
+      <svg viewBox="0 0 260 140" role="img" aria-label="Disulfide bond elongating after electron capture">
         <g font-family="IBM Plex Mono, monospace">
-          <line x1="20" y1="45" x2="60" y2="45" stroke="#3b5576" stroke-width="2"/>
-          <circle cx="72" cy="45" r="11" fill="#2b2a12" stroke="#e8d36a" stroke-width="1.5"/><text x="72" y="49" text-anchor="middle" font-size="10" fill="#e8d36a">S</text>
-          <line x1="83" y1="45" x2="107" y2="45" stroke="#e8d36a" stroke-width="2"/>
-          <circle cx="118" cy="45" r="11" fill="#2b2a12" stroke="#e8d36a" stroke-width="1.5"/><text x="118" y="49" text-anchor="middle" font-size="10" fill="#e8d36a">S</text>
-          <line x1="129" y1="45" x2="169" y2="45" stroke="#3b5576" stroke-width="2"/>
-          <text x="95" y="28" text-anchor="middle" font-size="9" fill="#8f9db3">2.04 Å</text>
-          <text x="190" y="49" font-size="9" fill="#8f9db3">intact</text>
-
-          <line x1="20" y1="100" x2="52" y2="100" stroke="#3b5576" stroke-width="2"/>
-          <circle cx="64" cy="100" r="11" fill="#2b2a12" stroke="#e8d36a" stroke-width="1.5"/><text x="64" y="104" text-anchor="middle" font-size="10" fill="#e8d36a">S</text>
-          <line x1="75" y1="100" x2="115" y2="100" stroke="#e8d36a" stroke-width="1.5" stroke-dasharray="3 3"/>
-          <circle cx="126" cy="100" r="11" fill="#2b2a12" stroke="#e8d36a" stroke-width="1.5"/><text x="126" y="104" text-anchor="middle" font-size="10" fill="#e8d36a">S</text>
-          <line x1="137" y1="100" x2="169" y2="100" stroke="#3b5576" stroke-width="2"/>
-          <text x="95" y="86" text-anchor="middle" font-size="9" fill="#7fe3ff">[RSSR]•⁻ ≈ 2.7 Å</text>
-          <text x="180" y="104" font-size="9" fill="#8f9db3">λmax ≈ 400 nm</text>
+          <line x1="14" y1="40" x2="62" y2="40" stroke="#5b7aa0" stroke-width="2"/>
+          <circle cx="76" cy="40" r="13" fill="#2b2a12" stroke="#e8d36a" stroke-width="1.6"/><text x="76" y="45" text-anchor="middle" font-size="13" fill="#e8d36a">S</text>
+          <line x1="89" y1="40" x2="111" y2="40" stroke="#e8d36a" stroke-width="2.2"/>
+          <circle cx="124" cy="40" r="13" fill="#2b2a12" stroke="#e8d36a" stroke-width="1.6"/><text x="124" y="45" text-anchor="middle" font-size="13" fill="#e8d36a">S</text>
+          <line x1="137" y1="40" x2="185" y2="40" stroke="#5b7aa0" stroke-width="2"/>
+          <text x="100" y="18" text-anchor="middle" font-size="12" fill="#cdd6e3">2.04 Å</text>
+          <text x="194" y="45" font-size="12" fill="#cdd6e3">intact</text>
+          <line x1="14" y1="98" x2="52" y2="98" stroke="#5b7aa0" stroke-width="2"/>
+          <circle cx="66" cy="98" r="13" fill="#2b2a12" stroke="#e8d36a" stroke-width="1.6"/><text x="66" y="103" text-anchor="middle" font-size="13" fill="#e8d36a">S</text>
+          <line x1="79" y1="98" x2="121" y2="98" stroke="#e8d36a" stroke-width="1.8" stroke-dasharray="4 3"/>
+          <circle cx="134" cy="98" r="13" fill="#2b2a12" stroke="#e8d36a" stroke-width="1.6"/><text x="134" y="103" text-anchor="middle" font-size="13" fill="#e8d36a">S</text>
+          <line x1="147" y1="98" x2="185" y2="98" stroke="#5b7aa0" stroke-width="2"/>
+          <text x="100" y="76" text-anchor="middle" font-size="12" fill="#7fe3ff">[RSSR]•⁻ ≈ 2.7 Å</text>
+          <text x="100" y="132" text-anchor="middle" font-size="12" fill="#cdd6e3">λmax ≈ 400 nm</text>
         </g>
       </svg>
       <div class="eq">RSSR + e⁻ → [RSSR]•⁻<br>[RSSR]•⁻ → RS• + RS⁻</div>
@@ -347,46 +345,46 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
     <article class="card sd">
       <div class="rank">3 · oxidation (h⁺)</div>
       <h3 style="margin:0">Glu / Asp decarboxylation</h3>
-      <svg viewBox="0 0 240 130" role="img" aria-label="Carboxylate losing CO2 after oxidation">
+      <svg viewBox="0 0 260 140" role="img" aria-label="Carboxylate losing CO2 after oxidation">
         <g font-family="IBM Plex Mono, monospace">
-          <line x1="20" y1="70" x2="60" y2="70" stroke="#3b5576" stroke-width="2"/>
-          <text x="22" y="62" font-size="9" fill="#8f9db3">Cγ/Cβ</text>
-          <circle cx="70" cy="70" r="9" fill="#14202f" stroke="#8f9db3" stroke-width="1.5"/><text x="70" y="74" text-anchor="middle" font-size="9" fill="#e2e8f1">C</text>
-          <line x1="77" y1="64" x2="95" y2="46" stroke="#ff6f5e" stroke-width="2"/>
-          <line x1="77" y1="76" x2="95" y2="94" stroke="#ff6f5e" stroke-width="2"/>
-          <circle cx="101" cy="40" r="9" fill="#2a1414" stroke="#ff6f5e" stroke-width="1.5"/><text x="101" y="44" text-anchor="middle" font-size="9" fill="#ff6f5e">O</text>
-          <circle cx="101" cy="100" r="9" fill="#2a1414" stroke="#ff6f5e" stroke-width="1.5"/><text x="101" y="104" text-anchor="middle" font-size="9" fill="#ff6f5e">O⁻</text>
-          <text x="128" y="74" font-size="12" fill="#ffb54a">h⁺ →</text>
-          <text x="172" y="60" font-size="10" fill="#e2e8f1">R•</text>
-          <text x="172" y="84" font-size="10" fill="#e2e8f1">+ CO₂</text>
+          <line x1="14" y1="74" x2="62" y2="74" stroke="#5b7aa0" stroke-width="2"/>
+          <text x="14" y="64" font-size="12" fill="#cdd6e3">Cγ/Cβ</text>
+          <circle cx="74" cy="74" r="12" fill="#14202f" stroke="#cdd6e3" stroke-width="1.6"/><text x="74" y="79" text-anchor="middle" font-size="12" fill="#eef2f7">C</text>
+          <line x1="83" y1="66" x2="101" y2="46" stroke="#ff6f5e" stroke-width="2.2"/>
+          <line x1="83" y1="82" x2="101" y2="102" stroke="#ff6f5e" stroke-width="2.2"/>
+          <circle cx="109" cy="38" r="12" fill="#2a1414" stroke="#ff6f5e" stroke-width="1.6"/><text x="109" y="43" text-anchor="middle" font-size="12" fill="#ff8f80">O</text>
+          <circle cx="109" cy="110" r="12" fill="#2a1414" stroke="#ff6f5e" stroke-width="1.6"/><text x="109" y="115" text-anchor="middle" font-size="12" fill="#ff8f80">O⁻</text>
+          <text x="136" y="80" font-size="16" fill="#ffb54a">h⁺ →</text>
+          <text x="194" y="64" font-size="15" fill="#eef2f7">R•</text>
+          <text x="194" y="92" font-size="15" fill="#eef2f7">+ CO₂</text>
         </g>
       </svg>
       <div class="eq">RCOO⁻ − e⁻ → RCOO•<br>RCOO• → R• + CO₂</div>
-      <p>Hole or OH<sup>•</sup> oxidation of the carboxylate followed by CO₂ loss; carboxyl density fades first.<sup class="r"><a href="#ref-burmeister2000">6</a>,<a href="#ref-weik2000">7</a></sup> Active-site and crystal-contact acids are most sensitive.<sup class="r"><a href="#ref-fioravanti2007">10</a></sup> CO₂ may remain trapped near the site at 100 K. <span class="unc">CASE-DEPENDENT</span></p>
+      <p>Hole or OH<sup>•</sup> oxidation of the carboxylate followed by CO₂ loss; carboxyl density fades first.<sup class="r"><a href="#ref-burmeister2000">6</a>,<a href="#ref-weik2000">7</a></sup> Active-site, internal-cavity and crystal-contact acids are most sensitive; acids paired with Lys/Arg are less affected.<sup class="r"><a href="#ref-fioravanti2007">10</a></sup> CO₂ may remain trapped near the site at 100 K. <span class="unc">CASE-DEPENDENT</span></p>
     </article>
     <article class="card sd">
       <div class="rank">4–5 · later onset</div>
       <h3 style="margin:0">Met C–S and Tyr O–H</h3>
-      <svg viewBox="0 0 240 130" role="img" aria-label="Methionine C–S bond cleavage">
+      <svg viewBox="0 0 260 140" role="img" aria-label="Methionine C–S bond cleavage">
         <g font-family="IBM Plex Mono, monospace">
-          <line x1="16" y1="65" x2="44" y2="65" stroke="#3b5576" stroke-width="2"/>
-          <circle cx="54" cy="65" r="9" fill="#14202f" stroke="#8f9db3" stroke-width="1.5"/><text x="54" y="69" text-anchor="middle" font-size="8" fill="#e2e8f1">Cγ</text>
-          <line x1="63" y1="65" x2="86" y2="65" stroke="#e8d36a" stroke-width="2" stroke-dasharray="3 3"/>
-          <circle cx="97" cy="65" r="11" fill="#2b2a12" stroke="#e8d36a" stroke-width="1.5"/><text x="97" y="69" text-anchor="middle" font-size="9" fill="#e8d36a">Sδ</text>
-          <line x1="108" y1="65" x2="131" y2="65" stroke="#e8d36a" stroke-width="2" stroke-dasharray="3 3"/>
-          <circle cx="141" cy="65" r="9" fill="#14202f" stroke="#8f9db3" stroke-width="1.5"/><text x="141" y="69" text-anchor="middle" font-size="8" fill="#e2e8f1">Cε</text>
-          <text x="74" y="50" text-anchor="middle" font-size="12" fill="#ff6f5e">✕</text>
-          <text x="120" y="50" text-anchor="middle" font-size="12" fill="#ff6f5e">✕</text>
-          <text x="97" y="100" text-anchor="middle" font-size="9" fill="#8f9db3">either C–S bond may break</text>
+          <line x1="30" y1="66" x2="68" y2="66" stroke="#5b7aa0" stroke-width="2"/>
+          <circle cx="80" cy="66" r="13" fill="#14202f" stroke="#cdd6e3" stroke-width="1.6"/><text x="80" y="71" text-anchor="middle" font-size="12" fill="#eef2f7">Cγ</text>
+          <line x1="93" y1="66" x2="115" y2="66" stroke="#e8d36a" stroke-width="2.2" stroke-dasharray="4 3"/>
+          <circle cx="130" cy="66" r="15" fill="#2b2a12" stroke="#e8d36a" stroke-width="1.6"/><text x="130" y="71" text-anchor="middle" font-size="13" fill="#e8d36a">Sδ</text>
+          <line x1="145" y1="66" x2="167" y2="66" stroke="#e8d36a" stroke-width="2.2" stroke-dasharray="4 3"/>
+          <circle cx="180" cy="66" r="13" fill="#14202f" stroke="#cdd6e3" stroke-width="1.6"/><text x="180" y="71" text-anchor="middle" font-size="12" fill="#eef2f7">Cε</text>
+          <text x="104" y="46" text-anchor="middle" font-size="16" fill="#ff6f5e">✕</text>
+          <text x="156" y="46" text-anchor="middle" font-size="16" fill="#ff6f5e">✕</text>
+          <text x="130" y="112" text-anchor="middle" font-size="12" fill="#cdd6e3">either C–S bond may break</text>
         </g>
       </svg>
       <div class="eq">Met: Cγ–Sδ or Sδ–Cε scission<br>Tyr: loss of OH density</div>
-      <p>Met C–S cleavage and Tyr hydroxyl loss are reported at higher doses than disulfide and carboxylate damage.<sup class="r"><a href="#ref-burmeister2000">6</a></sup> Relevant for Se-Met phasing: Se sites decay with dose, which can degrade or (RIP) be exploited for phasing.<sup class="r"><a href="#ref-garman2010">1</a></sup></p>
+      <p>Tyr hydroxyl loss and Met C–S cleavage follow disulfide and carboxylate damage.<sup class="r"><a href="#ref-garman2010">1</a>,<a href="#ref-burmeister2000">6</a></sup> Relevant for Se-Met phasing: Se sites decay with dose, which can degrade or (RIP) be exploited for phasing.<sup class="r"><a href="#ref-garman2010">1</a></sup></p>
     </article>
   </div>
   <div class="fig">
     <div class="figbar"><h3 style="margin:0">Schematic susceptibility curves</h3><span class="sp"></span><span class="legend" id="sdleg"></span></div>
-    <canvas id="sdplot" height="260" aria-label="Schematic fraction intact versus dose for each damage class"></canvas>
+    <canvas id="sdplot" height="340" aria-label="Schematic fraction intact versus dose for each damage class"></canvas>
     <div class="figcap">Fraction of sites intact versus dose, log axis. Order follows the cited studies; midpoints and widths are illustrative only and vary by protein, site and photon energy. <span class="unc">SCHEMATIC</span></div>
   </div>
 </section>
@@ -411,13 +409,13 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
       <dl class="kv" id="gread"></dl>
       <div>
         <h3>Observables</h3>
-        <ul class="tight" style="font-size:.86rem">
+        <ul class="tight">
           <li><b>Intensity loss</b>, starting at high resolution; I/σ(I) in the outer shell falls first.</li>
           <li><b>Wilson B rises</b> roughly linearly with dose; rate varies between crystals.<sup class="r"><a href="#ref-kmetko2006">3</a></sup></li>
-          <li><b>Unit-cell volume expands</b>, typically by a few tenths of a percent to ~1 %; rate is not transferable between crystals, so not a reliable dose metric.<sup class="r"><a href="#ref-murray2002">25</a>,<a href="#ref-ravelli2002">26</a></sup> <span class="unc">APPROX</span></li>
+          <li><b>Unit-cell volume expands</b>, typically by a few tenths of a percent to ~1 %; rate is not transferable between crystals, so not a reliable dose metric.<sup class="r"><a href="#ref-murray2002">24</a>,<a href="#ref-ravelli2002">25</a></sup> <span class="unc">APPROX</span></li>
           <li><b>Mosaicity</b> often increases; not universal.</li>
           <li><b>Scaling B</b> (per-batch relative B in AIMLESS/XSCALE) becomes increasingly negative with frame number.</li>
-          <li><b>R<sub>d</sub></b> rises with frame separation (Diederichs).<sup class="r"><a href="#ref-diederichs2006">27</a></sup></li>
+          <li><b>R<sub>d</sub></b> rises with frame separation (Diederichs).<sup class="r"><a href="#ref-diederichs2006">26</a></sup></li>
           <li>Rising R<sub>merge</sub>, falling CC½ in the outer shell.</li>
         </ul>
       </div>
@@ -442,14 +440,14 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
             <thead><tr><th>Limit</th><th>Value</th><th>Basis</th></tr></thead>
             <tbody>
               <tr><td>Henderson limit</td><td class="num">20 MGy</td><td>Dose to halve diffracting power, extrapolated from electron-diffraction data on 2D crystals.<sup class="r"><a href="#ref-henderson1990">2</a></sup></td></tr>
-              <tr><td>Garman limit</td><td class="num">30 MGy</td><td>Recommended limit: mean intensity reduced to ~70 % of initial; for most biological questions.<sup class="r"><a href="#ref-owen2006">32</a></sup></td></tr>
-              <tr><td>Experimental D½</td><td class="num">43 MGy</td><td>Dose to halve mean intensity, apoferritin and holoferritin crystals, 100 K.<sup class="r"><a href="#ref-owen2006">32</a></sup></td></tr>
+              <tr><td>Garman limit</td><td class="num">30 MGy</td><td>Recommended limit: mean intensity reduced to ln2 × I₀ ≈ 0.69 I₀.<sup class="r"><a href="#ref-owen2006">31</a></sup></td></tr>
+              <tr><td>Experimental D½</td><td class="num">43 MGy</td><td>Dose to halve mean intensity, 4.3 (± 0.3) × 10⁷ Gy; apoferritin and holoferritin, 100 K.<sup class="r"><a href="#ref-owen2006">31</a></sup></td></tr>
               <tr><td>Resolution-dependent D½</td><td class="num">≈ 10<i>d</i> MGy</td><td>Howells criterion; consistent with Owen 2006 and Kmetko 2006 data.<sup class="r"><a href="#ref-howells2009">11</a>,<a href="#ref-holtonfrankel2010">5</a></sup></td></tr>
-              <tr><td>Room temperature</td><td class="num">~0.2–1 MGy</td><td>Strongly system- and dose-rate-dependent.<sup class="r"><a href="#ref-navegarman2005">21</a>,<a href="#ref-southworth2007">22</a>,<a href="#ref-warkentin2013">24</a></sup> <span class="unc">APPROX</span></td></tr>
+              <tr><td>Room temperature</td><td class="num">~0.3–1 MGy</td><td>30 MGy scaled by the 26–113× lifetime ratio for lysozyme; strongly system- and dose-rate-dependent.<sup class="r"><a href="#ref-southworth2007">21</a>,<a href="#ref-warkentin2013">23</a></sup> <span class="unc">APPROX</span></td></tr>
             </tbody>
           </table>
         </div>
-        <p class="note" style="margin-top:8px">Specific damage to metal sites, disulfides and active-site carboxylates is often visible well below 20 MGy. Compute dose per crystal with RADDOSE-3D;<sup class="r"><a href="#ref-zeldin2013">28</a></sup> quantify per-atom damage with B<sub>damage</sub>.<sup class="r"><a href="#ref-gerstel2015">29</a></sup></p>
+        <p class="note" style="margin-top:8px">Specific damage to metal sites, disulfides and active-site carboxylates is often visible well below 20 MGy. Compute dose per crystal with RADDOSE-3D;<sup class="r"><a href="#ref-zeldin2013">27</a></sup> quantify per-atom damage with B<sub>damage</sub>.<sup class="r"><a href="#ref-gerstel2015">28</a></sup></p>
       </div>
     </div>
   </div>
@@ -463,12 +461,12 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
   <div class="grid2">
     <div class="card">
       <ul class="tight">
-        <li><b>Plan dose, not exposure time.</b> Calculate with RADDOSE-3D for the actual beam profile, crystal shape and composition.<sup class="r"><a href="#ref-zeldin2013">28</a></sup></li>
-        <li><b>Spread dose.</b> Helical/vector scans, multiple positions, multi-crystal merging, serial crystallography.</li>
+        <li><b>Plan dose, not exposure time.</b> Calculate with RADDOSE-3D for the actual beam profile, crystal shape and composition.<sup class="r"><a href="#ref-zeldin2013">27</a></sup></li>
+        <li><b>Spread dose.</b> Helical (vector) scans translate the crystal during rotation so each image exposes fresh volume. Compared with standard rotation at SOLEIL PROXIMA 2A, helical scans extended usable resolution over the collection and preserved the anomalous signal for phasing; C–Br bond loss served as a sensitive damage monitor.<sup class="r"><a href="#ref-polsinelli2017">32</a></sup> With microbeams and translations the dose distribution is inhomogeneous; diffraction-weighted dose (RADDOSE-3D) models the decay, and offsetting the rotation axis from the beam by 1.25 × beam FWHM extended crystal lifetime.<sup class="r"><a href="#ref-zeldin2013pnas">33</a></sup> Also: multiple positions, multi-crystal merging, serial crystallography.</li>
         <li><b>Collect redox-sensitive sites first</b>, or composite structures from low-dose wedges of many crystals; verify with online spectroscopy.<sup class="r"><a href="#ref-beitlich2007">12</a>,<a href="#ref-yano2005">13</a></sup></li>
         <li><b>Microbeams on microcrystals</b> can gain from photoelectron escape, larger at higher photon energy.<sup class="r"><a href="#ref-navehill2005">15</a>,<a href="#ref-sanishvili2011">16</a></sup></li>
-        <li><b>Scavengers</b>: mixed results at 100 K; some benefit reported at RT.<sup class="r"><a href="#ref-southworth2007">22</a></sup> <span class="unc">CASE-DEPENDENT</span></li>
-        <li><b>XFEL</b> femtosecond pulses outrun global damage ("diffraction before destruction"),<sup class="r"><a href="#ref-neutze2000">30</a></sup> but metal sites can still be affected within longer pulses.<sup class="r"><a href="#ref-nass2015">31</a></sup></li>
+        <li><b>Scavengers</b>: mixed results at 100 K; styrene ineffective, tentative evidence for ascorbate in lysozyme.<sup class="r"><a href="#ref-murray2002">24</a></sup> <span class="unc">CASE-DEPENDENT</span></li>
+        <li><b>XFEL</b> femtosecond pulses outrun global damage ("diffraction before destruction"),<sup class="r"><a href="#ref-neutze2000">29</a></sup> but metal sites can still be affected within longer pulses.<sup class="r"><a href="#ref-nass2015">30</a></sup></li>
       </ul>
     </div>
     <div class="card">
@@ -499,7 +497,7 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
     <li id="ref-weik2002">Weik M, Bergès J, Raves ML, Gros P, McSweeney S, Silman I, Sussman JL, Houée-Levin C, Ravelli RBG (2002) Evidence for the formation of disulfide radicals in protein crystals upon X-ray irradiation. <i>J Synchrotron Rad</i> 9:342–346. <a href="https://doi.org/10.1107/s0909049502014589">doi</a></li>
     <li id="ref-fioravanti2007">Fioravanti E, Vellieux FMD, Amara P, Madern D, Weik M (2007) Specific radiation damage to acidic residues and its relation to their chemical and structural environment. <i>J Synchrotron Rad</i> 14:84–91. <a href="https://doi.org/10.1107/S0909049506038623">doi</a></li>
     <li id="ref-howells2009">Howells MR, Beetz T, Chapman HN, et al. (2009) An assessment of the resolution limitation due to radiation-damage in X-ray diffraction microscopy. <i>J Electron Spectrosc Relat Phenom</i> 170:4–12. <a href="https://doi.org/10.1016/j.elspec.2008.10.008">doi</a></li>
-    <li id="ref-beitlich2007">Beitlich T, Kühnel K, Schulze-Briese C, Shoeman RL, Schlichting I (2007) Cryoradiolytic reduction of crystalline heme proteins. <i>J Synchrotron Rad</i> 14:11–23. <a href="https://doi.org/10.1107/S0909049506049806">doi</a></li>
+    <li id="ref-beitlich2007">Beitlich T, Kühnel K, Schulze-Briese C, Shoeman RL, Schlichting I (2007) Cryoradiolytic reduction of crystalline heme proteins: analysis by UV-Vis spectroscopy and X-ray crystallography. <i>J Synchrotron Rad</i> 14:11–23. <a href="https://doi.org/10.1107/S0909049506049806">doi</a></li>
     <li id="ref-yano2005">Yano J, Kern J, Irrgang KD, et al. (2005) X-ray damage to the Mn₄Ca complex in single crystals of photosystem II. <i>PNAS</i> 102:12047–12052. <a href="https://doi.org/10.1073/pnas.0505207102">doi</a></li>
     <li id="ref-meents2010">Meents A, Gutmann S, Wagner A, Schulze-Briese C (2010) Origin and temperature dependence of radiation damage in biological samples at cryogenic temperatures. <i>PNAS</i> 107:1094–1099. <a href="https://doi.org/10.1073/pnas.0905481107">doi</a></li>
     <li id="ref-navehill2005">Nave C, Hill MA (2005) Will reduced radiation damage occur with very small crystals? <i>J Synchrotron Rad</i> 12:299–303. <a href="https://doi.org/10.1107/S0909049505003274">doi</a></li>
@@ -508,7 +506,6 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
     <li id="ref-boudaiffa2000">Boudaïffa B, Cloutier P, Hunting D, Huels MA, Sanche L (2000) Resonant formation of DNA strand breaks by low-energy (3 to 20 eV) electrons. <i>Science</i> 287:1658–1660. <a href="https://doi.org/10.1126/science.287.5458.1658">doi</a></li>
     <li id="ref-spinks">Spinks JWT, Woods RJ (1990) <i>An Introduction to Radiation Chemistry</i>, 3rd edn. Wiley, New York.</li>
     <li id="ref-sliz2003">Sliz P, Harrison SC, Rosenbaum G (2003) How does radiation damage in protein crystals depend on X-ray dose? <i>Structure</i> 11:13–19. <a href="https://doi.org/10.1016/S0969-2126(02)00910-3">doi</a></li>
-    <li id="ref-navegarman2005">Nave C, Garman EF (2005) Towards an understanding of radiation damage in cryocooled macromolecular crystals. <i>J Synchrotron Rad</i> 12:257–260. <a href="https://doi.org/10.1107/S0909049505007132">doi</a></li>
     <li id="ref-southworth2007">Southworth-Davies RJ, Medina MA, Carmichael I, Garman EF (2007) Observation of decreased radiation damage at higher dose rates in room temperature protein crystallography. <i>Structure</i> 15:1531–1541. <a href="https://doi.org/10.1016/j.str.2007.10.013">doi</a></li>
     <li id="ref-owen2012">Owen RL, Axford D, Nettleship JE, et al. (2012) Outrunning free radicals in room-temperature macromolecular crystallography. <i>Acta Cryst D</i> 68:810–818. <a href="https://doi.org/10.1107/S0907444912012553">doi</a></li>
     <li id="ref-warkentin2013">Warkentin M, Hopkins JB, Badeau R, Mulichak AM, Keefe LJ, Thorne RE (2013) Global radiation damage: temperature dependence, time dependence and how to outrun it. <i>J Synchrotron Rad</i> 20:7–13. <a href="https://doi.org/10.1107/S0909049512048303">doi</a></li>
@@ -520,8 +517,10 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
     <li id="ref-neutze2000">Neutze R, Wouts R, van der Spoel D, Weckert E, Hajdu J (2000) Potential for biomolecular imaging with femtosecond X-ray pulses. <i>Nature</i> 406:752–757. <a href="https://doi.org/10.1038/35021099">doi</a></li>
     <li id="ref-nass2015">Nass K, Foucar L, Barends TRM, et al. (2015) Indications of radiation damage in ferredoxin microcrystals using high-intensity X-FEL beams. <i>J Synchrotron Rad</i> 22:225–238. <a href="https://doi.org/10.1107/S1600577515002349">doi</a></li>
     <li id="ref-owen2006">Owen RL, Rudiño-Piñera E, Garman EF (2006) Experimental determination of the radiation dose limit for cryocooled protein crystals. <i>PNAS</i> 103:4912–4917. <a href="https://doi.org/10.1073/pnas.0600973103">doi</a></li>
+    <li id="ref-polsinelli2017">Polsinelli I, Savko M, Rouanet-Mehouas C, Ciccone L, Nencetti S, Orlandini E, Stura EA, Shepard W (2017) Comparison of helical scan and standard rotation methods in single-crystal X-ray data collection strategies. <i>J Synchrotron Rad</i> 24:42–52. <a href="https://doi.org/10.1107/S1600577516018488">doi</a></li>
+    <li id="ref-zeldin2013pnas">Zeldin OB, Brockhauser S, Bremridge J, Holton JM, Garman EF (2013) Predicting the X-ray lifetime of protein crystals. <i>PNAS</i> 110:20551–20556. <a href="https://doi.org/10.1073/pnas.1315879110">doi</a></li>
   </ol>
-  <p class="note">DOIs other than those for refs 1, 9, 10 and 12 were entered from memory and have not been individually resolved. <span class="unc">VERIFY</span></p>
+  <p class="note">DOIs and bibliographic details checked against PubMed (26 Nov 2026), except refs 2 and 27, which are not indexed there.</p>
 </section>
 
 </div>
@@ -532,7 +531,7 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
 const css = getComputedStyle(document.documentElement);
 const C = n => css.getPropertyValue(n).trim();
 const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-const MONO = '11px "IBM Plex Mono", ui-monospace, monospace';
+const MONO = '14px "IBM Plex Mono", ui-monospace, monospace';
 
 function fit(cv){
   const r = cv.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio||1, 2);
@@ -559,17 +558,17 @@ function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();r
   ticks.forEach(t=>{ h += `<div class="rtick" style="left:${x(t)}%">${tl[t]}</div>`; });
   const spans = [
     {a:0.02,b:1, col:C('--metal'), lab:'Metal reduction', sub:'onset, system-dependent', pos:'up'},
-    {a:0.2,b:1, col:C('--oh'), lab:'RT global D½', sub:'~0.2–1 MGy', pos:'dn', off:1}
+    {a:0.27,b:1.15, col:C('--oh'), lab:'RT limit', sub:'~0.3–1 MGy', pos:'dn', off:1}
   ];
   spans.forEach(s=>{
-    h += `<div class="rspan" style="left:${x(s.a)}%;width:${x(s.b)-x(s.a)}%;border-color:${s.col};${s.off?'top:118px;height:14px':''}"></div>`;
+    h += `<div class="rspan" style="left:${x(s.a)}%;width:${x(s.b)-x(s.a)}%;border-color:${s.col};${s.off?'top:144px;height:14px':''}"></div>`;
   });
   const marks = [
     {v:0.1, lab:'Metal reduction', sub:'onset often ≪ 1 MGy', col:C('--metal'), pos:'up'},
     {v:2.5, lab:'S–S, Glu/Asp', sub:'~1–10 MGy', col:'#e8d36a', pos:'up'},
     {v:20, lab:'Henderson', sub:'20 MGy', col:C('--warn'), pos:'up'},
     {v:43, lab:'Owen D½', sub:'43 MGy', col:C('--bad'), pos:'up', tall:1},
-    {v:0.45, lab:'RT global D½', sub:'~0.2–1 MGy', col:C('--oh'), pos:'dn'},
+    {v:0.55, lab:'RT limit', sub:'~0.3–1 MGy', col:C('--oh'), pos:'dn'},
     {v:30, lab:'Garman limit', sub:'30 MGy', col:C('--warn'), pos:'dn'}
   ];
   marks.forEach(m=>{
@@ -777,16 +776,20 @@ function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();r
     tally.innerHTML=`<dt>Metal centres reduced</dt><dd>${stats.metal}</dd><dt>e⁻ captured at S–S</dt><dd>${stats.ss}</dd><dt>Holes at carboxylates</dt><dd>${stats.cooh}</dd><dt>OH• trapped in solvent</dt><dd>${RT?'-':stats.ohTrap}</dd><dt>OH• / H• reacted with protein</dt><dd>${RT?stats.ohReact:'≈ 0'}</dd>`;
   }
   function loop(ts){ const dt=Math.min(.05,(ts-(last||ts))/1000); last=ts; step(dt); draw(ts); upd(); raf=requestAnimationFrame(loop); }
-  function setT(rt){ RT=rt; b100.setAttribute('aria-pressed',!rt); b300.setAttribute('aria-pressed',rt); reset(); }
-  b100.onclick=()=>setT(false); b300.onclick=()=>setT(true); document.getElementById('treset').onclick=()=>reset();
-  reset();
-  if(reduce){ for(let i=0;i<300;i++)step(.03); draw(0); upd(); }
-  else {
-    const io=new IntersectionObserver(es=>{es.forEach(e=>{ if(e.isIntersecting){last=0; raf=requestAnimationFrame(loop);} else cancelAnimationFrame(raf); });});
-    io.observe(cv);
-    for(let i=0;i<120;i++)step(.03); draw(0); upd();
-  }
-  let rt; addEventListener('resize',()=>{clearTimeout(rt); rt=setTimeout(reset,150);});
+  // Every reset pre-runs the model and draws, so the canvas is never left blank
+  // (a resize clears the canvas; with reduced motion there is no loop to repaint it).
+  function restart(){ reset(); for(let i=0;i<(reduce?300:120);i++)step(.03); draw(0); upd(); }
+  function setT(rt){ RT=rt; b100.setAttribute('aria-pressed',!rt); b300.setAttribute('aria-pressed',rt); restart(); }
+  b100.onclick=()=>setT(false); b300.onclick=()=>setT(true); document.getElementById('treset').onclick=()=>restart();
+  restart();
+  let running=false;
+  function start(){ if(running||reduce)return; running=true; last=0; raf=requestAnimationFrame(loop); }
+  function stop(){ running=false; cancelAnimationFrame(raf); }
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(es=>{es.forEach(e=>{ e.isIntersecting?start():stop(); });}).observe(cv);
+  } else start();
+  let rt, lastW=cv.getBoundingClientRect().width;
+  addEventListener('resize',()=>{clearTimeout(rt); rt=setTimeout(()=>{ const w=cv.getBoundingClientRect().width; if(Math.abs(w-lastW)<1) return; lastW=w; restart(); },150);});
 })();
 
 /* ---------- 04 SPECIFIC DAMAGE CURVES ---------- */
@@ -801,17 +804,20 @@ function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();r
   ];
   leg.innerHTML=S.map(s=>`<span><i style="background:${s.c}"></i>${s.n}</span>`).join('');
   function draw(){
-    const {ctx,w,h}=fit(cv); const L=46,R=14,T=14,B=34; const pw=w-L-R, ph=h-T-B;
+    const {ctx,w,h}=fit(cv); const L=78,R=50,T=16,B=58; const pw=w-L-R, ph=h-T-B;
     const lo=-2, hi=2; const X=v=>L+(Math.log10(v)-lo)/(hi-lo)*pw, Y=f=>T+(1-f)*ph;
-    ctx.font=MONO; ctx.strokeStyle=C('--line'); ctx.fillStyle=C('--faint'); ctx.lineWidth=1;
-    [0.01,0.1,1,10,100].forEach(v=>{ctx.beginPath();ctx.moveTo(X(v),T);ctx.lineTo(X(v),T+ph);ctx.stroke(); ctx.textAlign='center'; ctx.fillText(v>=1?v+' MGy':(v*1000)+' kGy',X(v),h-12);});
-    [0,.5,1].forEach(f=>{ctx.beginPath();ctx.moveTo(L,Y(f));ctx.lineTo(L+pw,Y(f));ctx.stroke(); ctx.textAlign='right'; ctx.fillText(f.toFixed(1),L-6,Y(f)+4);});
-    ctx.save(); ctx.translate(12,T+ph/2); ctx.rotate(-Math.PI/2); ctx.textAlign='center'; ctx.fillText('fraction intact',0,0); ctx.restore();
+    ctx.font='15px "IBM Plex Mono", ui-monospace, monospace'; ctx.lineWidth=1;
+    [0.01,0.1,1,10,100].forEach(v=>{ctx.strokeStyle=C('--line2');ctx.beginPath();ctx.moveTo(X(v),T);ctx.lineTo(X(v),T+ph);ctx.stroke(); ctx.fillStyle=C('--fg'); ctx.textAlign='center'; ctx.fillText(v>=1?v+' MGy':(v*1000)+' kGy',X(v),T+ph+22);});
+    [0,.5,1].forEach(f=>{ctx.strokeStyle=C('--line2');ctx.beginPath();ctx.moveTo(L,Y(f));ctx.lineTo(L+pw,Y(f));ctx.stroke(); ctx.fillStyle=C('--fg'); ctx.textAlign='right'; ctx.fillText(f.toFixed(1),L-8,Y(f)+5);});
+    ctx.strokeStyle=C('--muted'); ctx.beginPath(); ctx.moveTo(L,T); ctx.lineTo(L,T+ph); ctx.lineTo(L+pw,T+ph); ctx.stroke();
+    ctx.fillStyle=C('--fg'); ctx.font='600 15px "IBM Plex Sans", system-ui, sans-serif';
+    ctx.textAlign='center'; ctx.fillText('absorbed dose (log scale)',L+pw/2,h-8);
+    ctx.save(); ctx.translate(20,T+ph/2); ctx.rotate(-Math.PI/2); ctx.fillText('fraction of sites intact',0,0); ctx.restore();
     for(const s of S){
       ctx.beginPath();
       for(let i=0;i<=200;i++){ const lv=lo+(hi-lo)*i/200, v=10**lv; const f=1/(1+Math.exp((lv-Math.log10(s.m))/(s.w*0.43)));
         i?ctx.lineTo(X(v),Y(f)):ctx.moveTo(X(v),Y(f)); }
-      ctx.strokeStyle=s.c; ctx.lineWidth=2; ctx.setLineDash(s.dash?[5,4]:[]); ctx.stroke(); ctx.setLineDash([]);
+      ctx.strokeStyle=s.c; ctx.lineWidth=2.6; ctx.setLineDash(s.dash?[5,4]:[]); ctx.stroke(); ctx.setLineDash([]);
     }
     ctx.textAlign='left';
   }
@@ -852,7 +858,7 @@ function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();r
     }
     ctx.globalCompositeOperation='source-over';
     ctx.font=MONO; ctx.textAlign='left';
-    [4,3,2,1.5].forEach(d=>{ const rr=sc/d; ctx.strokeStyle='rgba(143,157,179,.28)'; ctx.setLineDash([3,4]); ctx.beginPath(); ctx.arc(c,c,rr,0,6.28); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle=C('--faint'); ctx.fillText(d+' Å',c+rr*0.707+3,c-rr*0.707-3); });
+    [4,3,2,1.5].forEach(d=>{ const rr=sc/d; ctx.strokeStyle='rgba(205,214,227,.45)'; ctx.setLineDash([3,4]); ctx.beginPath(); ctx.arc(c,c,rr,0,6.28); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle=C('--fg'); ctx.fillText(d+' Å',c+rr*0.707+3,c-rr*0.707-3); });
     const dl=dlim(D), rl=sc/dl; ctx.strokeStyle=C('--warn'); ctx.lineWidth=1.4; ctx.beginPath(); ctx.arc(c,c,rl,0,6.28); ctx.stroke(); ctx.lineWidth=1;
     ctx.fillStyle=C('--warn'); ctx.fillText('model limit '+dl.toFixed(2)+' Å',10,w-12);
     ctx.fillStyle='#0c1420'; ctx.beginPath(); ctx.arc(c,c,9,0,6.28); ctx.fill();
@@ -860,13 +866,17 @@ function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();r
   const DS=[1.5,2,3,5], DC=['#ff6f5e','#ffb54a','#58d39a','#6cc4ff'];
   document.getElementById('cleg').innerHTML=DS.map((d,i)=>`<span><i style="background:${DC[i]}"></i>${d} Å</span>`).join('')+`<span><i style="background:#e2e8f1"></i>selected d</span>`;
   function drawCurve(D,dsel){
-    const {ctx,w,h}=fit(cur); const L=40,R=12,T=14,B=34, pw=w-L-R, ph=h-T-B, Dm=60;
+    const {ctx,w,h}=fit(cur); const L=74,R=14,T=16,B=56, pw=w-L-R, ph=h-T-B, Dm=60;
     const X=v=>L+v/Dm*pw, Y=f=>T+(1-f)*ph;
     ctx.font=MONO; ctx.lineWidth=1;
-    for(let v=0;v<=60;v+=10){ctx.strokeStyle=C('--line'); ctx.beginPath(); ctx.moveTo(X(v),T); ctx.lineTo(X(v),T+ph); ctx.stroke(); ctx.fillStyle=C('--faint'); ctx.textAlign='center'; ctx.fillText(v,X(v),h-18);}
-    ctx.fillText('dose (MGy)',L+pw/2,h-4);
-    for(let f=0;f<=1.001;f+=.25){ctx.strokeStyle=C('--line'); ctx.beginPath(); ctx.moveTo(L,Y(f)); ctx.lineTo(L+pw,Y(f)); ctx.stroke(); ctx.fillStyle=C('--faint'); ctx.textAlign='right'; ctx.fillText(f.toFixed(2),L-5,Y(f)+4);}
-    [[20,'Henderson',C('--warn')],[30,'Garman',C('--warn')],[43,'D½ 43',C('--bad')]].forEach(([v,l,c],i)=>{ctx.strokeStyle=c; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(X(v),T); ctx.lineTo(X(v),T+ph); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle=c; ctx.textAlign='left'; ctx.fillText(l,X(v)+3,T+10+i*13);});
+    for(let v=0;v<=60;v+=10){ctx.strokeStyle=C('--line2'); ctx.beginPath(); ctx.moveTo(X(v),T); ctx.lineTo(X(v),T+ph); ctx.stroke(); ctx.fillStyle=C('--fg'); ctx.textAlign='center'; ctx.fillText(v,X(v),T+ph+20);}
+    for(let f=0;f<=1.001;f+=.25){ctx.strokeStyle=C('--line2'); ctx.beginPath(); ctx.moveTo(L,Y(f)); ctx.lineTo(L+pw,Y(f)); ctx.stroke(); ctx.fillStyle=C('--fg'); ctx.textAlign='right'; ctx.fillText(f.toFixed(2),L-7,Y(f)+5);}
+    ctx.strokeStyle=C('--muted'); ctx.beginPath(); ctx.moveTo(L,T); ctx.lineTo(L,T+ph); ctx.lineTo(L+pw,T+ph); ctx.stroke();
+    ctx.fillStyle=C('--fg'); ctx.font='600 15px "IBM Plex Sans", system-ui, sans-serif'; ctx.textAlign='center';
+    ctx.fillText('absorbed dose (MGy)',L+pw/2,h-8);
+    ctx.save(); ctx.translate(18,T+ph/2); ctx.rotate(-Math.PI/2); ctx.fillText('⟨I⟩ / ⟨I⟩₀',0,0); ctx.restore();
+    ctx.font=MONO;
+    [[20,'Henderson',C('--warn')],[30,'Garman',C('--warn')],[43,'D½ 43',C('--bad')]].forEach(([v,l,c],i)=>{ctx.strokeStyle=c; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(X(v),T); ctx.lineTo(X(v),T+ph); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle=c; ctx.textAlign='left'; ctx.fillText(l,X(v)+4,T+14+i*17);});
     // y = 0.5 guide
     ctx.strokeStyle='rgba(226,232,241,.25)'; ctx.beginPath(); ctx.moveTo(L,Y(.5)); ctx.lineTo(L+pw,Y(.5)); ctx.stroke();
     DS.forEach((d,i)=>{ctx.strokeStyle=DC[i]; ctx.lineWidth=1.8; ctx.beginPath(); for(let v=0;v<=Dm;v+=.5){const y=Y(decay(v,d)); v?ctx.lineTo(X(v),y):ctx.moveTo(X(v),y);} ctx.stroke();});
