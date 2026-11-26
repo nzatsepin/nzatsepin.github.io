@@ -109,7 +109,7 @@ main.page.tool .row.n1>.c{max-width:none}
 .menu.open{display:flex}.menu li ul{display:block;position:static;box-shadow:none;border:0;padding:0 0 0 14px}
 .row.n2,.row.n3,.row.n4{grid-template-columns:1fr}}
 /* === redesign shared === */
-.ptop{position:relative;background:#12203d url('images/336af87e26ca856863743ef4a15eea0b.jpg') center 62%/cover no-repeat;color:#ffffff}
+.ptop{position:relative;background:#12203d url('images/header-saguaro-sunset.jpg') center 62%/cover no-repeat;color:#ffffff}
 .ptop::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(14,22,44,.88) 0%,rgba(14,22,44,.66) 50%,rgba(14,22,44,.15) 85%)}
 .ptop .wrap{position:relative;padding-top:52px;padding-bottom:46px}
 .ptop h1{font-size:38px;line-height:1.1;margin:0 0 12px;color:#ffffff}
