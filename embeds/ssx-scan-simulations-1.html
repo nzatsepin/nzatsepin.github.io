@@ -102,14 +102,14 @@ nav a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visibl
   <section class="notes scene" data-s="C">
     <h2>Assumptions</h2>
     <ol>
-      <li>Defaults are the slide 17 MX3 settings: 13 keV, 2.11 × 10¹² ph/s, 6.4 × 4.8 µm FWHM, 1 mm/s, 20 µm column pitch, 50 Hz.</li>
+      <li>Defaults are typical MX3 settings: 13 keV, 2.11 × 10¹² ph/s, 6.4 × 4.8 µm FWHM, 1 mm/s, 20 µm column pitch, 50 Hz.</li>
       <li>Gaussian beam; continuous fly scan, no chopper; each point is crossed once.</li>
       <li>Fluence per pass F = Φ / (√(2π) σₕ v), independent of frame time and of the beam size along the scan. Peak dose rate uses Φ / (2π σₕ σᵥ).</li>
       <li>Dose is water-equivalent: D = F · E · (μₑₙ/ρ)water, with NIST values interpolated log-log [1]. Real crystals absorb more (S, Cu, Cl, heavy buffers); use RADDOSE-3D for real samples [2].</li>
       <li>The recorded grid is a rectangle covering the drop (dashed outline); the scan starts at the top right and runs down the first column. At each column end the beam keeps moving past the grid by the overshoot distance, steps over one pitch and returns, all at scan speed with the beam on and the detector not recording. Real turnarounds include acceleration and settling, so the overshoot slider stands in for the stage’s turnaround distance.</li>
       <li>Crystals are spread uniformly over the drop footprint (areal density), sizes log-normal (σ = 0.45) around the typical size. A frame counts as a hit if the beam stripe, ± half the FWHM, touches a crystal.</li>
       <li>Predicted hit rate: P = (π/4)[1 − exp(−n⟨A⟩)], with A = (w + s)(L + s), w the beam FWHM across the scan, L the travel per frame, s the crystal size, and π/4 the fraction of the square grid covered by the circular drop.</li>
-      <li>Not modelled: diffusion of long-lived radiolysis products into neighbouring columns (see slide 17 notes), crystal settling and drop curvature.</li>
+      <li>Not modelled: diffusion of long-lived radiolysis products into neighbouring columns, crystal settling and drop curvature.</li>
     </ol>
     <h2>References</h2>
     <ol>
@@ -117,7 +117,7 @@ nav a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visibl
       <li>Zeldin, O. B., Gerstel, M. &amp; Garman, E. F. RADDOSE-3D: time- and space-resolved modelling of dose in macromolecular crystallography. J. Appl. Cryst. 46, 1225–1230 (2013).</li>
     </ol>
   </section>
-  <p class="notes stamp">Figures generated 23 November 2026 (Melbourne, AEDT) for CRYSTAL36 / SCANZ, 1 December 2026. Models are illustrative; values are not measurements unless stated.</p>
+  <p class="notes stamp">Models are illustrative; values are not measurements unless stated.</p>
 </div>
 </div>
 
@@ -271,7 +271,7 @@ A.draw=function(){
 /* ======================================================================
    B. Spot fading
    ====================================================================== */
-const B={u:0,ratio:75,hold:0,rate:4.5,Hc:7.5}; // D-half = Hc*d MGy at 100 K; 7.5 MGy/Å gives 15 MGy at 2 Å (slide 9)
+const B={u:0,ratio:75,hold:0,rate:4.5,Hc:7.5}; // D-half = Hc*d MGy at 100 K; 7.5 MGy/Å gives 15 MGy at 2 Å
 B.init=function(){
   const r=mulberry32(5);this.R=270;const lam=12.398/13;this.lam=lam;const th=Math.asin(lam/(2*1.6));this.L=this.R/Math.tan(2*th);
   // 3D still: tetragonal lattice (lysozyme-like, a=79, c=38 Å) in a random orientation, cut by the Ewald sphere

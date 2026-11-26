@@ -232,3 +232,9 @@ main.page .tools.edu{margin:8px 0 24px}
 .menu>li>a,.logo{white-space:nowrap}
 .menu>li:nth-last-child(-n+3)>ul{left:auto;right:0}
 @media(min-width:1121px){.menu li ul{max-height:80vh;overflow-y:auto}}
+
+.menu li ul li.grp{padding:9px 10px 3px;font-size:11.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#5b6678}
+.menu li ul li.grp:first-child{padding-top:4px}
+main.page h2.edugrp{margin:26px 0 10px;font-size:20px}
+main.page h2.edugrp:first-child{margin-top:0}
+.menu li.dd:has(.grp)>ul{min-width:330px}

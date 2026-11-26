@@ -119,7 +119,7 @@ tr.hl td{background:var(--drop)}
 <li>Set the beam FWHM, scan mode (fly or step), spacing and timing.</li>
 <li>The planner covers the sample with vertical-column grids: each within the frame limit and fast-scan range, never stacked vertically. “Grid splitting” trades off-sample frames against the number of grids.</li>
 <li>Zoom in to inspect beam footprints, frame start/stop ticks, overhangs and scan direction; hover a table row to highlight its grid.</li>
-<li>Copy the start-position table. Orange boxes are warnings; the blue box is derived information. Hover ? for definitions. Placeholder values are marked in their tooltips.</li>
+<li>Copy the start-position table. Orange boxes are warnings; the blue box is derived information. Hover ? for definitions. Tooltips flag defaults to check against current beamline values.</li>
 </ol></details>
 <div class="layout">
 <div id="controls"></div>
@@ -160,7 +160,7 @@ tr.hl td{background:var(--drop)}
     <div><button id="copyTsv" type="button">Copy table</button> <button id="copyCsv" type="button">Copy CSV</button></div>
   </div>
   <div class="tablewrap"><table id="tbl"><thead></thead><tbody></tbody></table></div>
-  <div class="note">Start = centre of the first data frame (fly) or point (step) in each grid’s top-right column; in fly mode the goniometer begins one overhang above it. Every grid spans the full sample height of its columns, so grids are never stacked vertically and overhangs never cross collected regions. Frame size, acceleration, overheads and fast-scan ranges are placeholders to be set from beamline values.</div>
+  <div class="note">Start = centre of the first data frame (fly) or point (step) in each grid’s top-right column; in fly mode the goniometer begins one overhang above it. Every grid spans the full sample height of its columns, so grids are never stacked vertically and overhangs never cross collected regions. Frame size, acceleration, overheads and fast-scan ranges are defaults; check them against current beamline values.</div>
   <textarea id="copyBuf" aria-hidden="true" tabindex="-1"></textarea>
 </div>
 </div>
@@ -196,7 +196,7 @@ const TIPS = {
   speed: "Constant vertical goniometer speed during data collection. Editing speed keeps frame spacing fixed and changes frame rate.",
   mode: "Fly scan: the goniometer moves continuously along each column while the detector records frames at a fixed rate; each frame integrates a vertical trace. It is not a step-and-shoot grid, although it is usually called a grid scan. Step scan: the goniometer stops at each point and exposes there; the X-ray chopper is assumed synchronised, so only the points are exposed. Points are drawn as Gaussian profiles with a dashed FWHM contour.",
   spc: "Spacing pairs currently available at MX3: 5 × 5, 10 × 10 and 20 × 20 µm (H × V). Other values can be entered for planning.",
-  tstep: "Time to move to the next point and settle before exposing (step scan). Placeholder.",
+  tstep: "Time to move to the next point and settle before exposing (step scan). Default; check against the beamline.",
   bmove: "Without a fast shutter or chopper synchronised to the goniometer, the beam stays on while moving between points and during the turn between columns. Exposed regions are drawn hatched.",
   iw: "Width of the whole image in µm. Linked to µm per pixel.",
   cont: "Dead time between frames is negligible at ms frame times, so exposure ≈ frame time. DECTRIS specifications: EIGER2 X/XE effective dead time < 100 ns; EIGER (first generation, e.g. MX2 EIGER 16M) 3 µs (Casañas et al. 2016 report as low as 3.8 µs). Exact MX3 and MX2 values not confirmed here. Check your master file for your detector’s dead time if this is critical (/entry/instrument/detector/dead_time).",
@@ -204,12 +204,12 @@ const TIPS = {
   serp: "Serpentine: columns alternate down and up, turning around in the overhang. Unidirectional is disabled (not currently used); the code is retained.",
   maxpts: "Upper limit on frames in one grid. Columns are never split vertically, so a single column must fit within this limit.",
   rangeH: "Maximum horizontal travel within one grid (first to last column). 5 mm is your conservative estimate. For comparison, Arinax lists 6 mm range on the MD3-UP AZ alignment axis and 5 mm on the CX/CY centring table; MD5 values not checked.",
-  rangeV: "Maximum vertical travel of one column including both overhangs. 6 mm is a placeholder (stated as longer than 5 mm). Arinax lists 108 mm range on the MD3-UP AY alignment axis; the usable range with a plate holder will be smaller. MD5 values not checked.",
+  rangeV: "Maximum vertical travel of one column including both overhangs. Default 6 mm (stated as longer than 5 mm). Arinax lists 108 mm range on the MD3-UP AY alignment axis; the usable range with a plate holder will be smaller. MD5 values not checked.",
   acc: "Vertical goniometer acceleration, assumed constant. If observed overhangs are longer than predicted, lower this value or add extra overhang. Gives the overhang v²/(2a) at each column end and the turnaround time 2v/a per column; both grow with scan speed. Default 100 mm/s² is inferred from the Arinax MD3-UP specification (grid U-turn delay < 300 ms at 15 mm/s on AY → a ≥ 2v/t = 100 mm/s²), so it gives an upper estimate of overhang. Not an MD5 value; measure on the beamline.",
-  ovx: "Extra travel at each column end before and after data collection, e.g. settling. Added to v²/(2a). Placeholder.",
-  mbpf: "Stored size of one frame after compression. Depends on detector, compression and diffraction content. Placeholder.",
-  colOH: "Time per column in addition to collection and, in fly mode, the acceleration/deceleration ramps (2v/a, already included): horizontal step between columns, settling and detector re-triggering. 0.2 s is a placeholder; replace with a measured value.",
-  gridOH: "Time per grid: move to the grid start, detector arming, scan set-up and file handling. Placeholder.",
+  ovx: "Extra travel at each column end before and after data collection, e.g. settling. Added to v²/(2a). Default; check against the beamline.",
+  mbpf: "Stored size of one frame after compression. Depends on detector, compression and diffraction content. Default; check against the beamline.",
+  colOH: "Time per column in addition to collection and, in fly mode, the acceleration/deceleration ramps (2v/a, already included): horizontal step between columns, settling and detector re-triggering. Default 0.2 s; replace with a measured value.",
+  gridOH: "Time per grid: move to the grid start, detector arming, scan set-up and file handling. Default; check against the beamline.",
   opt: "Prioritise collection time or data volume. More, narrower grids follow the sample outline more closely (fewer off-sample frames, less data) but each grid adds set-up time. Shortest time (default): split only when the frames saved take longer to collect than one grid overhead. Least data: split whenever at least one frame is saved. Custom: split only when at least N frames are saved, e.g. for a drop that is not perfectly round, where the circle or traced outline is only approximate and fitting it frame by frame gains nothing.",
   pen: "Minimum off-sample frames an extra grid must save before the planner splits. Example: an oval drop entered as a 1 mm circle, at 20 µm spacing - with 200, only splits that remove ≥ 200 empty frames (about 0.08 mm² of empty area) are made, so edge fitting to an inexact outline is skipped. 0 = Least data; very large = one grid where the limits allow.",
   origin: "Reference point for start positions. Window = the circle’s bounding square, the rectangle, or the drawing window. Axes: z along the optical axis; +x right; +y up, as viewed on screen.",
