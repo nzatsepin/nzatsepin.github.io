@@ -124,7 +124,7 @@ python datgen.py --eiger --h5 /entry/sample/goniometer/omega -o run.dat run.stre
 </code></pre>
 <p>Values copied into the stream at indexing time (<code>indexamajig --copy-header=/path</code>) are cheaper to read: use <code>--headers</code> instead.</p>
 <p><strong>Item viewer.</strong> The viewer reads frames from master files whose <code>/entry/data</code> holds <code>data_000001</code>, <code>data_000002</code>, … external links. The event number counts frames across the links in order. You need <code>hdf5plugin</code> for bitshuffle/LZ4 data. The data files must sit next to the master file, as the links are relative.</p>
-<p><strong>Legacy LCLS/CXI.</strong> The XTC/CXI paths, Cheetah file-name parsing (<code>run</code>, <code>class</code>, <code>subcxi</code>) and <code>/LCLS/...</code> fields are kept unchanged. They have not been retested against current LCLS formats.</p>
+<p><strong>Legacy LCLS/CXI.</strong> The XTC/CXI paths, Cheetah file-name parsing (<code>run</code>, <code>class</code>, <code>subcxi</code>) and <code>/LCLS/...</code> fields are unchanged from the 2019 release; compatibility with current LCLS file formats has not been validated.</p>
 <h2 id="4-sample-positions-and-the-plate-plot">4. Sample positions and the plate plot</h2>
 <h3 id="41-what-to-record">4.1 What to record</h3>
 <p>Each frame needs: <strong>which file and frame</strong>, and <strong>where on the sample it was collected</strong>. DatView reads this from a positions table, one row per scan (or per frame), CSV or tab-separated:</p>
@@ -265,7 +265,7 @@ python datexport.py --partition well --merge &quot;process_hkl -y 4/mmm -o by_we
 <li><em>OR</em> filters in saved filter files load correctly (previously an exception).</li>
 <li>Histograms are drawn as one filled step outline per stack instead of one rectangle per bin. The counts are identical.</li>
 <li><code>datplot.py -s</code> works without a display. It has a new <code>plate</code> plot type.</li>
-<li>PyQt4 import fallbacks remain but are untested.</li>
+<li>PyQt5 is the supported toolkit (<code>requirements.txt</code>); the PyQt4 import fallbacks are retained from 2019 only.</li>
 </ul>
 <h2 id="8-troubleshooting">8. Troubleshooting</h2>
 <table>
