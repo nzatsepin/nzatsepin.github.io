@@ -58,6 +58,7 @@ nav a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visibl
 #fsbox:fullscreen .controls{width:min(100vw,calc((100vh - var(--ctlh,0px))*16/9));padding:8px 14px}
 #fsbox.hidectl .controls{display:none}
 @media (max-width:700px){.controls input[type=range]{width:110px}}
+/* overflow fixes */ .grid-ctl label{min-width:0;flex-wrap:wrap} .grid-ctl input[type=range]{flex:1 1 90px;min-width:80px;width:auto} .grid-ctl output{min-width:5em}
 </style>
 </head>
 <body>

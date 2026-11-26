@@ -105,7 +105,7 @@ canvas{display:block}
 }
 @media (max-width:820px){
   .app{grid-template-columns:minmax(0,1fr);grid-template-areas:"view" "side" "ctl"}
-  .view{height:max(440px, 70vh)}
+  .view{height:max(440px, min(70vh, 560px))}
   h1{font-size:1.6rem}
   .lhint,.info{display:none}
   .legend{max-width:calc(100% - 20px);bottom:56px}

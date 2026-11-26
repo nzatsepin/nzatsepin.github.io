@@ -536,7 +536,8 @@ const MONO = '11px "IBM Plex Mono", ui-monospace, monospace';
 
 function fit(cv){
   const r = cv.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio||1, 2);
-  const h = +cv.getAttribute('height');
+  if(!cv.dataset.h) cv.dataset.h = cv.getAttribute('height');
+  const h = +cv.dataset.h;
   const w = Math.max(200, r.width);
   const hh = cv.dataset.square ? w : h;
   cv.width = Math.round(w*dpr); cv.height = Math.round(hh*dpr);

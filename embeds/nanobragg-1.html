@@ -86,6 +86,7 @@ section{margin-top:2rem}
 .legend{font-size:.95rem;color:var(--muted)}
 .swatch{display:inline-block;width:.8em;height:.8em;vertical-align:-.05em;border:1px solid var(--line)}
 .bgx{display:block;margin:4px 0;font-size:.95rem}.bgx input[type=number]{font:inherit;padding:1px 4px}
+/* overflow fixes */ .lower>*{min-width:0} .eqband{overflow-x:auto;max-width:100%} .eqband math{max-width:100%} @media(max-width:520px){.eqband math{font-size:1.2rem}}
 </style>
 </head>
 <body>
@@ -807,11 +808,12 @@ const V = { g: null, j: 0, s: 1, ox: 0, oy: 0, fit: 1 };
 const vsat = document.getElementById('vsat'), vsatO = document.getElementById('vsatO');
 function vsatSync() { const S = V.j ? GSAT * 8 : GSAT; vsat.value = toT(satC, S); vsatO.textContent = S.toPrecision(2) + ' ph/px'; }
 vsat.oninput = () => { const S = fromT(satC, +vsat.value); GSAT = V.j ? S / 8 : S; gsat.value = toT(satC, GSAT); gsatO.textContent = GSAT.toPrecision(2) + ' ph/px'; vsatO.textContent = S.toPrecision(2) + ' ph/px'; paintGallery(); };
+function placeDlg(d){try{const fe=window.frameElement;if(!fe)return;const pw=fe.ownerDocument.defaultView,r=fe.getBoundingClientRect(),ph=pw.innerHeight;d.style.margin='0 auto';d.style.bottom='auto';d.style.height=Math.round(ph*0.94)+'px';d.style.maxHeight=Math.round(ph*0.94)+'px';d.style.top=Math.round(Math.max(0,-r.top)+ph*0.03)+'px';}catch(e){}}
 function vSize() { const r = vc.getBoundingClientRect(), d = window.devicePixelRatio || 1; vc.width = Math.max(10, Math.round(r.width * d)); vc.height = Math.max(10, Math.round(r.height * d)); }
 function vFit() { const src = V.g.cv[V.j]; V.fit = Math.min(vc.width / src.width, vc.height / src.height); V.s = V.fit; V.ox = (vc.width - src.width * V.s) / 2; V.oy = (vc.height - src.height * V.s) / 2; }
 function drawV() { if (!V.g) return; const src = V.g.cv[V.j]; vctx.setTransform(1, 0, 0, 1, 0, 0); vctx.fillStyle = '#ffffff'; vctx.fillRect(0, 0, vc.width, vc.height); vctx.imageSmoothingEnabled = V.s < 1; vctx.setTransform(V.s, 0, 0, V.s, V.ox, V.oy); vctx.drawImage(src, 0, 0); vctx.setTransform(1, 0, 0, 1, 0, 0); }
 function zoomAt(f, cx, cy) { const ns = Math.min(64, Math.max(V.fit * 0.5, V.s * f)); f = ns / V.s; V.ox = cx - (cx - V.ox) * f; V.oy = cy - (cy - V.oy) * f; V.s = ns; drawV(); }
-function openViewer(g, j) { V.g = g; V.j = j; document.getElementById('vTitle').textContent = `${g.name}, ${gMode === 'rot' ? 'rotation 0.1°' : 'still'}: ${j ? 'detail, 256 × 256 native 75 µm pixels' : 'whole detector, 4 × 4 binned (300 µm display pixels)'}`; vsatSync(); dlg.showModal(); vSize(); vFit(); drawV(); }
+function openViewer(g, j) { V.g = g; V.j = j; document.getElementById('vTitle').textContent = `${g.name}, ${gMode === 'rot' ? 'rotation 0.1°' : 'still'}: ${j ? 'detail, 256 × 256 native 75 µm pixels' : 'whole detector, 4 × 4 binned (300 µm display pixels)'}`; vsatSync(); dlg.showModal(); placeDlg(dlg); vSize(); vFit(); drawV(); }
 document.getElementById('vIn').onclick = () => zoomAt(1.6, vc.width / 2, vc.height / 2);
 document.getElementById('vOut').onclick = () => zoomAt(1 / 1.6, vc.width / 2, vc.height / 2);
 document.getElementById('vFit').onclick = () => { vFit(); drawV(); };
